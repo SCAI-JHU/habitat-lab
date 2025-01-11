@@ -17,6 +17,7 @@ from habitat.sims.habitat_simulator.debug_visualizer import DebugVisualizer
 if TYPE_CHECKING:
     from habitat.datasets.rearrange.samplers.receptacle import Receptacle
 
+import time
 
 def object_shortname_from_handle(object_handle: str) -> str:
     """
@@ -1227,7 +1228,23 @@ def open_link(
 
     TODO: does not do any collision checking to validate the state or move any other objects which may be contained in or supported by this link.
     """
+    set_link_normalized_joint_position(object_a, link_ix, 1.0)
 
+def open_link_steps(
+    object_a: habitat_sim.physics.ManagedArticulatedObject, link_ix: int, steps : int = 5
+) -> None:
+    """
+    Set a link to the "open" state. Sets the joint position to the maximum joint limit.
+
+    :param object_a: The parent ArticulatedObject of the link to check.
+    :param link_ix: The index of the link within the parent object. Not the link's object_id.
+
+    TODO: does not do any collision checking to validate the state or move any other objects which may be contained in or supported by this link.
+    """
+    # increments = np.linspace(0.0, 1.0, steps+1)[1:]
+    # for frac in increments:
+    #     set_link_normalized_joint_position(object_a, link_ix, frac)
+    #     env.step({})
     set_link_normalized_joint_position(object_a, link_ix, 1.0)
 
 

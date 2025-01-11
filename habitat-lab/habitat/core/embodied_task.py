@@ -317,14 +317,17 @@ class EmbodiedTask:
     ):
         if isinstance(action_name, (int, np.integer)):
             action_name = self.get_action_name(action_name)
+            print("xytestaction_name",action_name)
         assert (
             action_name in self.actions
         ), f"Can't find '{action_name}' action in {self.actions.keys()}."
         task_action = self.actions[action_name]
-        return task_action.step(
+        # print("xytesttttttask_action",action_name,task_action)
+        observation =  task_action.step(
             **action["action_args"],
             task=self,
         )
+        return observation
 
     def step(self, action: Dict[str, Any], episode: Episode):
         action_name = action["action"]
@@ -338,12 +341,29 @@ class EmbodiedTask:
                     action,
                     episode,
                 )
+                
         else:
             observations = self._step_single_action(
                 action_name, action, episode
             )
 
         self._sim.step_physics(1.0 / self._physics_target_sps)  # type:ignore
+
+        if observations and isinstance(observations,list):
+
+            print("len(observations)",len(observations))
+            for i in range(len(observations)):
+                observation = observations[i]
+                observations.update(
+            self.sensor_suite.get_observations(
+                observations=observation,
+                episode=episode,
+                action=action,
+                task=self,
+                should_time=True,
+            )
+
+        )
 
         if observations is None:
             observations = self._sim.step(None)
@@ -361,7 +381,7 @@ class EmbodiedTask:
             observations=observations, action=action, episode=episode
         )
         return observations
-
+    
     def get_action_name(self, action_index: Union[int, np.integer]):
         if action_index >= len(self.actions):
             raise ValueError(f"Action index '{action_index}' is out of range.")

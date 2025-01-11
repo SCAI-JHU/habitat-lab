@@ -118,6 +118,7 @@ class Manipulator(ArticulatedAgentInterface):
             )
             for i in self.params.arm_joints:
                 self.sim_obj.update_joint_motor(self.joint_motors[i][0], jms)
+                print("arm_jointsupdate_joint_motor")
         self._update_motor_settings_cache()
 
         # set correct gains for grippers
@@ -131,6 +132,7 @@ class Manipulator(ArticulatedAgentInterface):
             )
             for i in self.params.gripper_joints:
                 self.sim_obj.update_joint_motor(self.joint_motors[i][0], jms)
+                print("gripper_jointsupdate_joint_motor")
         self._update_motor_settings_cache()
 
         # set initial states and targets
@@ -256,7 +258,7 @@ class Manipulator(ArticulatedAgentInterface):
             "Currently no implementation for generic IK."
         )
 
-    def ee_transform(self, ee_index: int = 0) -> mn.Matrix4:
+    def ee_transform(self, ee_index: int = 0,xytest: int=None) -> mn.Matrix4:
         """Gets the transformation of the end-effector location. This is offset
         from the end-effector link location.
 
@@ -267,6 +269,13 @@ class Manipulator(ArticulatedAgentInterface):
             raise ValueError(
                 "The current manipulator does not have enough end effectors"
             )
+        
+        if xytest:
+            ef_link_transform = self.sim_obj.get_link_scene_node(
+            xytest
+        ).transformation
+            return ef_link_transform
+        
 
         ef_link_transform = self.sim_obj.get_link_scene_node(
             self.params.ee_links[ee_index]

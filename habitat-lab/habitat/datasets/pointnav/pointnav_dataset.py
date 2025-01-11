@@ -36,6 +36,7 @@ class PointNavDatasetV1(Dataset):
 
     @staticmethod
     def check_config_paths_exist(config: "DictConfig") -> bool:
+        print("xytest",config.data_path.format(split=config.split),os.path.exists(config.data_path.format(split=config.split)),os.path.exists(config.scenes_dir))
         return os.path.exists(
             config.data_path.format(split=config.split)
         ) and os.path.exists(config.scenes_dir)

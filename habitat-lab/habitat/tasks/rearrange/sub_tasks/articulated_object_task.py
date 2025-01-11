@@ -138,6 +138,7 @@ class SetArticulatedObjectTask(RearrangeTask):
             jms.velocity_target = 0.0
             jms.max_impulse = self._config.joint_max_impulse
         marker.ao_parent.update_joint_motor(marker.joint_idx, jms)
+        print("o_parent.update_joint_motor")
 
         num_timeout = 100
         self._disable_art_sleep()

@@ -106,6 +106,7 @@ class ArticulatedAgentBase(ArticulatedAgentInterface):
             # pylint: disable=not-an-iterable
             for i in self.params.wheel_joints:
                 self.sim_obj.update_joint_motor(self.joint_motors[i][0], jms)
+                print("_wheel_jointsposupdate_joint_motor")
         self._update_motor_settings_cache()
 
         # set correct gains for legs
@@ -123,6 +124,7 @@ class ArticulatedAgentBase(ArticulatedAgentInterface):
             # pylint: disable=not-an-iterable
             for i in self.params.leg_joints:
                 self.sim_obj.update_joint_motor(self.joint_motors[i][0], jms)
+                print("leg_jointsupdate_joint_motor")
             self.leg_joint_pos = self.params.leg_init_params
         self._update_motor_settings_cache()
 
@@ -258,6 +260,7 @@ class ArticulatedAgentBase(ArticulatedAgentInterface):
                 joint_positions[self.joint_pos_indices[jidx]] = ctrl[i]
             self.sim_obj.joint_positions = joint_positions
         else:
+            print("xytestself._base_type",self._base_type)
             raise NotImplementedError(
                 "There are no leg motors other than leg robots"
             )

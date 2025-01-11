@@ -10,7 +10,7 @@ defaults:
 
   - /habitat/dataset/rearrangement: hssd
 
-  - /habitat/task/actions@habitat.task.actions.agent_0_base_velocity: base_velocity
+  - /habitat/task/actions@habitat.task.actions.: base_velocity
   - /habitat/task/actions@habitat.task.actions.agent_0_rearrange_stop: rearrange_stop
   - /habitat/task/actions@habitat.task.actions.agent_0_humanoidjoint_action: humanoidjoint_action
 

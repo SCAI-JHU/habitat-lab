@@ -4,6 +4,8 @@
 
 import magnum as mn
 import numpy as np
+from typing import List
+import pinocchio
 
 from habitat.articulated_agents.mobile_manipulator import (
     ArticulatedAgentCameraParams,
@@ -80,9 +82,9 @@ class StretchRobot(MobileManipulator):
             fixed_base,
         )
 
-
 class StretchRobotNoWheels(StretchRobot):
     def __init__(
         self, urdf_path, sim, limit_robo_joints=True, fixed_base=True
     ):
         super().__init__(urdf_path, sim, limit_robo_joints, fixed_base)
+

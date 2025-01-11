@@ -2,7 +2,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from abc import ABC, abstractmethod
+from abc import ABC, abstractmethod 
+from habitat_sim.physics import JointMotorSettings, MotionType #xychange
 
 from habitat_sim.physics import ManagedBulletArticulatedObject
 
@@ -14,6 +15,7 @@ class ArticulatedAgentInterface(ABC):
         """Initializes this wrapper, but does not instantiate the robot."""
         # the Habitat ArticulatedObject API access wrapper
         self.sim_obj: ManagedBulletArticulatedObject = None
+        # self.sim_obj.motion_type = MotionType.DYNAMIC #xychange
 
     def get_robot_sim_id(self) -> int:
         """Get the unique id for referencing the robot."""
