@@ -118,9 +118,7 @@ def test_tactile():
     if not os.path.exists(config.habitat.simulator.scene):
         pytest.skip("Please download Habitat test data to data folder.")
     with habitat.config.read_write(config):
-        config.habitat.task.lab_sensors = {
-            "proximity_sensor": ProximitySensorConfig()
-        }
+        config.habitat.task.lab_sensors = {"proximity_sensor": ProximitySensorConfig()}
     with habitat.Env(config=config, dataset=None) as env:
         env.reset()
         random.seed(1234)
@@ -141,9 +139,7 @@ def test_collisions():
     if not os.path.exists(config.habitat.simulator.scene):
         pytest.skip("Please download Habitat test data to data folder.")
     with habitat.config.read_write(config):
-        config.habitat.task.measurements = {
-            "collisions": CollisionsMeasurementConfig()
-        }
+        config.habitat.task.measurements = {"collisions": CollisionsMeasurementConfig()}
     with habitat.Env(config=config, dataset=None) as env:
         env.reset()
 
@@ -285,9 +281,7 @@ def test_imagegoal_sensor():
     if not os.path.exists(config.habitat.simulator.scene):
         pytest.skip("Please download Habitat test data to data folder.")
     with habitat.config.read_write(config):
-        config.habitat.task.lab_sensors = {
-            "imagegoal_sensor": ImageGoalSensorConfig()
-        }
+        config.habitat.task.lab_sensors = {"imagegoal_sensor": ImageGoalSensorConfig()}
         agent_config = get_agent_config(config.habitat.simulator)
         agent_config.sim_sensors = {"rgb_sensor": HabitatSimRGBSensorConfig()}
     with habitat.Env(config=config, dataset=None) as env:
@@ -388,9 +382,7 @@ def test_get_observations_at():
                 if (
                     not (
                         np.allclose(agent_state.position, start_state.position)
-                        and np.allclose(
-                            agent_state.rotation, start_state.rotation
-                        )
+                        and np.allclose(agent_state.rotation, start_state.rotation)
                     )
                     and "rgb" in key
                 ):
@@ -441,9 +433,7 @@ def smoke_test_sensor(config, N_STEPS=100):
         no_noise_obs = env.reset()
         assert no_noise_obs is not None
 
-        actions = [
-            sample_non_stop_action(env.action_space) for _ in range(N_STEPS)
-        ]
+        actions = [sample_non_stop_action(env.action_space) for _ in range(N_STEPS)]
         for action in actions:
             assert env.step(action) is not None
 
@@ -455,12 +445,8 @@ def smoke_test_sensor(config, N_STEPS=100):
         {"fisheye_depth_sensor": SimulatorFisheyeDepthSensorConfig()},
         {"fisheye_semantic_sensor": HabitatSimFisheyeSemanticSensorConfig()},
         {"equirect_rgb_sensor": HabitatSimEquirectangularRGBSensorConfig()},
-        {
-            "equirect_depth_sensor": HabitatSimEquirectangularDepthSensorConfig()
-        },
-        {
-            "equirect_semantic_sensor": HabitatSimEquirectangularSemanticSensorConfig()
-        },
+        {"equirect_depth_sensor": HabitatSimEquirectangularDepthSensorConfig()},
+        {"equirect_semantic_sensor": HabitatSimEquirectangularSemanticSensorConfig()},
     ],
 )
 @pytest.mark.parametrize("cuda", [True, False])
@@ -483,32 +469,16 @@ def test_smoke_not_pinhole_sensors(sensors, cuda):
 @pytest.mark.parametrize(
     "sensor",
     [
-        {
-            "rgb_sensor": HabitatSimRGBSensorConfig(
-                sensor_subtype="ORTHOGRAPHIC"
-            )
-        },
+        {"rgb_sensor": HabitatSimRGBSensorConfig(sensor_subtype="ORTHOGRAPHIC")},
         {"rgb_sensor": HabitatSimRGBSensorConfig(sensor_subtype="PINHOLE")},
-        {
-            "depth_sensor": HabitatSimDepthSensorConfig(
-                sensor_subtype="ORTHOGRAPHIC"
-            )
-        },
-        {
-            "depth_sensor": HabitatSimDepthSensorConfig(
-                sensor_subtype="PINHOLE"
-            )
-        },
+        {"depth_sensor": HabitatSimDepthSensorConfig(sensor_subtype="ORTHOGRAPHIC")},
+        {"depth_sensor": HabitatSimDepthSensorConfig(sensor_subtype="PINHOLE")},
         {
             "semantic_sensor": HabitatSimSemanticSensorConfig(
                 sensor_subtype="ORTHOGRAPHIC"
             )
         },
-        {
-            "semantic_sensor": HabitatSimSemanticSensorConfig(
-                sensor_subtype="PINHOLE"
-            )
-        },
+        {"semantic_sensor": HabitatSimSemanticSensorConfig(sensor_subtype="PINHOLE")},
     ],
 )
 @pytest.mark.parametrize("cuda", [True, False])
@@ -566,9 +536,7 @@ def test_noise_models_rgbd():
         no_noise_obs = [env.reset()]
         no_noise_states = [env.sim.get_agent_state()]
 
-        actions = [
-            sample_non_stop_action(env.action_space) for _ in range(N_STEPS)
-        ]
+        actions = [sample_non_stop_action(env.action_space) for _ in range(N_STEPS)]
         for action in actions:
             no_noise_obs.append(env.step(action))
             no_noise_states.append(env.sim.get_agent_state())
@@ -576,20 +544,15 @@ def test_noise_models_rgbd():
     with habitat.config.read_write(config):
         agent_config = get_agent_config(config.habitat.simulator)
         agent_config.sim_sensors.rgb_sensor.noise_model = "GaussianNoiseModel"
-        agent_config.sim_sensors.rgb_sensor.noise_model_kwargs.intensity_constant = (
-            0.5
-        )
-        agent_config.sim_sensors.depth_sensor.noise_model = (
-            "RedwoodDepthNoiseModel"
-        )
+        agent_config.sim_sensors.rgb_sensor.noise_model_kwargs.intensity_constant = 0.5
+        agent_config.sim_sensors.depth_sensor.noise_model = "RedwoodDepthNoiseModel"
 
     with habitat.Env(config=config, dataset=None) as env:
         env.episode_iterator = iter([test_episode])
 
         obs = env.reset()
         assert np.linalg.norm(
-            obs["rgb"].astype(np.float32)
-            - no_noise_obs[0]["rgb"].astype(np.float32)
+            obs["rgb"].astype(np.float32) - no_noise_obs[0]["rgb"].astype(np.float32)
         ) > 1.5e-2 * np.linalg.norm(
             no_noise_obs[0]["rgb"].astype(np.float32)
         ), "No RGB noise detected."

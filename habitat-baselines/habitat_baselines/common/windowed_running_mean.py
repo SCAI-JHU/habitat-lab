@@ -15,6 +15,7 @@ import numpy as np
 @attr.s(auto_attribs=True, slots=True, repr=False)
 class WindowedRunningMean:
     r"""Efficient implementation of a windowed running mean. Supports an infinite window"""
+
     window_size: Union[int, float]
     _sum: float = attr.ib(0.0, init=False)
     _count: int = attr.ib(0, init=False)

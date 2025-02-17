@@ -2,8 +2,8 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
-from abc import ABC, abstractmethod 
-from habitat_sim.physics import JointMotorSettings, MotionType #xychange
+from abc import ABC, abstractmethod
+from habitat_sim.physics import JointMotorSettings, MotionType  # xychange
 
 from habitat_sim.physics import ManagedBulletArticulatedObject
 

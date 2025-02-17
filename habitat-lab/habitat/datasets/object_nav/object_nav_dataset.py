@@ -29,6 +29,7 @@ if TYPE_CHECKING:
 @registry.register_dataset(name="ObjectNav-v1")
 class ObjectNavDatasetV1(PointNavDatasetV1):
     r"""Class inherited from PointNavDataset that loads Object Navigation dataset."""
+
     category_to_task_category_id: Dict[str, int]
     category_to_scene_annotation_category_id: Dict[str, int]
     episodes: List[ObjectGoalNavEpisode] = []  # type: ignore
@@ -87,9 +88,7 @@ class ObjectNavDatasetV1(PointNavDatasetV1):
 
         return g
 
-    def from_json(
-        self, json_str: str, scenes_dir: Optional[str] = None
-    ) -> None:
+    def from_json(self, json_str: str, scenes_dir: Optional[str] = None) -> None:
         deserialized = json.loads(json_str)
         if CONTENT_SCENES_PATH_FIELD in deserialized:
             self.content_scenes_path = deserialized[CONTENT_SCENES_PATH_FIELD]

@@ -29,9 +29,7 @@ def conv3x3(
 
 def conv1x1(in_planes: int, out_planes: int, stride: int = 1) -> Conv2d:
     """1x1 convolution"""
-    return nn.Conv2d(
-        in_planes, out_planes, kernel_size=1, stride=stride, bias=False
-    )
+    return nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride, bias=False)
 
 
 class BasicBlock(nn.Module):
@@ -162,9 +160,7 @@ class SEBottleneck(Bottleneck):
         downsample=None,
         cardinality=1,
     ):
-        super().__init__(
-            inplanes, planes, ngroups, stride, downsample, cardinality
-        )
+        super().__init__(inplanes, planes, ngroups, stride, downsample, cardinality)
 
         self.se = _build_se_branch(planes * self.expansion)
 
@@ -307,9 +303,7 @@ def resneXt50(in_channels, base_planes, ngroups):
 
 
 def se_resnet50(in_channels, base_planes, ngroups):
-    model = ResNet(
-        in_channels, base_planes, ngroups, SEBottleneck, [3, 4, 6, 3]
-    )
+    model = ResNet(in_channels, base_planes, ngroups, SEBottleneck, [3, 4, 6, 3])
 
     return model
 

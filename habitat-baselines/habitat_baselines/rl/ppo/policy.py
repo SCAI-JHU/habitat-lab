@@ -253,9 +253,7 @@ class NetPolicy(nn.Module, Policy):
     aux_loss_modules: nn.ModuleDict
     action_distribution: nn.Module
 
-    def __init__(
-        self, net, action_space, policy_config=None, aux_loss_config=None
-    ):
+    def __init__(self, net, action_space, policy_config=None, aux_loss_config=None):
         Policy.__init__(self, action_space)
         nn.Module.__init__(self)
         self.net = net
@@ -265,9 +263,7 @@ class NetPolicy(nn.Module, Policy):
         if policy_config is None:
             self.action_distribution_type = "categorical"
         else:
-            self.action_distribution_type = (
-                policy_config.action_distribution_type
-            )
+            self.action_distribution_type = policy_config.action_distribution_type
 
         if self.action_distribution_type == "categorical":
             self.action_distribution = CategoricalNet(
@@ -281,15 +277,12 @@ class NetPolicy(nn.Module, Policy):
             )
         else:
             raise ValueError(
-                f"Action distribution {self.action_distribution_type}"
-                "not supported."
+                f"Action distribution {self.action_distribution_type}" "not supported."
             )
 
         self.critic = CriticHead(self.net.output_size)
 
-        self.aux_loss_modules = get_aux_modules(
-            aux_loss_config, action_space, self.net
-        )
+        self.aux_loss_modules = get_aux_modules(aux_loss_config, action_space, self.net)
 
     @property
     def hidden_state_shape(self):
@@ -353,9 +346,7 @@ class NetPolicy(nn.Module, Policy):
 
     @g_timer.avg_time("net_policy.get_value", level=1)
     def get_value(self, observations, rnn_hidden_states, prev_actions, masks):
-        features, _, _ = self.net(
-            observations, rnn_hidden_states, prev_actions, masks
-        )
+        features, _, _ = self.net(observations, rnn_hidden_states, prev_actions, masks)
         return self.critic(features)
 
     def evaluate_actions(
@@ -389,8 +380,7 @@ class NetPolicy(nn.Module, Policy):
             rnn_build_seq_info=rnn_build_seq_info,
         )
         aux_loss_res = {
-            k: v(aux_loss_state, batch)
-            for k, v in self.aux_loss_modules.items()
+            k: v(aux_loss_state, batch) for k, v in self.aux_loss_modules.items()
         }
 
         return (
@@ -503,10 +493,7 @@ class PointNavBaselineNet(Net):
     ):
         super().__init__()
 
-        if (
-            IntegratedPointGoalGPSAndCompassSensor.cls_uuid
-            in observation_space.spaces
-        ):
+        if IntegratedPointGoalGPSAndCompassSensor.cls_uuid in observation_space.spaces:
             self._n_input_goal = observation_space.spaces[
                 IntegratedPointGoalGPSAndCompassSensor.cls_uuid
             ].shape[0]
@@ -518,9 +505,7 @@ class PointNavBaselineNet(Net):
             goal_observation_space = spaces.Dict(
                 {"rgb": observation_space.spaces[ImageGoalSensor.cls_uuid]}
             )
-            self.goal_visual_encoder = SimpleCNN(
-                goal_observation_space, hidden_size
-            )
+            self.goal_visual_encoder = SimpleCNN(goal_observation_space, hidden_size)
             self._n_input_goal = hidden_size
 
         self._hidden_size = hidden_size

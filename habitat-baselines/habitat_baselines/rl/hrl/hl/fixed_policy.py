@@ -85,9 +85,7 @@ class FixedHighLevelPolicy(HighLevelPolicy):
         Returns:
             The next index to be used from the list of solution actions.
         """
-        if self._next_sol_idxs[batch_idx] >= len(
-            self._solution_actions[batch_idx]
-        ):
+        if self._next_sol_idxs[batch_idx] >= len(self._solution_actions[batch_idx]):
             baselines_logger.info(
                 f"Calling for immediate end with {self._next_sol_idxs[batch_idx]}"
             )
@@ -100,9 +98,7 @@ class FixedHighLevelPolicy(HighLevelPolicy):
     def get_value(self, observations, rnn_hidden_states, prev_actions, masks):
         # We assign a value of 0. This is needed so that we can concatenate values in multiagent
         # policies
-        return torch.zeros(rnn_hidden_states.shape[0], 1).to(
-            rnn_hidden_states.device
-        )
+        return torch.zeros(rnn_hidden_states.shape[0], 1).to(rnn_hidden_states.device)
 
     def get_next_skill(
         self,
@@ -122,9 +118,7 @@ class FixedHighLevelPolicy(HighLevelPolicy):
             if should_plan == 1.0:
                 use_idx = self._get_next_sol_idx(batch_idx, immediate_end)
 
-                skill_name, skill_args = self._solution_actions[batch_idx][
-                    use_idx
-                ]
+                skill_name, skill_args = self._solution_actions[batch_idx][use_idx]
                 baselines_logger.info(
                     f"Got next element of the plan with {skill_name}, {skill_args}"
                 )

@@ -18,9 +18,7 @@ def read(file_path, *args, **kwargs):
 def collect_requirements():
     # collect requirements.txt file in all subdirectories
     requirements = set()
-    for file_path in glob.glob(
-        "habitat_baselines/**/requirements.txt", recursive=True
-    ):
+    for file_path in glob.glob("habitat_baselines/**/requirements.txt", recursive=True):
         content = read(file_path)
         requirements.update(content.strip().split("\n"))
 

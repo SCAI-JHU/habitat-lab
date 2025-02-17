@@ -42,12 +42,8 @@ def update_config(
             hitl_config.debug_images.append(agent_sensor_name)
             gym_obs_keys.append(agent_sensor_name)
 
-        for (
-            gui_controlled_agent_config
-        ) in config.habitat_hitl.gui_controlled_agents:
-            gui_controlled_agent_index = (
-                gui_controlled_agent_config.agent_index
-            )
+        for gui_controlled_agent_config in config.habitat_hitl.gui_controlled_agents:
+            gui_controlled_agent_index = gui_controlled_agent_config.agent_index
             # make sure gui_controlled_agent_index is valid
             if not (
                 gui_controlled_agent_index >= 0
@@ -61,9 +57,7 @@ def update_config(
 
             # make sure chosen articulated_agent_type is supported
             gui_agent_key = sim_config.agents_order[gui_controlled_agent_index]
-            agent_type = sim_config.agents[
-                gui_agent_key
-            ].articulated_agent_type
+            agent_type = sim_config.agents[gui_agent_key].articulated_agent_type
             if agent_type != "KinematicHumanoid" and agent_type != "SpotRobot":
                 raise ValueError(
                     f"Selected agent for GUI control is of type {sim_config.agents[gui_agent_key].articulated_agent_type}, "
@@ -130,6 +124,6 @@ def update_config(
                 for action_key in gui_agent_actions:
                     task_actions.pop(action_key)
 
-                task_actions[
-                    f"{action_prefix}humanoidjoint_action"
-                ] = HumanoidJointActionConfig()
+                task_actions[f"{action_prefix}humanoidjoint_action"] = (
+                    HumanoidJointActionConfig()
+                )

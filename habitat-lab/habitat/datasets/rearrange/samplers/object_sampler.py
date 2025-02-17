@@ -62,13 +62,15 @@ class ObjectSampler:
         self._translation_up_offset = translation_up_offset
         self._constrain_to_largest_nav_island = constrain_to_largest_nav_island
 
-        self.receptacle_instances: Optional[
-            List[Receptacle]
-        ] = None  # all receptacles in the scene
-        self.receptacle_candidates: Optional[
-            List[Receptacle]
-        ] = None  # the specific receptacle instances relevant to this sampler
-        self.max_sample_attempts = 100  # number of distinct object|receptacle pairings to try before giving up
+        self.receptacle_instances: Optional[List[Receptacle]] = (
+            None  # all receptacles in the scene
+        )
+        self.receptacle_candidates: Optional[List[Receptacle]] = (
+            None  # the specific receptacle instances relevant to this sampler
+        )
+        self.max_sample_attempts = (
+            100  # number of distinct object|receptacle pairings to try before giving up
+        )
         self.max_placement_attempts = 50  # number of times to attempt a single object|receptacle placement pairing
         self.num_objects = num_objects  # tuple of [min,max] objects to sample
         assert self.num_objects[1] >= self.num_objects[0]
@@ -122,12 +124,9 @@ class ObjectSampler:
 
         if self._recep_set_sample_probs is not None:
             sample_weights = [
-                self._recep_set_sample_probs[k]
-                for k in self._allowed_recep_set_names
+                self._recep_set_sample_probs[k] for k in self._allowed_recep_set_names
             ]
-            match_recep_sets = random.choices(
-                match_recep_sets, weights=sample_weights
-            )
+            match_recep_sets = random.choices(match_recep_sets, weights=sample_weights)
 
         if match_recep_sets[0].is_on_top_of_sampler:
             rs = match_recep_sets[0]
@@ -171,9 +170,7 @@ class ObjectSampler:
                         break
 
                     # then search for inclusion
-                    for (
-                        object_substr
-                    ) in receptacle_set.included_object_substrings:
+                    for object_substr in receptacle_set.included_object_substrings:
                         if object_substr in receptacle.parent_object_handle:
                             # object substring is valid, try receptacle name constraint
                             for (
@@ -248,10 +245,7 @@ class ObjectSampler:
 
         # Note: we cache the largest island ID to reject samples which are primarily accessible from disconnected navmesh regions.
         # This assumption limits sampling to the largest navigable component of any scene.
-        if (
-            self._constrain_to_largest_nav_island
-            and self.largest_island_id == -1
-        ):
+        if self._constrain_to_largest_nav_island and self.largest_island_id == -1:
             self.largest_island_id = get_largest_island_index(
                 sim.pathfinder, sim, allow_outdoor=False
             )
@@ -278,8 +272,10 @@ class ObjectSampler:
                 assert sim.get_object_template_manager().get_library_has_handle(
                     object_handle
                 ), f"Found no object in the SceneDataset with handle '{object_handle}'."
-                new_object = sim.get_rigid_object_manager().add_object_by_template_handle(
-                    object_handle
+                new_object = (
+                    sim.get_rigid_object_manager().add_object_by_template_handle(
+                        object_handle
+                    )
                 )
 
             # try to place the object
@@ -293,9 +289,7 @@ class ObjectSampler:
                     )
                 elif self.orientation_sample == "all":
                     # set the object's orientation to a random quaternion
-                    new_object.rotation = (
-                        habitat_sim.utils.common.random_quaternion()
-                    )
+                    new_object.rotation = habitat_sim.utils.common.random_quaternion()
 
             if isinstance(receptacle, OnTopOfReceptacle):
                 snap_down = False
@@ -345,9 +339,7 @@ class ObjectSampler:
                     continue
                 return new_object
 
-        sim.get_rigid_object_manager().remove_object_by_handle(
-            new_object.handle
-        )
+        sim.get_rigid_object_manager().remove_object_by_handle(new_object.handle)
         logger.info(
             f"Failed to sample {object_handle} placement on {receptacle.unique_name} in {self.max_placement_attempts} tries."
         )
@@ -430,9 +422,9 @@ class ObjectSampler:
         """
 
         num_pairing_tries = 0
-        new_objects: List[
-            Tuple[habitat_sim.physics.ManagedRigidObject, Receptacle]
-        ] = []
+        new_objects: List[Tuple[habitat_sim.physics.ManagedRigidObject, Receptacle]] = (
+            []
+        )
         if object_idx_to_recep is None:
             object_idx_to_recep = {}
 
@@ -472,14 +464,11 @@ class ObjectSampler:
                     recep_tracker,
                     snap_down,
                     dbv,
-                    fixed_target_receptacle=object_idx_to_recep.get(
-                        cur_obj_idx, None
-                    ),
+                    fixed_target_receptacle=object_idx_to_recep.get(cur_obj_idx, None),
                     fixed_obj_handle=fixed_obj_handle,
                 )
-                if (
-                    new_object is not None
-                    and recep_tracker.allocate_one_placement(receptacle)
+                if new_object is not None and recep_tracker.allocate_one_placement(
+                    receptacle
                 ):
                     # used up receptacle, need to recompute the sampler's receptacle_candidates
                     self.receptacle_candidates = None
@@ -509,7 +498,5 @@ class ObjectSampler:
         )
         # cleanup
         for new_object, _ in new_objects:
-            sim.get_rigid_object_manager().remove_object_by_handle(
-                new_object.handle
-            )
+            sim.get_rigid_object_manager().remove_object_by_handle(new_object.handle)
         return []

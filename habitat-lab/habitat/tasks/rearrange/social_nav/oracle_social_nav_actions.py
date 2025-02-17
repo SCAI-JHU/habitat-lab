@@ -82,9 +82,7 @@ class OracleNavCoordAction(OracleNavAction):  # type: ignore
         )
         if np.linalg.norm(nav_to_target_coord) == 0:
             return {}
-        final_nav_targ, obj_targ_pos = self._get_target_for_coord(
-            nav_to_target_coord
-        )
+        final_nav_targ, obj_targ_pos = self._get_target_for_coord(nav_to_target_coord)
 
         base_T = self.cur_articulated_agent.base_transformation
         curr_path_points = self._path_to_point(final_nav_targ)
@@ -121,9 +119,7 @@ class OracleNavCoordAction(OracleNavAction):  # type: ignore
                 if not at_goal:
                     if self.nav_mode == "avoid":
                         backward = np.array([-1.0, 0, 0])
-                        robot_backward = np.array(
-                            base_T.transform_vector(backward)
-                        )
+                        robot_backward = np.array(base_T.transform_vector(backward))
                         robot_backward = robot_backward[[0, 2]]
                         angle_to_target = get_angle(robot_backward, rel_targ)
                         if (
@@ -188,15 +184,11 @@ class OracleNavCoordAction(OracleNavAction):  # type: ignore
                 # This line is important to reset the controller
                 self._update_controller_to_navmesh()
                 base_action = self.humanoid_controller.get_pose()
-                kwargs[
-                    f"{self._action_arg_prefix}human_joints_trans"
-                ] = base_action
+                kwargs[f"{self._action_arg_prefix}human_joints_trans"] = base_action
 
                 return HumanoidJointAction.step(self, *args, **kwargs)
             else:
-                raise ValueError(
-                    "Unrecognized motion type for oracle nav action"
-                )
+                raise ValueError("Unrecognized motion type for oracle nav action")
 
 
 @registry.register_task_action
@@ -244,18 +236,14 @@ class OracleNavRandCoordAction(OracleNavCoordAction):  # type: ignore
 
     def _reach_human(self, robot_pos, human_pos, base_T):
         """Check if the agent reaches the human or not"""
-        facing = (
-            robot_human_vec_dot_product(robot_pos, human_pos, base_T) > 0.5
-        )
+        facing = robot_human_vec_dot_product(robot_pos, human_pos, base_T) > 0.5
 
         # Use geodesic distance here
         dis = self._sim.geodesic_distance(robot_pos, human_pos)
 
         return dis <= 2.0 and facing
 
-    def _compute_robot_to_human_min_step(
-        self, robot_trans, human_pos, human_pos_list
-    ):
+    def _compute_robot_to_human_min_step(self, robot_trans, human_pos, human_pos_list):
         """The function to compute the minimum step to reach the goal"""
         _vel_scale = self._config.lin_speed
 
@@ -269,8 +257,7 @@ class OracleNavRandCoordAction(OracleNavCoordAction):  # type: ignore
         robot_pos[1] = human_pos[1]
         step_taken = 0
         while (
-            not self._reach_human(robot_pos, human_pos, base_T)
-            and step_taken <= 1500
+            not self._reach_human(robot_pos, human_pos, base_T) and step_taken <= 1500
         ):
             path_points = self._find_path_given_start_end(robot_pos, human_pos)
             cur_nav_targ = path_points[1]
@@ -286,9 +273,7 @@ class OracleNavRandCoordAction(OracleNavCoordAction):  # type: ignore
             robot_forward = robot_forward[[0, 2]]
             rel_targ = rel_targ[[0, 2]]
             angle_to_target = get_angle(robot_forward, rel_targ)
-            dist_to_final_nav_targ = np.linalg.norm(
-                (human_pos - robot_pos)[[0, 2]]
-            )
+            dist_to_final_nav_targ = np.linalg.norm((human_pos - robot_pos)[[0, 2]])
 
             if dist_to_final_nav_targ < self._config.dist_thresh:
                 # Look at the object
@@ -334,9 +319,7 @@ class OracleNavRandCoordAction(OracleNavCoordAction):  # type: ignore
                 island_index=self._sim.largest_island_idx,
             )
 
-        kwargs[
-            self._action_arg_prefix + "oracle_nav_coord_action"
-        ] = self.coord_nav
+        kwargs[self._action_arg_prefix + "oracle_nav_coord_action"] = self.coord_nav
 
         ret_val = super().step(*args, **kwargs)
         if self.skill_done:
@@ -349,16 +332,11 @@ class OracleNavRandCoordAction(OracleNavCoordAction):  # type: ignore
                 len(self._sim.agents_mgr) == 2
             ), "Does not support more than two agents when you want human to stop and walk based on the distance to the robot"
             robot_id = int(1 - self._agent_index)
-            robot_pos = self._sim.get_agent_data(
-                robot_id
-            ).articulated_agent.base_pos
+            robot_pos = self._sim.get_agent_data(robot_id).articulated_agent.base_pos
             human_pos = self.cur_articulated_agent.base_pos
             dis = self._sim.geodesic_distance(robot_pos, human_pos)
             # The human needs to stop and wait for robot to come if the distance is too larget
-            if (
-                dis
-                > self._config.human_stop_and_walk_to_robot_distance_threshold
-            ):
+            if dis > self._config.human_stop_and_walk_to_robot_distance_threshold:
                 self.humanoid_controller.set_framerate_for_linspeed(
                     0.0, 0.0, self._sim.ctrl_freq
                 )

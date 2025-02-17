@@ -97,6 +97,7 @@ class _ReadWrapper:
     r"""Convenience wrapper to track if a connection to a worker process
     should have something to read.
     """
+
     read_fn: Callable[[], Any]
     rank: int
     is_waiting: bool = False
@@ -119,6 +120,7 @@ class _WriteWrapper:
     can be written to safely.  In other words, checks to make sure the
     result returned from the last write was read.
     """
+
     write_fn: Callable[[Any], None]
     read_wrapper: _ReadWrapper
 
@@ -204,26 +206,18 @@ class VectorEnv:
 
         for write_fn in self._connection_write_fns:
             write_fn((CALL_COMMAND, (OBSERVATION_SPACE_NAME, None)))
-        self.observation_spaces = [
-            read_fn() for read_fn in self._connection_read_fns
-        ]
+        self.observation_spaces = [read_fn() for read_fn in self._connection_read_fns]
         for write_fn in self._connection_write_fns:
             write_fn((CALL_COMMAND, (ACTION_SPACE_NAME, None)))
-        self.action_spaces = [
-            read_fn() for read_fn in self._connection_read_fns
-        ]
+        self.action_spaces = [read_fn() for read_fn in self._connection_read_fns]
 
         for write_fn in self._connection_write_fns:
             write_fn((CALL_COMMAND, (ORIG_ACTION_SPACE_NAME, None)))
-        self.orig_action_spaces = [
-            read_fn() for read_fn in self._connection_read_fns
-        ]
+        self.orig_action_spaces = [read_fn() for read_fn in self._connection_read_fns]
 
         for write_fn in self._connection_write_fns:
             write_fn((CALL_COMMAND, (NUMBER_OF_EPISODE_NAME, None)))
-        self.number_of_episodes = [
-            read_fn() for read_fn in self._connection_read_fns
-        ]
+        self.number_of_episodes = [read_fn() for read_fn in self._connection_read_fns]
         self._paused: List[Tuple] = []
 
     @property
@@ -335,8 +329,7 @@ class VectorEnv:
             worker_conn.close()
 
         read_fns = [
-            _ReadWrapper(p.recv, rank)
-            for rank, p in enumerate(parent_connections)
+            _ReadWrapper(p.recv, rank) for rank, p in enumerate(parent_connections)
         ]
         write_fns = [
             _WriteWrapper(p.send, read_fn)
@@ -399,9 +392,7 @@ class VectorEnv:
         results = [self._connection_read_fns[index_env]()]
         return results
 
-    def async_step_at(
-        self, index_env: int, action: Union[int, np.ndarray]
-    ) -> None:
+    def async_step_at(self, index_env: int, action: Union[int, np.ndarray]) -> None:
         self._warn_cuda_tensors(action)
         self._connection_write_fns[index_env]((STEP_COMMAND, action))
 
@@ -433,9 +424,7 @@ class VectorEnv:
     @profiling_wrapper.RangeContext("wait_step")
     def wait_step(self) -> List[Any]:
         r"""Wait until all the asynchronous environments have synchronized."""
-        return [
-            self.wait_step_at(index_env) for index_env in range(self.num_envs)
-        ]
+        return [self.wait_step_at(index_env) for index_env in range(self.num_envs)]
 
     def step(self, data: Sequence[Union[int, np.ndarray]]) -> List[Any]:
         r"""Perform actions in the vectorized environments.
@@ -546,26 +535,20 @@ class VectorEnv:
             function_args_list = [None] * len(function_names)
         assert len(function_names) == len(function_args_list)
         func_args = zip(function_names, function_args_list)
-        for write_fn, func_args_on in zip(
-            self._connection_write_fns, func_args
-        ):
+        for write_fn, func_args_on in zip(self._connection_write_fns, func_args):
             write_fn((CALL_COMMAND, func_args_on))
         results = []
         for read_fn in self._connection_read_fns:
             results.append(read_fn())
         return results
 
-    def render(
-        self, mode: str = "human", *args, **kwargs
-    ) -> Optional[np.ndarray]:
+    def render(self, mode: str = "human", *args, **kwargs) -> Optional[np.ndarray]:
         r"""Render observations from all environments in a tiled image."""
         if self._batch_renderer is not None:
             images = self._batch_renderer.copy_output_to_image()
         else:
             for write_fn in self._connection_write_fns:
-                write_fn(
-                    (RENDER_COMMAND, (args, {"mode": "rgb_array", **kwargs}))
-                )
+                write_fn((RENDER_COMMAND, (args, {"mode": "rgb_array", **kwargs})))
             images = [read_fn() for read_fn in self._connection_read_fns]
         tile = tile_images(images)
         if mode == "human":
@@ -658,8 +641,7 @@ class ThreadedVectorEnv(VectorEnv):
             thread.start()
 
         read_fns = [
-            _ReadWrapper(q.get, rank)
-            for rank, q in enumerate(parent_read_queues)
+            _ReadWrapper(q.get, rank) for rank, q in enumerate(parent_read_queues)
         ]
         write_fns = [
             _WriteWrapper(q.put, read_wrapper)

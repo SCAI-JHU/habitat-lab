@@ -73,6 +73,7 @@ class PPOTrainer(BaseRLTrainer):
     r"""Trainer class for PPO algorithm
     Paper: https://arxiv.org/abs/1707.06347.
     """
+
     supported_tasks = ["Nav-v0"]
 
     SHORT_ROLLOUT_THRESHOLD: float = 0.25
@@ -201,9 +202,7 @@ class PPOTrainer(BaseRLTrainer):
 
             with read_write(self.config):
                 self.config.habitat_baselines.torch_gpu_id = local_rank
-                self.config.habitat.simulator.habitat_sim_v0.gpu_device_id = (
-                    local_rank
-                )
+                self.config.habitat.simulator.habitat_sim_v0.gpu_device_id = local_rank
                 # Multiply by the number of simulators to make sure they also get unique seeds
                 self.config.habitat.seed += (
                     torch.distributed.get_rank()
@@ -233,9 +232,7 @@ class PPOTrainer(BaseRLTrainer):
             if non_scalar_metric_root in self.config.habitat.task.measurements:
                 with read_write(self.config):
                     OmegaConf.set_struct(self.config, False)
-                    self.config.habitat.task.measurements.pop(
-                        non_scalar_metric_root
-                    )
+                    self.config.habitat.task.measurements.pop(non_scalar_metric_root)
                     OmegaConf.set_struct(self.config, True)
                 if self.config.habitat_baselines.verbose:
                     logger.info(
@@ -274,9 +271,9 @@ class PPOTrainer(BaseRLTrainer):
                 self._encoder is not None
             ), "Visual encoder is not specified for this actor"
             with inference_mode():
-                batch[
-                    PointNavResNetNet.PRETRAINED_VISUAL_FEATURES_KEY
-                ] = self._encoder(batch)
+                batch[PointNavResNetNet.PRETRAINED_VISUAL_FEATURES_KEY] = self._encoder(
+                    batch
+                )
 
         self._agent.rollouts.insert_first_observations(batch)
 
@@ -317,9 +314,7 @@ class PPOTrainer(BaseRLTrainer):
         torch.save(checkpoint, save_file_path)
         torch.save(
             checkpoint,
-            os.path.join(
-                self.config.habitat_baselines.checkpoint_folder, "latest.pth"
-            ),
+            os.path.join(self.config.habitat_baselines.checkpoint_folder, "latest.pth"),
         )
         if self.config.habitat_baselines.on_save_ckpt_callback is not None:
             hydra.utils.call(
@@ -349,17 +344,13 @@ class PPOTrainer(BaseRLTrainer):
 
         with g_timer.avg_time("trainer.sample_action"), inference_mode():
             # Sample actions
-            step_batch = self._agent.rollouts.get_current_step(
-                env_slice, buffer_index
-            )
+            step_batch = self._agent.rollouts.get_current_step(env_slice, buffer_index)
 
             profiling_wrapper.range_push("compute actions")
 
             # Obtain lenghts
             step_batch_lens = {
-                k: v
-                for k, v in step_batch.items()
-                if k.startswith("index_len")
+                k: v for k, v in step_batch.items() if k.startswith("index_len")
             }
             action_data = self._agent.actor_critic.act(
                 step_batch["observations"],
@@ -411,9 +402,7 @@ class PPOTrainer(BaseRLTrainer):
                 for index_env in range(env_slice.start, env_slice.stop)
             ]
 
-            observations, rewards_l, dones, infos = [
-                list(x) for x in zip(*outputs)
-            ]
+            observations, rewards_l, dones, infos = [list(x) for x in zip(*outputs)]
 
         with g_timer.avg_time("trainer.update_stats"):
             observations = self.envs.post_step(observations)
@@ -460,15 +449,13 @@ class PPOTrainer(BaseRLTrainer):
                     )
                 self.running_episode_stats[k][env_slice] += v.where(done_masks, v.new_zeros(()))  # type: ignore
 
-            self.current_episode_reward[env_slice].masked_fill_(
-                done_masks, 0.0
-            )
+            self.current_episode_reward[env_slice].masked_fill_(done_masks, 0.0)
 
         if self._is_static_encoder:
             with inference_mode(), g_timer.avg_time("trainer.visual_features"):
-                batch[
-                    PointNavResNetNet.PRETRAINED_VISUAL_FEATURES_KEY
-                ] = self._encoder(batch)
+                batch[PointNavResNetNet.PRETRAINED_VISUAL_FEATURES_KEY] = self._encoder(
+                    batch
+                )
 
         self._agent.rollouts.insert(
             next_observations=batch,
@@ -492,9 +479,7 @@ class PPOTrainer(BaseRLTrainer):
         with inference_mode():
             step_batch = self._agent.rollouts.get_last_step()
             step_batch_lens = {
-                k: v
-                for k, v in step_batch.items()
-                if k.startswith("index_len")
+                k: v for k, v in step_batch.items() if k.startswith("index_len")
             }
 
             next_value = self._agent.actor_critic.get_value(
@@ -525,9 +510,7 @@ class PPOTrainer(BaseRLTrainer):
         self, losses: Dict[str, float], count_steps_delta: int
     ) -> Dict[str, float]:
         stats_ordering = sorted(self.running_episode_stats.keys())
-        stats = torch.stack(
-            [self.running_episode_stats[k] for k in stats_ordering], 0
-        )
+        stats = torch.stack([self.running_episode_stats[k] for k in stats_ordering], 0)
 
         stats = self._all_reduce(stats)
 
@@ -545,9 +528,7 @@ class PPOTrainer(BaseRLTrainer):
             count_steps_delta = int(stats[-1].item())
             stats /= torch.distributed.get_world_size()
 
-            losses = {
-                k: stats[i].item() for i, k in enumerate(loss_name_ordering)
-            }
+            losses = {k: stats[i].item() for i, k in enumerate(loss_name_ordering)}
 
         if self._is_distributed and rank0_only():
             self.num_rollouts_done_store.set("num_done", "0")
@@ -557,15 +538,9 @@ class PPOTrainer(BaseRLTrainer):
         return losses
 
     @rank0_only
-    def _training_log(
-        self, writer, losses: Dict[str, float], prev_time: int = 0
-    ):
+    def _training_log(self, writer, losses: Dict[str, float], prev_time: int = 0):
         deltas = {
-            k: (
-                (v[-1] - v[0]).sum().item()
-                if len(v) > 1
-                else v[0].sum().item()
-            )
+            k: ((v[-1] - v[0]).sum().item() if len(v) > 1 else v[0].sum().item())
             for k, v in self.window_episode_stats.items()
         }
         deltas["count"] = max(deltas["count"], 1.0)
@@ -605,10 +580,7 @@ class PPOTrainer(BaseRLTrainer):
             )
 
         # log stats
-        if (
-            self.num_updates_done % self.config.habitat_baselines.log_interval
-            == 0
-        ):
+        if self.num_updates_done % self.config.habitat_baselines.log_interval == 0:
             logger.info(
                 "update: {}\tfps: {:.3f}\t".format(
                     self.num_updates_done,
@@ -676,16 +648,12 @@ class PPOTrainer(BaseRLTrainer):
             requeue_stats = resume_state["requeue_stats"]
             self.num_steps_done = requeue_stats["num_steps_done"]
             self.num_updates_done = requeue_stats["num_updates_done"]
-            self._last_checkpoint_percent = requeue_stats[
-                "_last_checkpoint_percent"
-            ]
+            self._last_checkpoint_percent = requeue_stats["_last_checkpoint_percent"]
             count_checkpoints = requeue_stats["count_checkpoints"]
             prev_time = requeue_stats["prev_time"]
 
             self.running_episode_stats = requeue_stats["running_episode_stats"]
-            self.window_episode_stats.update(
-                requeue_stats["window_episode_stats"]
-            )
+            self.window_episode_stats.update(requeue_stats["window_episode_stats"])
             resume_run_id = requeue_stats.get("run_id", None)
 
         with (
@@ -750,8 +718,8 @@ class PPOTrainer(BaseRLTrainer):
                         )
 
                         for buffer_index in range(self._agent.nbuffers):
-                            count_steps_delta += (
-                                self._collect_environment_result(buffer_index)
+                            count_steps_delta += self._collect_environment_result(
+                                buffer_index
                             )
 
                             if (buffer_index + 1) == self._agent.nbuffers:
@@ -763,9 +731,7 @@ class PPOTrainer(BaseRLTrainer):
                                         "_collect_rollout_step"
                                     )
 
-                                self._compute_actions_and_step_envs(
-                                    buffer_index
-                                )
+                                self._compute_actions_and_step_envs(buffer_index)
 
                         if is_last_step:
                             break
@@ -823,9 +789,7 @@ class PPOTrainer(BaseRLTrainer):
         # a hierarchial policy
         if self.config.habitat_baselines.eval.should_load_ckpt:
             # map_location="cpu" is almost always better than mapping to a CUDA device.
-            ckpt_dict = self.load_checkpoint(
-                checkpoint_path, map_location="cpu"
-            )
+            ckpt_dict = self.load_checkpoint(checkpoint_path, map_location="cpu")
             step_id = ckpt_dict["extra_state"]["step"]
             logger.info(f"Loaded checkpoint trained for {step_id} steps")
         else:
@@ -834,9 +798,7 @@ class PPOTrainer(BaseRLTrainer):
         if "config" not in ckpt_dict:
             ckpt_dict["config"] = None
 
-        config = self._get_resume_state_config_or_new_config(
-            ckpt_dict["config"]
-        )
+        config = self._get_resume_state_config_or_new_config(ckpt_dict["config"])
         with read_write(config):
             config.habitat.dataset.split = config.habitat_baselines.eval.split
 
@@ -844,9 +806,7 @@ class PPOTrainer(BaseRLTrainer):
             n_agents = len(config.habitat.simulator.agents)
             for agent_i in range(n_agents):
                 agent_name = config.habitat.simulator.agents_order[agent_i]
-                agent_config = get_agent_config(
-                    config.habitat.simulator, agent_i
-                )
+                agent_config = get_agent_config(config.habitat.simulator, agent_i)
 
                 agent_sensors = agent_config.sim_sensors
                 extra_sensors = config.habitat_baselines.eval.extra_sim_sensors
@@ -855,18 +815,13 @@ class PPOTrainer(BaseRLTrainer):
                 with read_write(config):
                     if config.habitat.gym.obs_keys is not None:
                         for render_view in extra_sensors.values():
-                            if (
-                                render_view.uuid
-                                not in config.habitat.gym.obs_keys
-                            ):
+                            if render_view.uuid not in config.habitat.gym.obs_keys:
                                 if n_agents > 1:
                                     config.habitat.gym.obs_keys.append(
                                         f"{agent_name}_{render_view.uuid}"
                                     )
                                 else:
-                                    config.habitat.gym.obs_keys.append(
-                                        render_view.uuid
-                                    )
+                                    config.habitat.gym.obs_keys.append(render_view.uuid)
 
         if config.habitat_baselines.verbose:
             logger.info(f"env config: {OmegaConf.to_yaml(config)}")

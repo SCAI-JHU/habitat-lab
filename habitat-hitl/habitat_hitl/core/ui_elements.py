@@ -195,13 +195,9 @@ class UIManager:
         self._client_state = client_state
         self._client_message_manager = client_message_manager
         self._users = users
-        self._user_canvases = _create_default_user_canvases(
-            users.max_user_count
-        )
+        self._user_canvases = _create_default_user_canvases(users.max_user_count)
 
-    def update_canvas(
-        self, canvas_uid: str, destination_mask: Mask
-    ) -> UIContext:
+    def update_canvas(self, canvas_uid: str, destination_mask: Mask) -> UIContext:
         """
         Update a canvas.
 
@@ -233,9 +229,7 @@ class UIManager:
         Use `update_canvas()` instead of calling this function directly.
         """
         for user_index in self._users.indices(destination_mask):
-            cached_elements = self._user_canvases[user_index].get(
-                canvas_uid, {}
-            )
+            cached_elements = self._user_canvases[user_index].get(canvas_uid, {})
             self._user_canvases[user_index][canvas_uid] = ui_elements
 
             def is_canvas_dirty() -> bool:
@@ -243,8 +237,7 @@ class UIManager:
                     return True
                 else:
                     return any(
-                        uid not in cached_elements
-                        or element != cached_elements[uid]
+                        uid not in cached_elements or element != cached_elements[uid]
                         for uid, element in ui_elements.items()
                     )
 
@@ -290,9 +283,7 @@ class UIManager:
         self.clear_all_canvases(Mask.ALL)
 
         # Reset internal state.
-        self._user_canvases = _create_default_user_canvases(
-            self._users.max_user_count
-        )
+        self._user_canvases = _create_default_user_canvases(self._users.max_user_count)
 
 
 class UIContext:
@@ -308,9 +299,7 @@ class UIContext:
     ```
     """
 
-    def __init__(
-        self, canvas_uid: str, destination_mask: Mask, manager: UIManager
-    ):
+    def __init__(self, canvas_uid: str, destination_mask: Mask, manager: UIManager):
         self._canvas_uid = canvas_uid
         self._manager = manager
         self._destination_mask = destination_mask

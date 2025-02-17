@@ -20,9 +20,7 @@ except ImportError:
 
 def get_writer(config, **kwargs):
     if config.habitat_baselines.writer_type == "tb":
-        return TensorboardWriter(
-            config.habitat_baselines.tensorboard_dir, **kwargs
-        )
+        return TensorboardWriter(config.habitat_baselines.tensorboard_dir, **kwargs)
     elif config.habitat_baselines.writer_type == "wb":
         return WeightsAndBiasesWriter(config)
     else:
@@ -88,15 +86,11 @@ class TensorboardWriter:
         if not self.writer:
             return
         # initial shape of np.ndarray list: N * (H, W, 3)
-        frame_tensors = [
-            torch.from_numpy(np_arr).unsqueeze(0) for np_arr in images
-        ]
+        frame_tensors = [torch.from_numpy(np_arr).unsqueeze(0) for np_arr in images]
         video_tensor = torch.cat(tuple(frame_tensors))
         video_tensor = video_tensor.permute(0, 3, 1, 2).unsqueeze(0)
         # final shape of video tensor: (1, n, 3, H, W)
-        self.writer.add_video(
-            video_name, video_tensor, fps=fps, global_step=step_idx
-        )
+        self.writer.add_video(video_name, video_tensor, fps=fps, global_step=step_idx)
 
 
 class WeightsAndBiasesWriter:
@@ -125,9 +119,7 @@ class WeightsAndBiasesWriter:
             if k.startswith("SLURM_")
         }
         if wandb is None:
-            raise ValueError(
-                "Requested to log with wandb, but wandb is not installed."
-            )
+            raise ValueError("Requested to log with wandb, but wandb is not installed.")
         if resume_run_id is not None:
             wb_kwargs["id"] = resume_run_id
             wb_kwargs["resume"] = "must"
@@ -148,8 +140,7 @@ class WeightsAndBiasesWriter:
 
     def add_scalars(self, log_group, data_dict, step_id):
         log_data_dict = {
-            f"{log_group}/{k.replace(' ', '')}": v
-            for k, v in data_dict.items()
+            f"{log_group}/{k.replace(' ', '')}": v for k, v in data_dict.items()
         }
         wandb.log(log_data_dict, step=int(step_id))  # type: ignore[attr-defined]
 

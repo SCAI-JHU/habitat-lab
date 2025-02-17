@@ -101,9 +101,7 @@ class GuiPlacementHelper:
 
     def update(self, ray: Ray, query_obj_id: int):
         sim = self._app_service.sim
-        query_obj = sim.get_rigid_object_manager().get_object_by_id(
-            query_obj_id
-        )
+        query_obj = sim.get_rigid_object_manager().get_object_by_id(query_obj_id)
 
         cached_is_collidable = query_obj.collidable
         query_obj.collidable = True

@@ -45,13 +45,12 @@ class Metric:
                 self.metrics[i][2] = np.mean(values[i])
             else:
                 self.metrics[i][0] = (
-                    self.metrics[i][0] * (self.num_iters - 1)
-                    + np.mean(values[i])
+                    self.metrics[i][0] * (self.num_iters - 1) + np.mean(values[i])
                 ) / self.num_iters
 
-                self.metrics[i][1] = 0.95 * self.metrics[i][
-                    1
-                ] + 0.05 * np.mean(values[i])
+                self.metrics[i][1] = 0.95 * self.metrics[i][1] + 0.05 * np.mean(
+                    values[i]
+                )
 
                 self.metrics[i][2] = np.mean(values[i])
 

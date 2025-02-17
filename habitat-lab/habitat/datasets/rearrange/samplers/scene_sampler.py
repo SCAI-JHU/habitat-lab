@@ -88,9 +88,7 @@ class BalancedSceneSampler(SceneSampler):
         assert len(scenes) > 0, "No scenes provided to BalancedSceneSampler."
         self.scenes = scenes
         self.num_episodes = num_episodes
-        assert self.num_episodes % len(
-            self.scenes
-        ) == 0 and self.num_episodes >= len(
+        assert self.num_episodes % len(self.scenes) == 0 and self.num_episodes >= len(
             self.scenes
         ), f"Requested number of episodes '{self.num_episodes}' not divisible by number of scenes {len(self.scenes)}, results would be unbalanced."
         self.num_ep_per_scene = int(self.num_episodes / len(self.scenes))

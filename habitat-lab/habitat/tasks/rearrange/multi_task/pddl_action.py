@@ -80,9 +80,7 @@ class PddlAction:
         return None
 
     def __repr__(self):
-        return (
-            f"<Action {self._name} ({self._params})->({self._param_values})>"
-        )
+        return f"<Action {self._name} ({self._params})->({self._param_values})>"
 
     @property
     def compact_str(self) -> str:
@@ -92,9 +90,7 @@ class PddlAction:
         params = ",".join([x.name for x in self._param_values])
         return f"{self._name}({params})"
 
-    def is_precond_satisfied_from_predicates(
-        self, predicates: List[Predicate]
-    ) -> bool:
+    def is_precond_satisfied_from_predicates(self, predicates: List[Predicate]) -> bool:
         """
         Checks if the preconditions of the action are satisfied from the input
         predicates ALONE.
@@ -167,9 +163,7 @@ class PddlAction:
         post_conds = self._post_cond
         if self._post_cond_search is not None:
             found_assign = None
-            assert len(self._pre_cond.prev_truth_vals) == len(
-                self._post_cond_search
-            )
+            assert len(self._pre_cond.prev_truth_vals) == len(self._post_cond_search)
             for sat, assign in zip(
                 self._pre_cond.prev_truth_vals, self._post_cond_search
             ):
@@ -190,9 +184,7 @@ class PddlAction:
     @property
     def param_values(self) -> Optional[List[PddlEntity]]:
         if self._param_values is None:
-            raise ValueError(
-                "Accessing action param values before they are set."
-            )
+            raise ValueError("Accessing action param values before they are set.")
         if len(self._param_values) != len(self._params):
             raise ValueError()
         return self._param_values

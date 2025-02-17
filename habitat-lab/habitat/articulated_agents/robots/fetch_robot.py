@@ -69,9 +69,7 @@ class FetchRobot(MobileManipulator):
             },
         )
 
-    def __init__(
-        self, agent_cfg, sim, limit_robo_joints=True, fixed_base=True
-    ):
+    def __init__(self, agent_cfg, sim, limit_robo_joints=True, fixed_base=True):
         super().__init__(
             self._get_fetch_params(),
             agent_cfg,
@@ -97,9 +95,7 @@ class FetchRobot(MobileManipulator):
 
     @property
     def base_transformation(self):
-        add_rot = mn.Matrix4.rotation(
-            mn.Rad(-np.pi / 2), mn.Vector3(1.0, 0, 0)
-        )
+        add_rot = mn.Matrix4.rotation(mn.Rad(-np.pi / 2), mn.Vector3(1.0, 0, 0))
         return self.sim_obj.transformation @ add_rot
 
     def update(self):
@@ -120,9 +116,7 @@ class FetchRobot(MobileManipulator):
 
 
 class FetchRobotNoWheels(FetchRobot):
-    def __init__(
-        self, urdf_path, sim, limit_robo_joints=True, fixed_base=True
-    ):
+    def __init__(self, urdf_path, sim, limit_robo_joints=True, fixed_base=True):
         super().__init__(urdf_path, sim, limit_robo_joints, fixed_base)
         self.back_joint_id -= 2
         self.head_rot_jid -= 2

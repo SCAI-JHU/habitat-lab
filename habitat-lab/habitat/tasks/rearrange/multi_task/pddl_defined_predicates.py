@@ -68,9 +68,7 @@ def set_robot_holding(
         agent_data.grasp_mgr.desnap(True)
     elif hold_state:
         if obj is None:
-            raise ValueError(
-                f"If setting hold state {hold_state=}, must set object"
-            )
+            raise ValueError(f"If setting hold state {hold_state=}, must set object")
         # Swap objects to the desired object.
         obj_idx = cast(int, sim_info.search_for_entity(obj))
         agent_data.grasp_mgr.desnap(True)
@@ -79,9 +77,7 @@ def set_robot_holding(
         sim.internal_step(-1)
 
 
-def is_inside(
-    obj: PddlEntity, recep: PddlEntity, sim_info: PddlSimInfo
-) -> bool:
+def is_inside(obj: PddlEntity, recep: PddlEntity, sim_info: PddlSimInfo) -> bool:
     """
     Check if an entity is inside the receptacle.
     """
@@ -241,9 +237,7 @@ def is_object_at(
         recep = cast(mn.Range3D, sim_info.search_for_entity(at_entity))
         return recep.contains(entity_pos)
     else:
-        raise ValueError(
-            f"Got unexpected combination of {obj} and {at_entity}"
-        )
+        raise ValueError(f"Got unexpected combination of {obj} and {at_entity}")
 
 
 def set_object_at(
@@ -263,14 +257,10 @@ def set_object_at(
     sim = sim_info.sim
 
     # The source object must be movable.
-    if not sim_info.check_type_matches(
-        obj, SimulatorObjectType.MOVABLE_ENTITY.value
-    ):
+    if not sim_info.check_type_matches(obj, SimulatorObjectType.MOVABLE_ENTITY.value):
         raise ValueError(f"Got unexpected obj {obj}")
 
-    if sim_info.check_type_matches(
-        at_entity, SimulatorObjectType.GOAL_ENTITY.value
-    ):
+    if sim_info.check_type_matches(at_entity, SimulatorObjectType.GOAL_ENTITY.value):
         targ_idx = cast(
             int,
             sim_info.search_for_entity(at_entity),

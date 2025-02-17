@@ -85,9 +85,7 @@ class RearrangeGraspManager:
         the agent violated the hold constraint.
         """
 
-        ee_pos = self._managed_articulated_agent.ee_transform(
-            self.ee_index
-        ).translation
+        ee_pos = self._managed_articulated_agent.ee_transform(self.ee_index).translation
         if self._snapped_obj_id is not None and (
             np.linalg.norm(ee_pos - self.snap_rigid_obj.translation)
             >= self._config.hold_thresh
@@ -107,10 +105,7 @@ class RearrangeGraspManager:
     def is_grasped(self) -> bool:
         """Returns whether or not an object or marker is currently grasped."""
 
-        return (
-            self._snapped_obj_id is not None
-            or self._snapped_marker_id is not None
-        )
+        return self._snapped_obj_id is not None or self._snapped_marker_id is not None
 
     def update(self) -> None:
         """Reset the collision group of the grasped object if its distance to the end effector exceeds a threshold.
@@ -206,9 +201,7 @@ class RearrangeGraspManager:
 
         if len(self._snap_constraints) != 0:
             # We were already grabbing something else.
-            raise ValueError(
-                f"Tried snapping to {marker_name} when already snapped"
-            )
+            raise ValueError(f"Tried snapping to {marker_name} when already snapped")
 
         marker = self._sim.get_marker(marker_name)
         self._snapped_marker_id = marker_name
@@ -265,9 +258,7 @@ class RearrangeGraspManager:
             link_id = self._managed_articulated_agent.ee_link_id(self.ee_index)
             sim_object = self._managed_articulated_agent.sim_obj
             link_node = sim_object.get_link_scene_node(link_id)
-            link_frame_world_space = (
-                link_node.absolute_transformation().rotation()
-            )
+            link_frame_world_space = link_node.absolute_transformation().rotation()
 
             object_frame_world_space = (
                 self._sim.get_rigid_object_manager()
@@ -364,9 +355,7 @@ class RearrangeGraspManager:
 
         # Set collision group to GraspedObject so that it doesn't collide
         # with the links of the robot.
-        self.snap_rigid_obj.override_collision_group(
-            CollisionGroups.UserGroup7
-        )
+        self.snap_rigid_obj.override_collision_group(CollisionGroups.UserGroup7)
 
         self._keep_T = keep_T
 

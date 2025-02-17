@@ -40,9 +40,7 @@ class RearrangePickTaskV1(RearrangeTask):
         self._spawn_max_dist_to_obj = self._config.spawn_max_dist_to_obj
         self._num_spawn_attempts = self._config.num_spawn_attempts
         self._filter_colliding_states = self._config.filter_colliding_states
-        self._spawn_max_dist_to_obj_delta = (
-            self._config.spawn_max_dist_to_obj_delta
-        )
+        self._spawn_max_dist_to_obj_delta = self._config.spawn_max_dist_to_obj_delta
 
     def set_args(self, obj, **kwargs):
         self.force_set_idx = obj
@@ -118,9 +116,7 @@ class RearrangePickTaskV1(RearrangeTask):
         sel_idx = self._sample_idx(sim)
         start_pos, start_rot = self._gen_start_pos(sim, episode, sel_idx)
 
-        set_agent_base_via_obj_trans(
-            start_pos, start_rot, sim.articulated_agent
-        )
+        set_agent_base_via_obj_trans(start_pos, start_rot, sim.articulated_agent)
 
         self._targ_idx = sel_idx
 

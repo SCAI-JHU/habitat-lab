@@ -144,9 +144,7 @@ class PPO(nn.Module, Updater):
         if not self.use_normalized_advantage:
             return advantages
 
-        var, mean = self._compute_var_mean(
-            advantages[torch.isfinite(advantages)]
-        )
+        var, mean = self._compute_var_mean(advantages[torch.isfinite(advantages)])
 
         advantages -= mean
 
@@ -219,9 +217,7 @@ class PPO(nn.Module, Updater):
                 value_pred_clipped,
             )
 
-        value_loss = 0.5 * F.mse_loss(
-            values, batch["returns"], reduction="none"
-        )
+        value_loss = 0.5 * F.mse_loss(values, batch["returns"], reduction="none")
 
         if "is_coeffs" in batch:
             assert isinstance(batch["is_coeffs"], torch.Tensor)
@@ -274,9 +270,7 @@ class PPO(nn.Module, Updater):
 
             learner_metrics["grad_norm"].append(grad_norm)
             if isinstance(self.entropy_coef, LagrangeInequalityCoefficient):
-                learner_metrics["entropy_coef"].append(
-                    self.entropy_coef().detach()
-                )
+                learner_metrics["entropy_coef"].append(self.entropy_coef().detach())
 
             for name, res in aux_loss_res.items():
                 for k, v in res.items():
@@ -291,10 +285,7 @@ class PPO(nn.Module, Updater):
             if isinstance(rollouts, VERRolloutStorage):
                 assert isinstance(batch["policy_version"], torch.Tensor)
                 record_min_mean_max(
-                    (
-                        rollouts.current_policy_version
-                        - batch["policy_version"]
-                    ).float(),
+                    (rollouts.current_policy_version - batch["policy_version"]).float(),
                     "policy_version_difference",
                 )
 
@@ -308,14 +299,10 @@ class PPO(nn.Module, Updater):
 
         for epoch in range(self.ppo_epoch):
             profiling_wrapper.range_push("PPO.update epoch")
-            data_generator = rollouts.data_generator(
-                advantages, self.num_mini_batch
-            )
+            data_generator = rollouts.data_generator(advantages, self.num_mini_batch)
 
             for _bid, batch in enumerate(data_generator):
-                self._update_from_batch(
-                    batch, epoch, rollouts, learner_metrics
-                )
+                self._update_from_batch(batch, epoch, rollouts, learner_metrics)
 
             profiling_wrapper.range_pop()  # PPO.update epoch
 
@@ -349,9 +336,7 @@ class PPO(nn.Module, Updater):
         if torch.distributed.is_initialized():
             for p in self.non_ac_params:
                 if p.grad is not None:
-                    p.grad.data.detach().div_(
-                        torch.distributed.get_world_size()
-                    )
+                    p.grad.data.detach().div_(torch.distributed.get_world_size())
                     handles.append(
                         torch.distributed.all_reduce(
                             p.grad.data.detach(), async_op=True

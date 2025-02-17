@@ -49,9 +49,7 @@ class DynNavRLEnv(RearrangeTask):
         self.force_recep_to_name = None
 
         # Set config options
-        self._object_in_hand_sample_prob = (
-            self._config.object_in_hand_sample_prob
-        )
+        self._object_in_hand_sample_prob = self._config.object_in_hand_sample_prob
         self._min_start_distance = self._config.min_start_distance
 
         self._nav_to_info = None
@@ -79,10 +77,7 @@ class DynNavRLEnv(RearrangeTask):
         start_hold_obj_idx: Optional[int] = None
 
         # Only change the scene if this skill is not running as a sub-task
-        if (
-            force_idx is None
-            and random.random() < self._object_in_hand_sample_prob
-        ):
+        if force_idx is None and random.random() < self._object_in_hand_sample_prob:
             start_hold_obj_idx = self._generate_snap_to_obj()
 
         if start_hold_obj_idx is None:
@@ -98,10 +93,7 @@ class DynNavRLEnv(RearrangeTask):
             nav_to_pos = all_pos[np.random.randint(0, len(all_pos))]
 
         def filter_func(start_pos, _):
-            return (
-                np.linalg.norm(start_pos - nav_to_pos)
-                > self._min_start_distance
-            )
+            return np.linalg.norm(start_pos - nav_to_pos) > self._min_start_distance
 
         (
             articulated_agent_pos,

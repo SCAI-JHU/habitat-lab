@@ -27,9 +27,7 @@ class StretchRobot(MobileManipulator):
             gripper_init_params=np.array([0.0, 0.0], dtype=np.float32),
             ee_offset=[mn.Vector3(0.08, 0, 0)],
             ee_links=[36],
-            ee_constraint=np.array(
-                [[[-0.08, 0.29], [-0.84, -0.27], [0.01, 1.12]]]
-            ),
+            ee_constraint=np.array([[[-0.08, 0.29], [-0.84, -0.27], [0.01, 1.12]]]),
             cameras={
                 "head": ArticulatedAgentCameraParams(
                     cam_offset_pos=mn.Vector3(0, 0.0, 0.1),
@@ -66,14 +64,10 @@ class StretchRobot(MobileManipulator):
 
     @property
     def base_transformation(self):
-        add_rot = mn.Matrix4.rotation(
-            mn.Rad(-np.pi / 2), mn.Vector3(1.0, 0, 0)
-        )
+        add_rot = mn.Matrix4.rotation(mn.Rad(-np.pi / 2), mn.Vector3(1.0, 0, 0))
         return self.sim_obj.transformation @ add_rot
 
-    def __init__(
-        self, agent_cfg, sim, limit_robo_joints=True, fixed_base=True
-    ):
+    def __init__(self, agent_cfg, sim, limit_robo_joints=True, fixed_base=True):
         super().__init__(
             self._get_fetch_params(),
             agent_cfg,
@@ -82,9 +76,7 @@ class StretchRobot(MobileManipulator):
             fixed_base,
         )
 
-class StretchRobotNoWheels(StretchRobot):
-    def __init__(
-        self, urdf_path, sim, limit_robo_joints=True, fixed_base=True
-    ):
-        super().__init__(urdf_path, sim, limit_robo_joints, fixed_base)
 
+class StretchRobotNoWheels(StretchRobot):
+    def __init__(self, urdf_path, sim, limit_robo_joints=True, fixed_base=True):
+        super().__init__(urdf_path, sim, limit_robo_joints, fixed_base)

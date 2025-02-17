@@ -151,16 +151,12 @@ class SetArticulatedObjectTask(RearrangeTask):
             self._sim.articulated_agent.base_rot = angle_to_obj + noise
             self._sim.articulated_agent.base_pos = base_pos
 
-            articulated_agent_T = (
-                self._sim.articulated_agent.base_transformation
-            )
+            articulated_agent_T = self._sim.articulated_agent.base_transformation
             rel_targ_pos = articulated_agent_T.inverted().transform_point(
                 marker.current_transform.translation
             )
             if not self._is_there_spawn_noise:
-                rearrange_logger.debug(
-                    "No spawn noise, returning first found position"
-                )
+                rearrange_logger.debug("No spawn noise, returning first found position")
                 break
 
             eps = 1e-2

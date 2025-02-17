@@ -34,9 +34,7 @@ def approx_equal(a_src, b_src, eps=1e-4):
         if len(a_list) != len(b_list):
             return False
 
-        return all(
-            approx_equal(a_list[i], b_list[i]) for i in range(len(a_list))
-        )
+        return all(approx_equal(a_list[i], b_list[i]) for i in range(len(a_list)))
 
 
 def test_episode_save_files(filepath_base):

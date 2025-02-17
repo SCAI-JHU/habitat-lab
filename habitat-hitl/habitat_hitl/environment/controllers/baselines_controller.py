@@ -55,9 +55,7 @@ class SingleAgentBaselinesController(BaselinesController):
         gym_habitat_env: "GymHabitatEnv",
     ):
         self._agent_idx: int = agent_idx
-        self._agent_name: str = config.habitat.simulator.agents_order[
-            self._agent_idx
-        ]
+        self._agent_name: str = config.habitat.simulator.agents_order[self._agent_idx]
 
         self._agent_k: str
         if is_multi_agent:

@@ -73,9 +73,7 @@ def get_minos_for_sim_eqa_config():
 def check_json_serialization(dataset: habitat.Dataset):
     start_time = time.time()
     json_str = str(dataset.to_json())
-    logger.info(
-        "JSON conversion finished. {} sec".format((time.time() - start_time))
-    )
+    logger.info("JSON conversion finished. {} sec".format((time.time() - start_time)))
     decoded_dataset = dataset.__class__()
     decoded_dataset.from_json(json_str)
     assert len(decoded_dataset.episodes) > 0
@@ -88,9 +86,7 @@ def check_json_serialization(dataset: habitat.Dataset):
 
 def test_mp3d_eqa_dataset():
     dataset_config = get_config(CFG_TEST).habitat.dataset
-    if not mp3d_dataset.Matterport3dDatasetV1.check_config_paths_exist(
-        dataset_config
-    ):
+    if not mp3d_dataset.Matterport3dDatasetV1.check_config_paths_exist(dataset_config):
         pytest.skip("Please download Matterport3D EQA dataset to data folder.")
 
     dataset = mp3d_dataset.Matterport3dDatasetV1(config=dataset_config)
@@ -109,9 +105,7 @@ def test_dataset_splitting(split):
         if not mp3d_dataset.Matterport3dDatasetV1.check_config_paths_exist(
             dataset_config
         ):
-            pytest.skip(
-                "Please download Matterport3D EQA dataset to data folder."
-            )
+            pytest.skip("Please download Matterport3D EQA dataset to data folder.")
 
         scenes = mp3d_dataset.Matterport3dDatasetV1.get_scenes_to_load(
             config=dataset_config
@@ -124,9 +118,7 @@ def test_dataset_splitting(split):
         full_dataset = make_dataset(
             id_dataset=dataset_config.type, config=dataset_config
         )
-        full_episodes = {
-            (ep.scene_id, ep.episode_id) for ep in full_dataset.episodes
-        }
+        full_episodes = {(ep.scene_id, ep.episode_id) for ep in full_dataset.episodes}
 
         dataset_config.content_scenes = scenes[0 : len(scenes) // 2]
         split1_dataset = make_dataset(
@@ -210,9 +202,7 @@ def test_mp3d_eqa_sim_correspondence():
         while cycles_n > 0:
             env.reset()
             episode = env.current_episode
-            assert (
-                len(episode.goals) == 1
-            ), "Episode has no goals or more than one."
+            assert len(episode.goals) == 1, "Episode has no goals or more than one."
             assert (
                 len(episode.shortest_paths) == 1
             ), "Episode has no shortest paths or more than one."
@@ -292,8 +282,7 @@ def test_eqa_task():
     with habitat.Env(config=eqa_config, dataset=dataset) as env:
         env.episodes = list(
             filter(
-                lambda e: int(e.episode_id)
-                in TEST_EPISODE_SET[:EPISODES_LIMIT],
+                lambda e: int(e.episode_id) in TEST_EPISODE_SET[:EPISODES_LIMIT],
                 dataset.episodes,
             )
         )

@@ -39,9 +39,7 @@ class DidAgentsCollide(Measure):
             for articulated_agent in sim.agents_mgr.articulated_agents_iter
         ]
         if len(agent_ids) != 2:
-            raise ValueError(
-                f"Sensor only supports 2 agents. Got {agent_ids=}"
-            )
+            raise ValueError(f"Sensor only supports 2 agents. Got {agent_ids=}")
 
         for cp in contact_points:
             if coll_name_matches(cp, agent_ids[0]) and coll_name_matches(
@@ -104,12 +102,8 @@ class OtherAgentGps(UsesArticulatedAgentInterface, Sensor):
             self.agent_id < 2
         ), f"OtherAgentGps only supports 2 agents, got {self.agent_id=}"
         other_agent_id = (self.agent_id + 1) % 2
-        my_pos = self._sim.get_agent_data(
-            self.agent_id
-        ).articulated_agent.base_pos
-        other_pos = self._sim.get_agent_data(
-            other_agent_id
-        ).articulated_agent.base_pos
+        my_pos = self._sim.get_agent_data(self.agent_id).articulated_agent.base_pos
+        other_pos = self._sim.get_agent_data(other_agent_id).articulated_agent.base_pos
         return np.array(my_pos - other_pos)[[0, 2]]
 
 
@@ -136,9 +130,7 @@ class MultiAgentGlobalPredicatesSensor(UsesArticulatedAgentInterface, Sensor):
     @property
     def predicates_list(self):
         if self._predicates_list is None:
-            self._predicates_list = (
-                self._task.pddl_problem.get_possible_predicates()
-            )
+            self._predicates_list = self._task.pddl_problem.get_possible_predicates()
         return self._predicates_list
 
     def _get_observation_space(self, *args, config, **kwargs):
@@ -189,9 +181,7 @@ class AreAgentsWithinThreshold(Sensor):
             self._agent_idx
         ).articulated_agent.base_transformation
 
-        other_pos = self._sim.get_agent_data(
-            other_agent_id
-        ).articulated_agent.base_pos
+        other_pos = self._sim.get_agent_data(other_agent_id).articulated_agent.base_pos
         rel_pos = my_T.inverted().transform_point(other_pos)
 
         # z coordinate is the height.

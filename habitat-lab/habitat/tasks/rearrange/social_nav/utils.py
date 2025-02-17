@@ -22,11 +22,7 @@ rearrange_logger = HabitatLogger(
 def robot_human_vec_dot_product(robot_pos, human_pos, base_T):
     """Compute the dot product between the human_robot vector and robot forward vector"""
     vector_human_robot = human_pos[[0, 2]] - robot_pos[[0, 2]]
-    vector_human_robot = vector_human_robot / np.linalg.norm(
-        vector_human_robot
-    )
-    forward_robot = np.array(base_T.transform_vector(mn.Vector3(1, 0, 0)))[
-        [0, 2]
-    ]
+    vector_human_robot = vector_human_robot / np.linalg.norm(vector_human_robot)
+    forward_robot = np.array(base_T.transform_vector(mn.Vector3(1, 0, 0)))[[0, 2]]
     forward_robot = forward_robot / np.linalg.norm(forward_robot)
     return np.dot(forward_robot, vector_human_robot)

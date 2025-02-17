@@ -56,24 +56,17 @@ def snap_point_is_occluded(
         ray.direction = target - ray.origin
         raycast_results = sim.cast_ray(ray)
         # distance of 1 is the displacement between the two points
-        if (
-            raycast_results.has_hits()
-            and raycast_results.hits[0].ray_distance < 1
-        ):
+        if raycast_results.has_hits() and raycast_results.hits[0].ray_distance < 1:
             for hit in raycast_results.hits:
                 if hit.ray_distance > 1:
                     # exceeded the distance check without hitting an occlusion
                     return False
 
-                if (
-                    target_object_ids is not None
-                    and hit.object_id in target_object_ids
-                ):
+                if target_object_ids is not None and hit.object_id in target_object_ids:
                     # we hit an allowed object (i.e., the target object), so not occluded
                     return False
                 elif (
-                    ignore_object_ids is not None
-                    and hit.object_id in ignore_object_ids
+                    ignore_object_ids is not None and hit.object_id in ignore_object_ids
                 ):
                     # we hit an ignored object, so continue the search
                     continue
@@ -150,16 +143,11 @@ def unoccluded_navmesh_snap(
             if not np.isnan(sample[0]):
                 reject = False
                 for batch_sample in test_batch:
-                    if (
-                        np.linalg.norm(sample - batch_sample[0])
-                        < min_sample_dist
-                    ):
+                    if np.linalg.norm(sample - batch_sample[0]) < min_sample_dist:
                         reject = True
                         break
                 if not reject:
-                    test_batch.append(
-                        (sample, float(np.linalg.norm(sample - pos)))
-                    )
+                    test_batch.append((sample, float(np.linalg.norm(sample - pos))))
             sample_count += 1
 
         # sort the test batch points by distance to the target
@@ -296,10 +284,7 @@ def embodied_unoccluded_navmesh_snap(
                 np.array(target_position - batch_sample[0])
             )
 
-            if (
-                embodiment_heuristic_offsets is None
-                and agent_embodiment is None
-            ):
+            if embodiment_heuristic_offsets is None and agent_embodiment is None:
                 # No embodiment for collision detection, so return closest unoccluded point
                 return batch_sample[0], facing_target_angle, True
 
@@ -345,8 +330,7 @@ def embodied_unoccluded_navmesh_snap(
                             sim.pathfinder.is_navigable(offset_point)
                             and (
                                 island_id == -1
-                                or sim.pathfinder.get_island(offset_point)
-                                == island_id
+                                or sim.pathfinder.get_island(offset_point) == island_id
                             )
                         ):
                             is_collision = True
@@ -413,16 +397,12 @@ def is_collision(
     """
     nav_pos_3d = [np.array([xz[0], 0.0, xz[1]]) for xz in navmesh_offset]
     cur_pos = [trans.transform_point(xyz) for xyz in nav_pos_3d]
-    cur_pos = [
-        np.array([xz[0], trans.translation[1], xz[2]]) for xz in cur_pos
-    ]
+    cur_pos = [np.array([xz[0], trans.translation[1], xz[2]]) for xz in cur_pos]
 
     for pos in cur_pos:
         # Return True if the point is not navigable on the configured island
         # TODO: pathfinder.is_navigable does not support island specification, so duplicating functionality for now
-        largest_island_snap_point = pathfinder.snap_point(
-            pos, island_index=island_idx
-        )
+        largest_island_snap_point = pathfinder.snap_point(pos, island_index=island_idx)
         vertical_dist = abs(largest_island_snap_point[1] - pos[1])
         if vertical_dist > 0.5:
             return True
@@ -487,12 +467,8 @@ class SimpleVelocityControlEnv:
         linear_velocity = vel[0]
         angular_velocity = vel[1]
         # Map velocity actions
-        self.vel_control.linear_velocity = mn.Vector3(
-            [linear_velocity, 0.0, 0.0]
-        )
-        self.vel_control.angular_velocity = mn.Vector3(
-            [0.0, angular_velocity, 0.0]
-        )
+        self.vel_control.linear_velocity = mn.Vector3([linear_velocity, 0.0, 0.0])
+        self.vel_control.angular_velocity = mn.Vector3([0.0, angular_velocity, 0.0])
         # Compute the rigid state
         rigid_state = habitat_sim.RigidState(
             mn.Quaternion.from_matrix(trans.rotation()), trans.translation
@@ -548,18 +524,13 @@ def record_robot_nav_debug_image(
     dbv.render_debug_lines(debug_lines=path_point_render_lines)
 
     # draw the local coordinate axis of the robot
-    dbv.render_debug_frame(
-        axis_length=0.3, transformation=robot_transformation
-    )
+    dbv.render_debug_frame(axis_length=0.3, transformation=robot_transformation)
 
     # render the robot embodiment
-    nav_pos_3d = [
-        np.array([xz[0], 0.0, xz[1]]) for xz in robot_navmesh_offsets
-    ]
+    nav_pos_3d = [np.array([xz[0], 0.0, xz[1]]) for xz in robot_navmesh_offsets]
     cur_pos = [robot_transformation.transform_point(xyz) for xyz in nav_pos_3d]
     cur_pos = [
-        np.array([xz[0], robot_transformation.translation[1], xz[2]])
-        for xz in cur_pos
+        np.array([xz[0], robot_transformation.translation[1], xz[2]]) for xz in cur_pos
     ]
     dbv.render_debug_circles(
         [
@@ -617,9 +588,7 @@ def path_is_navigable_given_robot(
 
     :return: Whether or not the ratio of time-steps where collisions were detected is within the provided threshold.
     """
-    logger.info(
-        "Checking robot navigability between target object start and goal:"
-    )
+    logger.info("Checking robot navigability between target object start and goal:")
 
     snapped_start_pos = sim.pathfinder.snap_point(start_pos, selected_island)
     snapped_goal_pos = sim.pathfinder.snap_point(goal_pos, selected_island)
@@ -640,9 +609,7 @@ def path_is_navigable_given_robot(
     modified_settings = sim.pathfinder.nav_mesh_settings
     robot_navmesh_radius = modified_settings.agent_radius
     modified_settings.agent_radius += 0.05
-    assert sim.recompute_navmesh(
-        pf, modified_settings
-    ), "failed to recompute navmesh"
+    assert sim.recompute_navmesh(pf, modified_settings), "failed to recompute navmesh"
     # Init the shortest path
     path = habitat_sim.ShortestPath()
     # Set the locations
@@ -705,9 +672,7 @@ def path_is_navigable_given_robot(
         angle_to_target = get_angle(robot_forward, rel_targ)
         angle_to_obj = get_angle(robot_forward, rel_pos)
         # Compute the distance
-        dist_to_final_nav_targ = np.linalg.norm(
-            (final_nav_targ - robot_pos)[[0, 2]]
-        )
+        dist_to_final_nav_targ = np.linalg.norm((final_nav_targ - robot_pos)[[0, 2]])
         at_goal = bool(
             dist_to_final_nav_targ < distance_threshold
             and angle_to_obj < angle_threshold
@@ -729,14 +694,9 @@ def path_is_navigable_given_robot(
         trans = vc.act(trans, vel)
         robot_pos = trans.translation
         collision.append(
-            is_collision(
-                sim.pathfinder, trans, robot_navmesh_offsets, selected_island
-            )
+            is_collision(sim.pathfinder, trans, robot_navmesh_offsets, selected_island)
         )
-        if (
-            render_debug_video
-            and time_since_debug_frame > 1.0 / debug_framerate
-        ):
+        if render_debug_video and time_since_debug_frame > 1.0 / debug_framerate:
             time_since_debug_frame = 0
             record_robot_nav_debug_image(
                 curr_path_points=curr_path_points,
@@ -801,9 +761,7 @@ def is_accessible(
     if snapped is None:
         return False
 
-    horizontal_dist = float(
-        np.linalg.norm(np.array((snapped - point))[[0, 2]])
-    )
+    horizontal_dist = float(np.linalg.norm(np.array((snapped - point))[[0, 2]]))
     return horizontal_dist < nav_to_min_distance
 
 
@@ -838,9 +796,7 @@ def is_outdoor(
     num_tries = 0
     nav_samples: List[np.ndarray] = []
     while len(nav_samples) < num_samples and num_tries < max_sample_attempts:
-        nav_sample = pathfinder.get_random_navigable_point(
-            island_index=island_ix
-        )
+        nav_sample = pathfinder.get_random_navigable_point(island_index=island_ix)
         if np.any(np.isnan(nav_sample)):
             continue
         if min_sample_dist is not None:
@@ -858,8 +814,7 @@ def is_outdoor(
     #    - Any hit points classify the sample as indoor, otherwise outdoor.
     up = mn.Vector3(0, 1.0, 0)
     ray_results = [
-        sim.cast_ray(habitat_sim.geo.Ray(nav_sample, up))
-        for nav_sample in nav_samples
+        sim.cast_ray(habitat_sim.geo.Ray(nav_sample, up)) for nav_sample in nav_samples
     ]
     num_indoor_samples = sum([results.has_hits() for results in ray_results])
 
@@ -895,8 +850,7 @@ def get_largest_island_index(
     if not allow_outdoor:
         # classify indoor vs outdoor
         island_outdoor_classifications = [
-            is_outdoor(pathfinder, sim, island_info[0])
-            for island_info in island_areas
+            is_outdoor(pathfinder, sim, island_info[0]) for island_info in island_areas
         ]
         if False not in island_outdoor_classifications:
             return -1

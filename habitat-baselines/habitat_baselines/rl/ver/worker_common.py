@@ -90,9 +90,7 @@ class ProcessBase:
                 func()
             else:
                 if data is None:
-                    raise RuntimeError(
-                        f"Function for task {task} takes no data."
-                    )
+                    raise RuntimeError(f"Function for task {task} takes no data.")
                 elif n_params == 1:
                     func(data)
                 elif len(data) != n_params:
@@ -176,9 +174,7 @@ class WorkerBase:
         self._proc = p
 
     @staticmethod
-    def _worker_fn(
-        process_class: Type[ProcessBase], process_args, process_kwargs
-    ):
+    def _worker_fn(process_class: Type[ProcessBase], process_args, process_kwargs):
         #  signal.signal(signal.SIGINT, signal.SIG_IGN)
         signal.signal(signal.SIGTERM, signal.SIG_IGN)
 

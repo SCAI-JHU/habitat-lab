@@ -47,9 +47,7 @@ def file_is_glb(filepath: str) -> bool:
     return filepath.endswith(".glb")
 
 
-def find_files(
-    root_dir: str, discriminator: Callable[[str], bool]
-) -> List[str]:
+def find_files(root_dir: str, discriminator: Callable[[str], bool]) -> List[str]:
     """
     Recursively find all filepaths under a root directory satisfying a particular constraint as defined by a discriminator function.
 
@@ -79,9 +77,7 @@ def get_model_ids_from_scene_instance_json(filepath: str) -> List[str]:
     """
     Scrape a list of all unique model ids from the scene instance file.
     """
-    assert filepath.endswith(
-        ".scene_instance.json"
-    ), "Must be a scene instance JSON."
+    assert filepath.endswith(".scene_instance.json"), "Must be a scene instance JSON."
 
     model_ids = []
 
@@ -132,9 +128,7 @@ def process_model(args):
         )
     except Exception:
         try:
-            print(
-                f"Unable to decimate: {job.source_path}. Trying without decimation."
-            )
+            print(f"Unable to decimate: {job.source_path}. Trying without decimation.")
             source_tris, target_tris, simplified_tris = decimate.decimate(
                 inputFile=job.source_path,
                 outputFile=job.dest_path,
@@ -200,9 +194,7 @@ def simplify_models(jobs: List[Job], config: Config):
     total_models = len(jobs)
 
     # Pair up the model paths with the counter and lock
-    args_lists = [
-        (job, counter, lock, total_models, config.verbose) for job in jobs
-    ]
+    args_lists = [(job, counter, lock, total_models, config.verbose) for job in jobs]
 
     results = []
 
@@ -347,30 +339,22 @@ def main():
         jobs.append(job)
 
     # Add all models contained in the scenes
-    scene_models = find_model_paths_in_scenes(
-        args.hssd_hab_root_dir, scene_ids
-    )
+    scene_models = find_model_paths_in_scenes(args.hssd_hab_root_dir, scene_ids)
     for scene_model in scene_models:
         rel_path = scene_model[len(args.hssd_hab_root_dir) :]
         if "decomposed" not in scene_model:
             job = Job()
             source_path = os.path.join(args.hssd_models_root_dir, rel_path)
-            parts = source_path.split(
-                "/objects/"
-            )  # Remove 'objects/' from path
+            parts = source_path.split("/objects/")  # Remove 'objects/' from path
             job.source_path = os.path.join(parts[0], parts[1])
             assert len(parts) == 2
-            job.dest_path = os.path.join(
-                OUTPUT_DIR, hssd_hab_rel_dir, rel_path
-            )
+            job.dest_path = os.path.join(OUTPUT_DIR, hssd_hab_rel_dir, rel_path)
             job.simplify = False
             jobs.append(job)
         else:
             job = Job()
             job.source_path = os.path.join(args.hssd_hab_root_dir, rel_path)
-            job.dest_path = os.path.join(
-                OUTPUT_DIR, hssd_hab_rel_dir, rel_path
-            )
+            job.dest_path = os.path.join(OUTPUT_DIR, hssd_hab_rel_dir, rel_path)
             job.simplify = False
             jobs.append(job)
 
@@ -384,9 +368,7 @@ def main():
         jobs.append(job)
 
     # Add spot models
-    for filename in Path("data/robots/hab_spot_arm/meshesColored").rglob(
-        "*.glb"
-    ):
+    for filename in Path("data/robots/hab_spot_arm/meshesColored").rglob("*.glb"):
         rel_path = str(filename)[len("data/") :]
         job = Job()
         job.source_path = os.path.join("data", rel_path)

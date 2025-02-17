@@ -30,6 +30,7 @@ class VQATrainer(BaseILTrainer):
     r"""Trainer class for VQA model used in EmbodiedQA (Das et. al.; CVPR 2018)
     Paper: https://embodiedqa.org/paper.pdf.
     """
+
     supported_tasks = ["VQA-v0"]
 
     def __init__(self, config=None):
@@ -46,9 +47,7 @@ class VQATrainer(BaseILTrainer):
 
     def _make_results_dir(self):
         r"""Makes directory for saving VQA eval results."""
-        dir_name = self.config.habitat_baselines.il.results_dir.format(
-            split="val"
-        )
+        dir_name = self.config.habitat_baselines.il.results_dir.format(split="val")
         os.makedirs(dir_name, exist_ok=True)
 
     def _save_vqa_results(
@@ -101,9 +100,7 @@ class VQATrainer(BaseILTrainer):
             result_path, "ckpt_{}_{}_image.jpg".format(ckpt_idx, episode_id)
         )
 
-        save_vqa_image_results(
-            images, q_string, pred_answer, gt_answer, result_path
-        )
+        save_vqa_image_results(images, q_string, pred_answer, gt_answer, result_path)
 
     def train(self) -> None:
         r"""Main method for training VQA (Answering) model of EQA.
@@ -200,9 +197,7 @@ class VQATrainer(BaseILTrainer):
                     loss = lossFn(scores, answers)
 
                     # update metrics
-                    accuracy, ranks = metrics.compute_ranks(
-                        scores.data.cpu(), answers
-                    )
+                    accuracy, ranks = metrics.compute_ranks(scores.data.cpu(), answers)
                     metrics.update([loss.item(), accuracy, ranks, 1.0 / ranks])
 
                     loss.backward()
@@ -236,8 +231,7 @@ class VQATrainer(BaseILTrainer):
                 # Dataloader length for IterableDataset doesn't take into
                 # account batch size for Pytorch v < 1.6.0
                 num_batches = math.ceil(
-                    len(vqa_dataset)
-                    / config.habitat_baselines.il.vqa.batch_size
+                    len(vqa_dataset) / config.habitat_baselines.il.vqa.batch_size
                 )
 
                 avg_loss /= num_batches
@@ -265,9 +259,7 @@ class VQATrainer(BaseILTrainer):
 
                 print("-----------------------------------------")
 
-                self.save_checkpoint(
-                    model.state_dict(), "epoch_{}.ckpt".format(epoch)
-                )
+                self.save_checkpoint(model.state_dict(), "epoch_{}.ckpt".format(epoch))
 
                 epoch += 1
 
@@ -290,9 +282,7 @@ class VQATrainer(BaseILTrainer):
         config = self.config
 
         with read_write(config):
-            config.habitat.dataset.split = (
-                self.config.habitat_baselines.eval.split
-            )
+            config.habitat.dataset.split = self.config.habitat_baselines.eval.split
 
         vqa_dataset = (
             EQADataset(
@@ -325,9 +315,7 @@ class VQATrainer(BaseILTrainer):
         }
         model = VqaLstmCnnAttentionModel(**model_kwargs)
 
-        state_dict = torch.load(
-            checkpoint_path, map_location={"cuda:0": "cpu"}
-        )
+        state_dict = torch.load(checkpoint_path, map_location={"cuda:0": "cpu"})
         model.load_state_dict(state_dict)
 
         lossFn = torch.nn.CrossEntropyLoss()
@@ -367,9 +355,7 @@ class VQATrainer(BaseILTrainer):
 
                 loss = lossFn(scores, answers)
 
-                accuracy, ranks = metrics.compute_ranks(
-                    scores.data.cpu(), answers
-                )
+                accuracy, ranks = metrics.compute_ranks(scores.data.cpu(), answers)
                 metrics.update([loss.item(), accuracy, ranks, 1.0 / ranks])
 
                 (
@@ -390,9 +376,7 @@ class VQATrainer(BaseILTrainer):
 
                 if (
                     config.habitat_baselines.il.eval_save_results
-                    and t
-                    % config.habitat_baselines.il.eval_save_results_interval
-                    == 0
+                    and t % config.habitat_baselines.il.eval_save_results_interval == 0
                 ):
                     self._save_vqa_results(
                         checkpoint_index,
@@ -427,7 +411,5 @@ class VQATrainer(BaseILTrainer):
         logger.info("Average accuracy: {:.2f}".format(avg_accuracy))
         logger.info("Average mean rank: {:.2f}".format(avg_mean_rank))
         logger.info(
-            "Average mean reciprocal rank: {:.2f}".format(
-                avg_mean_reciprocal_rank
-            )
+            "Average mean reciprocal rank: {:.2f}".format(avg_mean_reciprocal_rank)
         )

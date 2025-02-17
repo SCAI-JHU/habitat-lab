@@ -35,17 +35,17 @@ class ClientHelper:
         self._kick_active: bool = (
             hitl_config.networking.client_max_idle_duration != None
         )
-        self._max_idle_duration: Optional[
-            int
-        ] = hitl_config.networking.client_max_idle_duration
+        self._max_idle_duration: Optional[int] = (
+            hitl_config.networking.client_max_idle_duration
+        )
 
         user_count = users.max_user_count
         self._show_idle_kick_warning: List[bool] = [False] * user_count
         self._last_activity: List[datetime] = [datetime.now()] * user_count
         self._display_latency_ms: List[Optional[float]] = [None] * user_count
-        self._client_frame_latency_avg_helper: List[
-            Optional[AverageHelper]
-        ] = [None] * user_count
+        self._client_frame_latency_avg_helper: List[Optional[AverageHelper]] = [
+            None
+        ] * user_count
         self._frame_counter: List[int] = [0] * user_count
 
         remote_client_state.on_client_connected.registerCallback(
@@ -105,9 +105,7 @@ class ClientHelper:
             return 0
         return int(self._max_idle_duration - self.get_idle_time(user_index))
 
-    def _update_idle_kick(
-        self, user_index: int, is_user_idle_this_frame: bool
-    ) -> None:
+    def _update_idle_kick(self, user_index: int, is_user_idle_this_frame: bool) -> None:
         """Tracks whether the user is idle. After some time, they will be kicked."""
 
         if not self._kick_active or user_index not in self._users.indices(
@@ -124,15 +122,11 @@ class ClientHelper:
         time_since_last_activity = now - self._last_activity[user_index]
 
         # Show idle warning when half of the allowed idle time is elapsed.
-        if time_since_last_activity >= timedelta(
-            seconds=self._max_idle_duration / 2
-        ):
+        if time_since_last_activity >= timedelta(seconds=self._max_idle_duration / 2):
             self._show_idle_kick_warning[user_index] = True
 
         # Kick when the allowed allowed idle time is elapsed.
-        if time_since_last_activity >= timedelta(
-            seconds=self._max_idle_duration
-        ):
+        if time_since_last_activity >= timedelta(seconds=self._max_idle_duration):
             print(f"User {user_index} is idle. Kicking.")
             self._remote_client_state.kick(Mask.from_index(user_index))
 

@@ -49,9 +49,7 @@ networking_process = None
 def launch_networking_process(interprocess_record: InterprocessRecord) -> None:
     global networking_process
 
-    networking_process = Process(
-        target=networking_main, args=(interprocess_record,)
-    )
+    networking_process = Process(target=networking_main, args=(interprocess_record,))
     networking_process.start()
 
 
@@ -108,9 +106,9 @@ class NetworkManager:
     """
 
     def __init__(self, interprocess_record: InterprocessRecord):
-        self._connected_clients: Dict[
-            int, WebSocketServerProtocol
-        ] = {}  # Dictionary to store connected clients
+        self._connected_clients: Dict[int, WebSocketServerProtocol] = (
+            {}
+        )  # Dictionary to store connected clients
 
         self._interprocess_record = interprocess_record
         self._networking_config = interprocess_record._networking_config
@@ -179,9 +177,7 @@ class NetworkManager:
             inc_keyframe_and_messages.messages,
         )
 
-    async def receive_client_states(
-        self, websocket: WebSocketServerProtocol
-    ) -> None:
+    async def receive_client_states(self, websocket: WebSocketServerProtocol) -> None:
         connection_id = id(websocket)
         async for message in websocket:
             try:
@@ -198,9 +194,7 @@ class NetworkManager:
                     print("Invalid client state!")
                     client_state["userIndex"] = 0
 
-                self._interprocess_record.send_client_state_to_main_thread(
-                    client_state
-                )
+                self._interprocess_record.send_client_state_to_main_thread(client_state)
 
             except json.JSONDecodeError:
                 print("Received invalid JSON data from the client.")
@@ -216,9 +210,7 @@ class NetworkManager:
         )
 
     def _check_kick_client(self):
-        kicked_user_indices = (
-            self._interprocess_record.get_queued_kick_signals()
-        )
+        kicked_user_indices = self._interprocess_record.get_queued_kick_signals()
         for user_index in kicked_user_indices:
             if user_index in self._user_slots:
                 print(f"Kicking client {user_index}.")
@@ -258,9 +250,7 @@ class NetworkManager:
 
                 for user_index in self._user_slots.keys():
                     slot = self._user_slots[user_index]
-                    message = inc_keyframes_and_messages[0].messages[
-                        user_index
-                    ]
+                    message = inc_keyframes_and_messages[0].messages[user_index]
 
                     # See hitl_defaults.yaml wait_for_app_ready_signal and ClientMessageManager.signal_app_ready
                     if (
@@ -288,9 +278,7 @@ class NetworkManager:
                             slot.needs_consolidated_keyframe = False
 
                         # Create final user keyframes by combining keyframes and user messages.
-                        for (
-                            keyframe_and_messages_to_send
-                        ) in inc_keyframes_and_messages:
+                        for keyframe_and_messages_to_send in inc_keyframes_and_messages:
                             user_keyframes_to_send.append(
                                 get_user_keyframe(
                                     keyframe_and_messages_to_send, user_index
@@ -316,9 +304,7 @@ class NetworkManager:
                         tasks[user_index] = slot.socket.send(
                             user_json_strings[user_index]
                         )
-                        slot.recent_connection_activity_timestamp = (
-                            datetime.now()
-                        )
+                        slot.recent_connection_activity_timestamp = datetime.now()
 
                 for user_index in range(self._max_client_count):
                     if self.is_okay_to_send_keyframes(user_index):
@@ -359,8 +345,7 @@ class NetworkManager:
         Returns true if the server had the capacity for a new connection.
         """
         return (
-            len(self._connected_clients)
-            < self._networking_config.max_client_count
+            len(self._connected_clients) < self._networking_config.max_client_count
             and self._interprocess_record.new_connections_allowed()
         )
 
@@ -415,9 +400,7 @@ class NetworkManager:
                 )
         return connection_record
 
-    async def handle_connection(
-        self, websocket: WebSocketServerProtocol
-    ) -> None:
+    async def handle_connection(self, websocket: WebSocketServerProtocol) -> None:
         # Kick clients after limit is reached.
         if not self.can_accept_connection():
             await websocket.close()
@@ -431,9 +414,7 @@ class NetworkManager:
         connection_id = user_slot.connection_id
 
         # TODO: Add _waiting_for_all_clients. Also add config to turn on this signal.
-        self._waiting_for_app_ready = (
-            self._networking_config.wait_for_app_ready_signal
-        )
+        self._waiting_for_app_ready = self._networking_config.wait_for_app_ready_signal
 
         print(
             f"Connection from client {connection_id} assigned to user_index {user_index}."
@@ -449,9 +430,7 @@ class NetworkManager:
                     if time_out <= 0:
                         raise (Exception("Timeout."))
                     try:
-                        connection_record = self.parse_connection_record(
-                            message
-                        )
+                        connection_record = self.parse_connection_record(message)
                         break
                     except Exception:
                         print(
@@ -459,9 +438,7 @@ class NetworkManager:
                         )
             except Exception:
                 raise (
-                    Exception(
-                        "Client disconnected while sending connection record."
-                    )
+                    Exception("Client disconnected while sending connection record.")
                 )
 
             if connection_record is None:
@@ -573,9 +550,7 @@ async def networking_main_async(
     network_mgr = NetworkManager(interprocess_record)
 
     # Start servers.
-    websocket_server = await start_websocket_server(
-        network_mgr, networking_config
-    )
+    websocket_server = await start_websocket_server(network_mgr, networking_config)
     http_runner = (
         await start_http_availability_server(network_mgr, networking_config)
         if networking_config.http_availability_server.enable

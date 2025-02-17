@@ -53,9 +53,7 @@ class SpotHeadStereoDepthSensor(UsesArticulatedAgentInterface, Sensor):
         if self.agent_id is None:
             target_key = require_sensors
         else:
-            target_key = [
-                f"agent_{self.agent_id}_{key}" for key in require_sensors
-            ]
+            target_key = [f"agent_{self.agent_id}_{key}" for key in require_sensors]
 
         # Handle the case that there are no stereo observations
         agent_do_not_have = False

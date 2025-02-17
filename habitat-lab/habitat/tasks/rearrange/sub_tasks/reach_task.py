@@ -54,8 +54,10 @@ class RearrangeReachTaskV1(RearrangeTask):
             )
 
         if self._config.render_target:
-            global_pos = self._sim.articulated_agent.base_transformation.transform_point(
-                self._desired_resting
+            global_pos = (
+                self._sim.articulated_agent.base_transformation.transform_point(
+                    self._desired_resting
+                )
             )
             self._sim.viz_ids["reach_target"] = self._sim.visualize_position(
                 global_pos, self._sim.viz_ids["reach_target"]

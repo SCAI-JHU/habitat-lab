@@ -40,9 +40,7 @@ class GlobalPredicatesSensor(Sensor):
     @property
     def predicates_list(self):
         if self._predicates_list is None:
-            self._predicates_list = (
-                self._task.pddl_problem.get_possible_predicates()
-            )
+            self._predicates_list = self._task.pddl_problem.get_possible_predicates()
         return self._predicates_list
 
     def _get_observation_space(self, *args, config, **kwargs):
@@ -87,12 +85,8 @@ class MoveObjectsReward(RearrangeReward):
         self._cur_rearrange_stage = 0
         self.update_target_object()
 
-        self._prev_obj_to_goal_dist = self.get_distance(
-            task, ObjectToGoalDistance
-        )
-        self._prev_ee_to_obj_dist = self.get_distance(
-            task, EndEffectorToObjectDistance
-        )
+        self._prev_obj_to_goal_dist = self.get_distance(task, ObjectToGoalDistance)
+        self._prev_ee_to_obj_dist = self.get_distance(task, EndEffectorToObjectDistance)
 
         self.update_metric(
             *args,
@@ -151,9 +145,7 @@ class MoveObjectsReward(RearrangeReward):
         # PICK REWARD: Reward for picking up the object, only given once to avoid
         # reward hacking.
 
-        already_gave_reward = (
-            self._cur_rearrange_stage in self._gave_pick_reward
-        )
+        already_gave_reward = self._cur_rearrange_stage in self._gave_pick_reward
         if picked_up_obj and not already_gave_reward:
             self._metric += self._config.pick_reward
             self._gave_pick_reward[self._cur_rearrange_stage] = True
@@ -165,20 +157,14 @@ class MoveObjectsReward(RearrangeReward):
         if place_success and not is_holding_obj:
             self._metric += self._config.single_rearrange_reward
             self._cur_rearrange_stage += 1
-            self._cur_rearrange_stage = (
-                self._cur_rearrange_stage % self.num_targets
-            )
+            self._cur_rearrange_stage = self._cur_rearrange_stage % self.num_targets
             if self._cur_rearrange_stage < self.num_targets:
                 self.update_target_object()
 
         # Need to call the get_distance functions again because the target
         # object may have changed in the previous if statement.
-        self._prev_obj_to_goal_dist = self.get_distance(
-            task, ObjectToGoalDistance
-        )
-        self._prev_ee_to_obj_dist = self.get_distance(
-            task, EndEffectorToObjectDistance
-        )
+        self._prev_obj_to_goal_dist = self.get_distance(task, ObjectToGoalDistance)
+        self._prev_ee_to_obj_dist = self.get_distance(task, EndEffectorToObjectDistance)
         self._prev_holding_obj = is_holding_obj
 
 

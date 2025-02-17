@@ -127,15 +127,11 @@ def ensure_entity_lists_match(
     """
 
     if len(to_set) != len(set_value):
-        raise ValueError(
-            f"Set arg values are unequal size {to_set} vs {set_value}"
-        )
+        raise ValueError(f"Set arg values are unequal size {to_set} vs {set_value}")
     # Check types are compatible
     for arg, set_arg in zip(to_set, set_value):
         if not set_arg.expr_type.is_subtype_of(arg.expr_type):
-            raise ValueError(
-                f"Arg type is incompatible \n{to_set}\n vs \n{set_value}"
-            )
+            raise ValueError(f"Arg type is incompatible \n{to_set}\n vs \n{set_value}")
 
 
 @dataclass
@@ -200,9 +196,7 @@ class PddlSimInfo:
         """
 
         ename = entity.name
-        if self.check_type_matches(
-            entity, SimulatorObjectType.ROBOT_ENTITY.value
-        ):
+        if self.check_type_matches(entity, SimulatorObjectType.ROBOT_ENTITY.value):
             robot_id = self.robot_ids[ename]
             return self.sim.get_agent_data(robot_id).articulated_agent.base_pos
         if self.check_type_matches(
@@ -210,9 +204,7 @@ class PddlSimInfo:
         ):
             marker_info = self.marker_handles[ename]
             return marker_info.get_current_position()
-        if self.check_type_matches(
-            entity, SimulatorObjectType.GOAL_ENTITY.value
-        ):
+        if self.check_type_matches(entity, SimulatorObjectType.GOAL_ENTITY.value):
             idx = self.target_ids[ename]
             targ_idxs, pos_targs = self.sim.get_targets()
             rel_idx = targ_idxs.tolist().index(idx)
@@ -222,15 +214,11 @@ class PddlSimInfo:
         ):
             recep = self.receptacles[ename]
             return np.array(recep.get_global_transform(self.sim).translation)
-        if self.check_type_matches(
-            entity, SimulatorObjectType.MOVABLE_ENTITY.value
-        ):
+        if self.check_type_matches(entity, SimulatorObjectType.MOVABLE_ENTITY.value):
             rom = self.sim.get_rigid_object_manager()
             idx = self.obj_ids[ename]
             abs_obj_id = self.sim.scene_obj_ids[idx]
-            cur_pos = rom.get_object_by_id(
-                abs_obj_id
-            ).transformation.translation
+            cur_pos = rom.get_object_by_id(abs_obj_id).transformation.translation
             return cur_pos
         raise ValueError()
 
@@ -244,21 +232,15 @@ class PddlSimInfo:
 
         ename = entity.name
 
-        if self.check_type_matches(
-            entity, SimulatorObjectType.ROBOT_ENTITY.value
-        ):
+        if self.check_type_matches(entity, SimulatorObjectType.ROBOT_ENTITY.value):
             return self.robot_ids[ename]
         elif self.check_type_matches(
             entity, SimulatorObjectType.ARTICULATED_RECEPTACLE_ENTITY.value
         ):
             return self.marker_handles[ename]
-        elif self.check_type_matches(
-            entity, SimulatorObjectType.GOAL_ENTITY.value
-        ):
+        elif self.check_type_matches(entity, SimulatorObjectType.GOAL_ENTITY.value):
             return self.target_ids[ename]
-        elif self.check_type_matches(
-            entity, SimulatorObjectType.MOVABLE_ENTITY.value
-        ):
+        elif self.check_type_matches(entity, SimulatorObjectType.MOVABLE_ENTITY.value):
             return self.obj_ids[ename]
         elif self.check_type_matches(
             entity, SimulatorObjectType.STATIC_RECEPTACLE_ENTITY.value

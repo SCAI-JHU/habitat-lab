@@ -17,69 +17,57 @@ def test_try_get_episode_indices():
 
     # Canonical 1-user case.
     data.connected_users = {0: {"episodes": "1,7,9"}}
-    assert AppStateStartSession._try_get_episode_indices(
-        data, total_episode_count
-    ) == [1, 7, 9]
+    assert AppStateStartSession._try_get_episode_indices(data, total_episode_count) == [
+        1,
+        7,
+        9,
+    ]
     data.connected_users = {1: {"episodes": "3, 2, 0"}}
-    assert AppStateStartSession._try_get_episode_indices(
-        data, total_episode_count
-    ) == [3, 2, 0]
+    assert AppStateStartSession._try_get_episode_indices(data, total_episode_count) == [
+        3,
+        2,
+        0,
+    ]
 
     # Canonical 2-user case.
     data.connected_users = {
         0: {"episodes": "1,7,9"},
         1: {"episodes": "1,7,9"},
     }
-    assert AppStateStartSession._try_get_episode_indices(
-        data, total_episode_count
-    ) == [1, 7, 9]
+    assert AppStateStartSession._try_get_episode_indices(data, total_episode_count) == [
+        1,
+        7,
+        9,
+    ]
 
     # No user.
     data.connected_users = {}
     assert (
-        AppStateStartSession._try_get_episode_indices(
-            data, total_episode_count
-        )
-        == None
+        AppStateStartSession._try_get_episode_indices(data, total_episode_count) == None
     )
 
     # Invalid formats.
     data.connected_users = {0: {"episodes": None}}
     assert (
-        AppStateStartSession._try_get_episode_indices(
-            data, total_episode_count
-        )
-        == None
+        AppStateStartSession._try_get_episode_indices(data, total_episode_count) == None
     )
     data.connected_users = {0: {"episodes": 1}}
     assert (
-        AppStateStartSession._try_get_episode_indices(
-            data, total_episode_count
-        )
-        == None
+        AppStateStartSession._try_get_episode_indices(data, total_episode_count) == None
     )
     data.connected_users = {0: {"episodes": 0.5}}
     assert (
-        AppStateStartSession._try_get_episode_indices(
-            data, total_episode_count
-        )
-        == None
+        AppStateStartSession._try_get_episode_indices(data, total_episode_count) == None
     )
     data.connected_users = {0: {"episodes": {0: 2}}}
     assert (
-        AppStateStartSession._try_get_episode_indices(
-            data, total_episode_count
-        )
-        == None
+        AppStateStartSession._try_get_episode_indices(data, total_episode_count) == None
     )
 
     # Empty list.
     data.connected_users = {0: {"episodes": []}}
     assert (
-        AppStateStartSession._try_get_episode_indices(
-            data, total_episode_count
-        )
-        == None
+        AppStateStartSession._try_get_episode_indices(data, total_episode_count) == None
     )
 
     # Mismatching episodes.
@@ -88,31 +76,19 @@ def test_try_get_episode_indices():
         1: {"episodes": "3,2,0"},
     }
     assert (
-        AppStateStartSession._try_get_episode_indices(
-            data, total_episode_count
-        )
-        == None
+        AppStateStartSession._try_get_episode_indices(data, total_episode_count) == None
     )
 
     # Out of range.
     data.connected_users = {0: {"episodes": [-1]}}
     assert (
-        AppStateStartSession._try_get_episode_indices(
-            data, total_episode_count
-        )
-        == None
+        AppStateStartSession._try_get_episode_indices(data, total_episode_count) == None
     )
     data.connected_users = {0: {"episodes": [10]}}
     assert (
-        AppStateStartSession._try_get_episode_indices(
-            data, total_episode_count
-        )
-        == None
+        AppStateStartSession._try_get_episode_indices(data, total_episode_count) == None
     )
     data.connected_users = {0: {"episodes": [0, 5, 11]}}
     assert (
-        AppStateStartSession._try_get_episode_indices(
-            data, total_episode_count
-        )
-        == None
+        AppStateStartSession._try_get_episode_indices(data, total_episode_count) == None
     )

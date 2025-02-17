@@ -82,9 +82,7 @@ class AgentPositionSensor(habitat.Sensor):
         )
 
     # This is called whenever reset is called or an action is taken
-    def get_observation(
-        self, observations, *args: Any, episode, **kwargs: Any
-    ):
+    def get_observation(self, observations, *args: Any, episode, **kwargs: Any):
         return self._sim.get_agent_state().position
 
 
@@ -105,14 +103,14 @@ def main():
     with habitat.config.read_write(config):
         my_value = 5
         # Add things to the config to for the measure
-        config.habitat.task.measurements[
-            "episode_info_example"
-        ] = EpisodeInfoExampleConfig(VALUE=my_value)
+        config.habitat.task.measurements["episode_info_example"] = (
+            EpisodeInfoExampleConfig(VALUE=my_value)
+        )
 
         # Now define the config for the sensor
-        config.habitat.task.lab_sensors[
-            "agent_position_sensor"
-        ] = AgentPositionSensorConfig(answer_to_life=42)
+        config.habitat.task.lab_sensors["agent_position_sensor"] = (
+            AgentPositionSensorConfig(answer_to_life=42)
+        )
 
     with habitat.Env(config=config) as env:
         print(env.reset()["agent_position"])

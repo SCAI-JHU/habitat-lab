@@ -106,9 +106,9 @@ class World:
             self._agent_object_ids.add(agent_ao.object_id)
         self._interactable_object_ids = set()
         aom = sim.get_articulated_object_manager()
-        all_ao: List[
-            ManagedBulletArticulatedObject
-        ] = aom.get_objects_by_handle_substring().values()
+        all_ao: List[ManagedBulletArticulatedObject] = (
+            aom.get_objects_by_handle_substring().values()
+        )
         # Classify all non-root links.
         for ao in all_ao:
             for link_object_id in ao.link_object_ids:
@@ -173,9 +173,7 @@ class World:
         """
         return self._all_states
 
-    def get_states_for_object_handle(
-        self, object_handle: str
-    ) -> List[ObjectStateInfo]:
+    def get_states_for_object_handle(self, object_handle: str) -> List[ObjectStateInfo]:
         """
         Get a list of all object states for a given object handle.
         """
@@ -220,9 +218,7 @@ class World:
         """
         return self._id_to_handle.get(object_id, None)
 
-    def get_rigid_object(
-        self, object_id: int
-    ) -> Optional[ManagedBulletRigidObject]:
+    def get_rigid_object(self, object_id: int) -> Optional[ManagedBulletRigidObject]:
         """Get the rigid object with the specified ID. Returns None if unsuccessful."""
         rom = self._sim.get_rigid_object_manager()
         return rom.get_object_by_id(object_id)
@@ -237,11 +233,7 @@ class World:
         obj = sim_utilities.get_obj_from_id(
             self._sim, object_id, self._link_id_to_ao_map
         )
-        if (
-            obj is not None
-            and obj.is_articulated
-            and object_id in obj.link_object_ids
-        ):
+        if obj is not None and obj.is_articulated and object_id in obj.link_object_ids:
             return obj.link_object_ids[object_id]
         return None
 
@@ -309,9 +301,7 @@ class World:
                 dataset_config=config.habitat.dataset
             )
             metadata_interface = MetadataInterface(metadata_dict)
-            metadata_interface.refresh_scene_caches(
-                sim, filter_receptacles=True
-            )
+            metadata_interface.refresh_scene_caches(sim, filter_receptacles=True)
             self._metadata_interface = metadata_interface
             osm = initialize_object_state_machine(sim, metadata_interface)
             self._object_state_machine = osm
@@ -319,9 +309,9 @@ class World:
             # Get object semantic categories.
             all_objects = sim_utilities.get_all_objects(sim)
             for obj in all_objects:
-                self._object_handle_categories[
-                    obj.handle
-                ] = metadata_interface.get_object_instance_category(obj)
+                self._object_handle_categories[obj.handle] = (
+                    metadata_interface.get_object_instance_category(obj)
+                )
 
             # Get active object states.
             active_states = osm.active_states

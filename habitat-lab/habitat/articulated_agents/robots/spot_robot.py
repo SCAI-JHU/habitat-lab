@@ -61,18 +61,14 @@ class SpotRobot(MobileManipulator):
                     cam_offset_pos=mn.Vector3(
                         0.4164822634134684, 0.0, 0.03614789234067159
                     ),
-                    cam_orientation=mn.Vector3(
-                        0.0290787, -0.940569, -0.38998877
-                    ),
+                    cam_orientation=mn.Vector3(0.0290787, -0.940569, -0.38998877),
                     attached_link_id=-1,
                 ),
                 "head_stereo_left": ArticulatedAgentCameraParams(
                     cam_offset_pos=mn.Vector3(
                         0.4164822634134684, 0.0, -0.03740343144695029
                     ),
-                    cam_orientation=mn.Vector3(
-                        -3.1125141, -0.940569, 2.751605
-                    ),
+                    cam_orientation=mn.Vector3(-3.1125141, -0.940569, 2.751605),
                     attached_link_id=-1,
                 ),
                 "third": ArticulatedAgentCameraParams(
@@ -117,14 +113,10 @@ class SpotRobot(MobileManipulator):
 
     @property
     def base_transformation(self):
-        add_rot = mn.Matrix4.rotation(
-            mn.Rad(-np.pi / 2), mn.Vector3(1.0, 0, 0)
-        )
+        add_rot = mn.Matrix4.rotation(mn.Rad(-np.pi / 2), mn.Vector3(1.0, 0, 0))
         return self.sim_obj.transformation @ add_rot
 
-    def __init__(
-        self, agent_cfg, sim, limit_robo_joints=True, fixed_base=True
-    ):
+    def __init__(self, agent_cfg, sim, limit_robo_joints=True, fixed_base=True):
         super().__init__(
             self._get_spot_params(),
             agent_cfg,

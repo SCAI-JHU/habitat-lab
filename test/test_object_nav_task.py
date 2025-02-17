@@ -24,9 +24,7 @@ PARTIAL_LOAD_SCENES = 3
 def check_json_serialization(dataset: habitat.Dataset):
     start_time = time.time()
     json_str = dataset.to_json()
-    logger.info(
-        "JSON conversion finished. {} sec".format((time.time() - start_time))
-    )
+    logger.info("JSON conversion finished. {} sec".format((time.time() - start_time)))
     decoded_dataset = ObjectNavDatasetV1()
     decoded_dataset.from_json(json_str)
     assert len(decoded_dataset.episodes) == len(dataset.episodes)
@@ -92,9 +90,7 @@ def test_dataset_splitting(config_file, split):
         full_dataset = make_dataset(
             id_dataset=dataset_config.type, config=dataset_config
         )
-        full_episodes = {
-            (ep.scene_id, ep.episode_id) for ep in full_dataset.episodes
-        }
+        full_episodes = {(ep.scene_id, ep.episode_id) for ep in full_dataset.episodes}
 
         dataset_config.content_scenes = scenes[: PARTIAL_LOAD_SCENES // 2]
         split1_dataset = make_dataset(
@@ -134,9 +130,7 @@ def test_object_nav_task(config_file):
     config = get_config(config_file)
 
     if not ObjectNavDatasetV1.check_config_paths_exist(config.habitat.dataset):
-        pytest.skip(
-            "Please download scene and ObjectNav dataset to data folder."
-        )
+        pytest.skip("Please download scene and ObjectNav dataset to data folder.")
 
     dataset = make_dataset(
         id_dataset=config.habitat.dataset.type, config=config.habitat.dataset

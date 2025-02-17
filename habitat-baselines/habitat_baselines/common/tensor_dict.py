@@ -67,9 +67,7 @@ class _DictTreeBase(Dict[str, Union["_DictTreeBase[T]", T]]):
         raise NotImplementedError()
 
     @classmethod
-    def from_tree(
-        cls: Type[_DictTreeInst], tree: Dict[str, Any]
-    ) -> _DictTreeInst:
+    def from_tree(cls: Type[_DictTreeInst], tree: Dict[str, Any]) -> _DictTreeInst:
         res = cls()
         for k, v in tree.items():
             if isinstance(v, dict):
@@ -97,9 +95,7 @@ class _DictTreeBase(Dict[str, Union["_DictTreeBase[T]", T]]):
     ) -> _DictTreeInst:
         res = cls()
         remaining: Tuple[List[Tuple[str, ...]], List[TensorLike]] = ([], [])
-        for i, (first_key, *other_keys_l), v in zip(
-            range(len(spec)), spec, leaves
-        ):
+        for i, (first_key, *other_keys_l), v in zip(range(len(spec)), spec, leaves):
             other_keys = tuple(other_keys_l)
             if len(other_keys) == 0:
                 v = cls._to_instance(v)
@@ -166,16 +162,10 @@ class _DictTreeBase(Dict[str, Union["_DictTreeBase[T]", T]]):
         return spec, tensors
 
     @overload
-    def __getitem__(
-        self: _DictTreeInst, index: str
-    ) -> Union[_DictTreeInst, T]:
-        ...
+    def __getitem__(self: _DictTreeInst, index: str) -> Union[_DictTreeInst, T]: ...
 
     @overload
-    def __getitem__(
-        self: _DictTreeInst, index: TensorIndexType
-    ) -> _DictTreeInst:
-        ...
+    def __getitem__(self: _DictTreeInst, index: TensorIndexType) -> _DictTreeInst: ...
 
     def __getitem__(
         self: _DictTreeInst, index: Union[str, TensorIndexType]
@@ -191,8 +181,7 @@ class _DictTreeBase(Dict[str, Union["_DictTreeBase[T]", T]]):
         index: str,
         value: Union[TensorLike, _DictTreeBase[T], DictTree],
         strict: bool = True,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @overload
     def set(
@@ -200,8 +189,7 @@ class _DictTreeBase(Dict[str, Union["_DictTreeBase[T]", T]]):
         index: TensorIndexType,
         value: Union[_DictTreeBase[T], DictTree],
         strict: bool = True,
-    ) -> None:
-        ...
+    ) -> None: ...
 
     def set(
         self,

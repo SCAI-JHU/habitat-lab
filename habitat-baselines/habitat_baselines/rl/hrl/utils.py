@@ -8,9 +8,7 @@ from habitat.core.spaces import ActionSpace
 from habitat_baselines.utils.common import get_num_actions
 
 
-def find_action_range(
-    action_space: ActionSpace, search_key: str
-) -> Tuple[int, int]:
+def find_action_range(action_space: ActionSpace, search_key: str) -> Tuple[int, int]:
     """
     Returns the start and end indices of an action key in the action tensor. If
     the key is not found, a Value error will be thrown.

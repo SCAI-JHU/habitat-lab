@@ -58,9 +58,7 @@ class ArtObjSkillPolicy(NnSkillPolicy):
             observations[RelativeRestingPositionSensor.cls_uuid], dim=-1
         )
         is_within_thresh = cur_resting_dist < self._config.at_resting_threshold
-        is_holding = (
-            observations[IsHoldingSensor.cls_uuid].view(-1).type(torch.bool)
-        )
+        is_holding = observations[IsHoldingSensor.cls_uuid].view(-1).type(torch.bool)
 
         is_not_holding = ~is_holding
         return is_not_holding & is_within_thresh & self._did_leave_start_zone

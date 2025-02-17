@@ -233,9 +233,7 @@ class RemoteClientState:
             output[user_index].append(client_state)
         return output
 
-    def _update_input_state(
-        self, all_client_states: List[List[ClientState]]
-    ) -> None:
+    def _update_input_state(self, all_client_states: List[List[ClientState]]) -> None:
         """Update mouse/keyboard input based on new client states."""
         if len(all_client_states) == 0 or len(self._gui_inputs) == 0:
             return
@@ -256,17 +254,11 @@ class RemoteClientState:
                     if ui is not None:
                         for button in ui.get("buttonsPressed", []):
                             self._pressed_ui_buttons[user_index].add(button)
-                        for textbox_id, text in ui.get(
-                            "textboxes", {}
-                        ).items():
+                        for textbox_id, text in ui.get("textboxes", {}).items():
                             self._textboxes[user_index][textbox_id] = text
 
-                input_json = (
-                    client_state["input"] if "input" in client_state else None
-                )
-                mouse_json = (
-                    client_state["mouse"] if "mouse" in client_state else None
-                )
+                input_json = client_state["input"] if "input" in client_state else None
+                mouse_json = client_state["mouse"] if "mouse" in client_state else None
 
                 if input_json is not None:
                     for button in input_json["buttonDown"]:
@@ -293,9 +285,7 @@ class RemoteClientState:
                         delta: List[Any] = mouse_json["scrollDelta"]
                         if len(delta) == 2:
                             mouse_scroll_offset += (
-                                delta[0]
-                                if abs(delta[0]) > abs(delta[1])
-                                else delta[1]
+                                delta[0] if abs(delta[0]) > abs(delta[1]) else delta[1]
                             )
 
                     if "mousePositionDelta" in mouse_json:
@@ -327,19 +317,13 @@ class RemoteClientState:
             last_client_state = client_states[-1]
 
             # Loading states.
-            self._client_loading[user_index] = last_client_state.get(
-                "isLoading", False
-            )
+            self._client_loading[user_index] = last_client_state.get("isLoading", False)
 
             input_json = (
-                last_client_state["input"]
-                if "input" in last_client_state
-                else None
+                last_client_state["input"] if "input" in last_client_state else None
             )
             mouse_json = (
-                last_client_state["mouse"]
-                if "mouse" in last_client_state
-                else None
+                last_client_state["mouse"] if "mouse" in last_client_state else None
             )
 
             gui_input._key_held.clear()
@@ -370,13 +354,9 @@ class RemoteClientState:
             pos, rot_quat = self.get_head_pose(user_index)
             if pos is not None and rot_quat is not None:
                 trans = mn.Matrix4.from_(rot_quat.to_matrix(), pos)
-                self._gui_drawer.push_transform(
-                    trans, destination_mask=server_only
-                )
+                self._gui_drawer.push_transform(trans, destination_mask=server_only)
                 color0 = avatar_color
-                color1 = mn.Color4(
-                    avatar_color.r, avatar_color.g, avatar_color.b, 0
-                )
+                color1 = mn.Color4(avatar_color.r, avatar_color.g, avatar_color.b, 0)
                 size = 0.5
 
                 # Draw a frustum (forward is flipped (z+))
@@ -412,16 +392,10 @@ class RemoteClientState:
 
             # Draw controller rays (forward is flipped (z+))
             for hand_idx in range(2):
-                hand_pos, hand_rot_quat = self.get_hand_pose(
-                    user_index, hand_idx
-                )
+                hand_pos, hand_rot_quat = self.get_hand_pose(user_index, hand_idx)
                 if hand_pos is not None and hand_rot_quat is not None:
-                    trans = mn.Matrix4.from_(
-                        hand_rot_quat.to_matrix(), hand_pos
-                    )
-                    self._gui_drawer.push_transform(
-                        trans, destination_mask=server_only
-                    )
+                    trans = mn.Matrix4.from_(hand_rot_quat.to_matrix(), hand_pos)
+                    self._gui_drawer.push_transform(trans, destination_mask=server_only)
                     pointer_len = 0.5
                     self._gui_drawer.draw_transformed_line(
                         mn.Vector3(0, 0, 0),
@@ -430,9 +404,7 @@ class RemoteClientState:
                         color1,
                         destination_mask=server_only,
                     )
-                    self._gui_drawer.pop_transform(
-                        destination_mask=server_only
-                    )
+                    self._gui_drawer.pop_transform(destination_mask=server_only)
 
     def _clean_disconnected_user_history(
         self,
@@ -454,17 +426,11 @@ class RemoteClientState:
             self._interprocess_record.get_queued_disconnection_records()
         )
 
-        assorted_client_states = (
-            self._interprocess_record.get_queued_client_states()
-        )
-        client_states = self._group_client_states_by_user_index(
-            assorted_client_states
-        )
+        assorted_client_states = self._interprocess_record.get_queued_client_states()
+        client_states = self._group_client_states_by_user_index(assorted_client_states)
         for user_index in range(len(client_states)):
             user_client_states = client_states[user_index]
-            self._receive_rate_trackers[user_index].increment(
-                len(user_client_states)
-            )
+            self._receive_rate_trackers[user_index].increment(len(user_client_states))
 
         for record in self._new_connection_records:
             self._on_client_connected.invoke(record)
@@ -511,6 +477,4 @@ class RemoteClientState:
         Immediately kick the users matching the specified user mask.
         """
         for user_index in self._users.indices(user_mask):
-            self._interprocess_record.send_kick_signal_to_networking_thread(
-                user_index
-            )
+            self._interprocess_record.send_kick_signal_to_networking_thread(user_index)

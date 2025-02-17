@@ -23,9 +23,7 @@ def create_env(args, proc_i):
     print(f"assigning {proc_i} gpu {spec_gpu}")
 
     set_opts = args.opts
-    set_opts.extend(
-        [f"habitat.simulator.habitat_sim_v0.gpu_device_id={spec_gpu}"]
-    )
+    set_opts.extend([f"habitat.simulator.habitat_sim_v0.gpu_device_id={spec_gpu}"])
 
     config = habitat.get_config(args.cfg, set_opts)
     return habitat.Env(config=config)
@@ -51,8 +49,7 @@ class ActionSpaceWrapper(ActionSpace):
 
                 elif "humanoid_pick" in action_arg_name:
                     action_arg_value = (
-                        np.array([random.randint(0, self.num_items_nav), 1])
-                        + 1
+                        np.array([random.randint(0, self.num_items_nav), 1]) + 1
                     )
 
                 else:
@@ -204,9 +201,7 @@ if __name__ == "__main__":
     load_fname = "orp/start_data/bench_ac.txt"
     parser = argparse.ArgumentParser()
     parser.add_argument("--out-name", type=str, default="")
-    parser.add_argument(
-        "--cfg", type=str, default="benchmark/rearrange/idle.yaml"
-    )
+    parser.add_argument("--cfg", type=str, default="benchmark/rearrange/idle.yaml")
 
     parser.add_argument(
         "--n-procs",

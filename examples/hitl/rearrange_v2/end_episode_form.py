@@ -156,9 +156,7 @@ class ErrorReportFormState(BaseFormState):
             UIButton(id_cancel, "Cancel", enabled=True),
             UIButton(id_report_error, "Report Error", enabled=True),
         ]
-        textbox = UITextbox(
-            id_textbox, self._data.error_report_text, enabled=True
-        )
+        textbox = UITextbox(id_textbox, self._data.error_report_text, enabled=True)
         app_service.client_message_manager.show_modal_dialogue_box(
             "Report Error",
             "Write a short description of the problem.\nFor example: 'Could not find the phone'.",

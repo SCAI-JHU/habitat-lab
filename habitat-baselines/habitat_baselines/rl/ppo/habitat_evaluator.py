@@ -79,19 +79,15 @@ class HabitatEvaluator(Evaluator):
             device=device,
             dtype=torch.bool,
         )
-        stats_episodes: Dict[
-            Any, Any
-        ] = {}  # dict of dicts that stores stats per episode
+        stats_episodes: Dict[Any, Any] = (
+            {}
+        )  # dict of dicts that stores stats per episode
         ep_eval_count: Dict[Any, int] = defaultdict(lambda: 0)
 
         if len(config.habitat_baselines.eval.video_option) > 0:
             # Add the first frame of the episode to the video.
             rgb_frames: List[List[np.ndarray]] = [
-                [
-                    observations_to_image(
-                        {k: v[env_idx] for k, v in batch.items()}, {}
-                    )
-                ]
+                [observations_to_image({k: v[env_idx] for k, v in batch.items()}, {})]
                 for env_idx in range(config.habitat_baselines.num_environments)
             ]
         else:
@@ -145,9 +141,7 @@ class HabitatEvaluator(Evaluator):
                     **space_lengths,
                 )
                 if action_data.should_inserts is None:
-                    test_recurrent_hidden_states = (
-                        action_data.rnn_hidden_states
-                    )
+                    test_recurrent_hidden_states = action_data.rnn_hidden_states
                     prev_actions.copy_(action_data.actions)  # type: ignore
                 else:
                     agent.actor_critic.update_hidden_state(
@@ -172,15 +166,11 @@ class HabitatEvaluator(Evaluator):
 
             outputs = envs.step(step_data)
 
-            observations, rewards_l, dones, infos = [
-                list(x) for x in zip(*outputs)
-            ]
+            observations, rewards_l, dones, infos = [list(x) for x in zip(*outputs)]
             # Note that `policy_infos` represents the information about the
             # action BEFORE `observations` (the action used to transition to
             # `observations`).
-            policy_infos = agent.actor_critic.get_extra(
-                action_data, infos, dones
-            )
+            policy_infos = agent.actor_critic.get_extra(action_data, infos, dones)
             for i in range(len(policy_infos)):
                 infos[i].update(policy_infos[i])
 
@@ -217,9 +207,7 @@ class HabitatEvaluator(Evaluator):
                     envs_to_pause.append(i)
 
                 # Exclude the keys from `_rank0_keys` from displaying in the video
-                disp_info = {
-                    k: v for k, v in infos[i].items() if k not in rank0_keys
-                }
+                disp_info = {k: v for k, v in infos[i].items() if k not in rank0_keys}
 
                 if len(config.habitat_baselines.eval.video_option) > 0:
                     # TODO move normalization / channel changing out of the policy and undo it here
@@ -244,9 +232,7 @@ class HabitatEvaluator(Evaluator):
                 # episode ended
                 if not not_done_masks[i].any().item():
                     pbar.update()
-                    episode_stats = {
-                        "reward": current_episode_reward[i].item()
-                    }
+                    episode_stats = {"reward": current_episode_reward[i].item()}
                     episode_stats.update(extract_scalars_from_info(infos[i]))
                     current_episode_reward[i] = 0
                     k = (

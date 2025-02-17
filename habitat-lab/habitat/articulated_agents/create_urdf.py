@@ -6,6 +6,7 @@ from copy import deepcopy
 import numpy as np
 from urdf_parser_py import urdf as ud
 
+
 def save_urdf_file(robot, file_name):
     urdf_string = robot.to_xml_string()
     print("Saving new URDF file to", file_name)
@@ -14,7 +15,10 @@ def save_urdf_file(robot, file_name):
     fid.close()
     print("Finished saving")
 
-urdf_filename = "/home/ubuntu/partnr-planner/data/robots/hab_stretch/urdf/hab_stretch.urdf"
+
+urdf_filename = (
+    "/home/ubuntu/partnr-planner/data/robots/hab_stretch/urdf/hab_stretch.urdf"
+)
 
 non_fixed_joints = [
     "joint_lift",
@@ -28,17 +32,17 @@ non_fixed_joints = [
 ]
 
 ik_joint_limits = {
-        "joint_mobile_base_translation": (-1, 1),
-        # "joint_mobile_base_rotation": (-(np.pi / 2.0), np.pi / 2.0),
-        "joint_lift": (0.0, 1.1),
-        "joint_arm_l0":(0.0, 0.13),
-        "joint_arm_l1":(0.0, 0.13),
-        "joint_arm_l2":(0.0, 0.13),
-        "joint_arm_l3":(0.0, 0.13),
-        "joint_wrist_yaw": (-1.75, 4),
-        "joint_wrist_pitch": (-1.57, 0.56),
-        "joint_wrist_roll": (-3.14, 3.14),
-    }
+    "joint_mobile_base_translation": (-1, 1),
+    # "joint_mobile_base_rotation": (-(np.pi / 2.0), np.pi / 2.0),
+    "joint_lift": (0.0, 1.1),
+    "joint_arm_l0": (0.0, 0.13),
+    "joint_arm_l1": (0.0, 0.13),
+    "joint_arm_l2": (0.0, 0.13),
+    "joint_arm_l3": (0.0, 0.13),
+    "joint_wrist_yaw": (-1.75, 4),
+    "joint_wrist_pitch": (-1.57, 0.56),
+    "joint_wrist_roll": (-3.14, 3.14),
+}
 
 print()
 print("Loading URDF from:")

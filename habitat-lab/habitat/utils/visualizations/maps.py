@@ -80,9 +80,7 @@ def draw_agent(
     # the agent sprite size should stay the same.
     initial_agent_size = AGENT_SPRITE.shape[0]
     new_size = rotated_agent.shape[0]
-    agent_size_px = max(
-        1, int(agent_radius_px * 2 * new_size / initial_agent_size)
-    )
+    agent_size_px = max(1, int(agent_radius_px * 2 * new_size / initial_agent_size))
     resized_agent = cv2.resize(
         rotated_agent,
         (agent_size_px, agent_size_px),
@@ -145,9 +143,7 @@ def pointnav_draw_target_birdseye_view(
     )
     movement_scale = 1.0 / goal_distance_padding
     half_res = resolution_px // 2
-    im_position = np.full(
-        (resolution_px, resolution_px, 3), 255, dtype=np.uint8
-    )
+    im_position = np.full((resolution_px, resolution_px, 3), 255, dtype=np.uint8)
 
     # Draw bands:
     for scale, color in zip(target_band_radii, target_band_colors):
@@ -200,9 +196,7 @@ def to_grid(
     (coordinate_max, coordinate_max)
     """
     if sim is None and pathfinder is None:
-        raise RuntimeError(
-            "Must provide either a simulator or pathfinder instance"
-        )
+        raise RuntimeError("Must provide either a simulator or pathfinder instance")
 
     if pathfinder is None:
         pathfinder = sim.pathfinder
@@ -232,9 +226,7 @@ def from_grid(
     """
 
     if sim is None and pathfinder is None:
-        raise RuntimeError(
-            "Must provide either a simulator or pathfinder instance"
-        )
+        raise RuntimeError("Must provide either a simulator or pathfinder instance")
 
     if pathfinder is None:
         pathfinder = sim.pathfinder
@@ -277,9 +269,7 @@ def calculate_meters_per_pixel(
 ):
     r"""Calculate the meters_per_pixel for a given map resolution"""
     if sim is None and pathfinder is None:
-        raise RuntimeError(
-            "Must provide either a simulator or pathfinder instance"
-        )
+        raise RuntimeError("Must provide either a simulator or pathfinder instance")
 
     if pathfinder is None:
         pathfinder = sim.pathfinder
@@ -372,9 +362,9 @@ def colorize_topdown_map(
         # Only desaturate things that are valid points as only valid points get revealed
         desat_mask = top_down_map != MAP_INVALID_POINT
 
-        _map[desat_mask] = (
-            _map * fog_of_war_desat_values[fog_of_war_mask]
-        ).astype(np.uint8)[desat_mask]
+        _map[desat_mask] = (_map * fog_of_war_desat_values[fog_of_war_mask]).astype(
+            np.uint8
+        )[desat_mask]
 
     return _map
 

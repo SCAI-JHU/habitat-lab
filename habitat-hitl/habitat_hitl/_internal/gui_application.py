@@ -81,25 +81,19 @@ class InputHandlerApplication(Application):
         # accumulate
         self._gui_input._mouse_scroll_offset += scroll_mod_val
 
-    def get_mouse_position(
-        self, mouse_event_position: mn.Vector2i
-    ) -> mn.Vector2i:
+    def get_mouse_position(self, mouse_event_position: mn.Vector2i) -> mn.Vector2i:
         """
         This function will get a screen-space mouse position appropriately
         scaled based on framebuffer size and window size.  Generally these would be
         the same value, but on certain HiDPI displays (Retina displays) they may be
         different.
         """
-        scaling = mn.Vector2i(self.framebuffer_size) / mn.Vector2i(
-            self.window_size
-        )
+        scaling = mn.Vector2i(self.framebuffer_size) / mn.Vector2i(self.window_size)
         return mouse_event_position * scaling
 
     def mouse_move_event(self, event: Application.MouseMoveEvent) -> None:
         mouse_pos = self.get_mouse_position(event.position)
-        relative_mouse_position = self.get_mouse_position(
-            event.relative_position
-        )
+        relative_mouse_position = self.get_mouse_position(event.relative_position)
         gui_input = self._gui_input
         gui_input._mouse_position = mouse_pos
         gui_input._relative_mouse_position[0] += relative_mouse_position[0]
@@ -154,21 +148,14 @@ class GuiApplication(InputHandlerApplication):
             self._debug_timer = curr_time
         else:
             elapsed_since_last_sim_update = curr_time - self._sim_time
-            num_sim_updates = int(
-                math.floor(elapsed_since_last_sim_update / sim_dt)
-            )
+            num_sim_updates = int(math.floor(elapsed_since_last_sim_update / sim_dt))
             num_sim_updates = min(num_sim_updates, max_sim_updates_per_render)
             self._debug_counter += num_sim_updates
             self._sim_time += sim_dt * num_sim_updates
 
             # don't let sim time fall too far behind
-            if (
-                curr_time - self._sim_time
-                > sim_dt * max_sim_updates_per_render
-            ):
-                self._sim_time = (
-                    curr_time - sim_dt * max_sim_updates_per_render
-                )
+            if curr_time - self._sim_time > sim_dt * max_sim_updates_per_render:
+                self._sim_time = curr_time - sim_dt * max_sim_updates_per_render
 
             self._last_draw_event_time = curr_time
             if self._debug_counter >= 10:

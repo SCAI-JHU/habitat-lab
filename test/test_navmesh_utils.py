@@ -33,17 +33,15 @@ from habitat_sim.utils.settings import default_sim_settings, make_cfg
 @pytest.mark.parametrize("scene_id", ["apt_0", "v3_sc0_staging_00"])
 def test_unoccluded_snapping_utils(scene_id):
     sim_settings = default_sim_settings.copy()
-    sim_settings[
-        "scene_dataset_config_file"
-    ] = "data/replica_cad/replicaCAD.scene_dataset_config.json"
+    sim_settings["scene_dataset_config_file"] = (
+        "data/replica_cad/replicaCAD.scene_dataset_config.json"
+    )
     sim_settings["scene"] = scene_id
     hab_cfg = make_cfg(sim_settings)
     with Simulator(hab_cfg) as sim:
         # explicitly load the navmesh
         # NOTE: in apt_0, navmesh does not include furniture, robot should find valid placements anyway with collision checking
-        sim.pathfinder.load_nav_mesh(
-            f"data/replica_cad/navmeshes/{scene_id}.navmesh"
-        )
+        sim.pathfinder.load_nav_mesh(f"data/replica_cad/navmeshes/{scene_id}.navmesh")
 
         # setup for visual debugging
         # sim.navmesh_visualization = True
@@ -60,9 +58,7 @@ def test_unoccluded_snapping_utils(scene_id):
         spot.update()
 
         # get the table in the middle of the room
-        table_object = sutils.get_obj_from_handle(
-            sim, "frl_apartment_table_02_:0000"
-        )
+        table_object = sutils.get_obj_from_handle(sim, "frl_apartment_table_02_:0000")
 
         agent_object_ids = [spot.sim_obj.object_id] + [
             *spot.sim_obj.link_object_ids.keys()
@@ -144,9 +140,7 @@ def test_unoccluded_snapping_utils(scene_id):
                 orientation,
                 success,
             ) = nav_utils.embodied_unoccluded_navmesh_snap(
-                target_position=mn.Vector3(
-                    float("nan"), float("nan"), float("nan")
-                ),
+                target_position=mn.Vector3(float("nan"), float("nan"), float("nan")),
                 height=1.3,
                 sim=sim,
                 target_object_ids=[table_object.object_id],
@@ -176,9 +170,7 @@ def test_unoccluded_snapping_utils(scene_id):
         try:
             _ = nav_utils.snap_point_is_occluded(
                 target=mn.Vector3(1, 0, 0),
-                snap_point=mn.Vector3(
-                    float("nan"), float("nan"), float("nan")
-                ),
+                snap_point=mn.Vector3(float("nan"), float("nan"), float("nan")),
                 height=1.3,
                 sim=sim,
                 target_object_ids=[table_object.object_id],

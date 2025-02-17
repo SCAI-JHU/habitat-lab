@@ -116,12 +116,8 @@ class PPOAgent(Agent):
             self.hidden_size,
             device=self.device,
         )
-        self.not_done_masks = torch.zeros(
-            1, 1, device=self.device, dtype=torch.bool
-        )
-        self.prev_actions = torch.zeros(
-            1, 1, dtype=torch.long, device=self.device
-        )
+        self.not_done_masks = torch.zeros(1, 1, device=self.device, dtype=torch.bool)
+        self.prev_actions = torch.zeros(1, 1, dtype=torch.long, device=self.device)
 
     def act(self, observations: Observations) -> Dict[str, int]:
         batch = batch_obs([observations], device=self.device)

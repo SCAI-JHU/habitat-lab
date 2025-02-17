@@ -40,9 +40,7 @@ def get_env_class(env_name: str) -> Type[habitat.RLEnv]:
 
 
 class RLTaskEnv(habitat.RLEnv):
-    def __init__(
-        self, config: "DictConfig", dataset: Optional[Dataset] = None
-    ):
+    def __init__(self, config: "DictConfig", dataset: Optional[Dataset] = None):
         super().__init__(config, dataset)
         self._reward_measure_name = self.config.task.reward_measure
         self._success_measure_name = self.config.task.success_measure
@@ -61,9 +59,7 @@ class RLTaskEnv(habitat.RLEnv):
     ) -> Union[RLTaskEnvObsType, Tuple[RLTaskEnvObsType, Dict]]:
         return super().reset(*args, return_info=return_info, **kwargs)
 
-    def step(
-        self, *args, **kwargs
-    ) -> Tuple[RLTaskEnvObsType, float, bool, dict]:
+    def step(self, *args, **kwargs) -> Tuple[RLTaskEnvObsType, float, bool, dict]:
         return super().step(*args, **kwargs)
 
     def get_reward_range(self):
@@ -103,9 +99,7 @@ class GymRegistryEnv(gym.Wrapper):
     used with habitat-baselines
     """
 
-    def __init__(
-        self, config: "DictConfig", dataset: Optional[Dataset] = None
-    ):
+    def __init__(self, config: "DictConfig", dataset: Optional[Dataset] = None):
         for dependency in config["env_task_gym_dependencies"]:
             importlib.import_module(dependency)
         env_name = config["env_task_gym_id"]
@@ -120,9 +114,7 @@ class GymHabitatEnv(gym.Wrapper):
     to use the default gym API.
     """
 
-    def __init__(
-        self, config: "DictConfig", dataset: Optional[Dataset] = None
-    ):
+    def __init__(self, config: "DictConfig", dataset: Optional[Dataset] = None):
         base_env = RLTaskEnv(config=config, dataset=dataset)
         env = HabGymWrapper(env=base_env)
         super().__init__(env)

@@ -71,9 +71,7 @@ class HRLPPO(PPO):
                 value_pred_clipped,
             )
 
-        value_loss = 0.5 * F.mse_loss(
-            values, batch["returns"], reduction="none"
-        )
+        value_loss = 0.5 * F.mse_loss(values, batch["returns"], reduction="none")
         value_loss = reduce_loss(value_loss)
 
         all_losses = [
@@ -104,9 +102,7 @@ class HRLPPO(PPO):
             total_size = batch["loss_mask"].shape[0]
             if isinstance(n_samples, torch.Tensor):
                 n_samples = n_samples.item()
-            learner_metrics["batch_filled_ratio"].append(
-                n_samples / total_size
-            )
+            learner_metrics["batch_filled_ratio"].append(n_samples / total_size)
 
             learner_metrics["value_loss"].append(value_loss)
             learner_metrics["action_loss"].append(action_loss)
@@ -119,9 +115,7 @@ class HRLPPO(PPO):
 
             learner_metrics["grad_norm"].append(grad_norm)
             if isinstance(self.entropy_coef, LagrangeInequalityCoefficient):
-                learner_metrics["entropy_coef"].append(
-                    self.entropy_coef().detach()
-                )
+                learner_metrics["entropy_coef"].append(self.entropy_coef().detach())
             for name, res in aux_loss_res.items():
                 for k, v in res.items():
                     learner_metrics[f"aux_{name}_{k}"].append(v.detach())

@@ -36,9 +36,7 @@ ORIGIN_NODE_FORMAT = "{{:.{0}f}} {{:.{0}f}} {{:.{0}f}}".format(
     ORIGIN_NODE_FLOAT_PRECISION
 )
 ZERO_ORIGIN_NODE = ET.fromstring('<origin xyz="0 0 0" rpy="0 0 0"/>')
-INERTIA_NODE_FMT = (
-    '<inertia ixx="{}" ixy="{}" ixz="{}" iyy="{}" iyz="{}" izz="{}" />'
-)
+INERTIA_NODE_FMT = '<inertia ixx="{}" ixy="{}" ixz="{}" iyy="{}" iyz="{}" izz="{}" />'
 BASE_LIMIT_NODE_STR = None
 multiplier = 1
 root_bone = None
@@ -188,9 +186,7 @@ def get_origin_from_matrix(M) -> ET.Element:
     euler = M.to_euler()
 
     origin_xml_node = ET.Element("origin")
-    origin_xml_node.set(
-        "rpy", ORIGIN_NODE_FORMAT.format(euler.x, euler.y, euler.z)
-    )
+    origin_xml_node.set("rpy", ORIGIN_NODE_FORMAT.format(euler.x, euler.y, euler.z))
     origin_xml_node.set(
         "xyz",
         ORIGIN_NODE_FORMAT.format(translation.x, translation.y, translation.z),
@@ -208,8 +204,7 @@ def get_origin_from_bone(bone) -> ET.Element:
     """
     global multiplier
     translation = (
-        bone.matrix_local.to_translation()
-        - bone.parent.matrix_local.to_translation()
+        bone.matrix_local.to_translation() - bone.parent.matrix_local.to_translation()
     )
 
     translation = translation / multiplier
@@ -348,9 +343,7 @@ def bone_to_urdf(this_bone):
         )
     )
     this_xml_link.append(
-        ET.fromstring(
-            '<mass value="{:.6f}"/>'.format(this_bone.body_segment_mass)
-        )
+        ET.fromstring('<mass value="{:.6f}"/>'.format(this_bone.body_segment_mass))
     )
 
     # Create the visual node
@@ -360,9 +353,7 @@ def bone_to_urdf(this_bone):
     padding = min(this_bone.length / (25 * multiplier), 0.02)
     this_xml_box.set(
         "size",
-        "{0} {1} {0}".format(
-            0.02, this_bone.length / multiplier - padding * 2
-        ),
+        "{0} {1} {0}".format(0.02, this_bone.length / multiplier - padding * 2),
     )
     this_xml_geom.append(this_xml_box)
 
@@ -594,24 +585,12 @@ def setup_bones():
     bpy.types.Bone.body_segment_mass = bpy.props.FloatProperty(
         name="URDF body segment mass", default=5.0
     )
-    bpy.types.Bone.ixx = bpy.props.FloatProperty(
-        name="Inertia value XX", default=1.0
-    )
-    bpy.types.Bone.iyy = bpy.props.FloatProperty(
-        name="Inertia value YY", default=1.0
-    )
-    bpy.types.Bone.izz = bpy.props.FloatProperty(
-        name="Inertia value ZZ", default=1.0
-    )
-    bpy.types.Bone.ixy = bpy.props.FloatProperty(
-        name="Inertia value XY", default=0.0
-    )
-    bpy.types.Bone.ixz = bpy.props.FloatProperty(
-        name="Inertia value XZ", default=0.0
-    )
-    bpy.types.Bone.iyz = bpy.props.FloatProperty(
-        name="Inertia value YZ", default=0.0
-    )
+    bpy.types.Bone.ixx = bpy.props.FloatProperty(name="Inertia value XX", default=1.0)
+    bpy.types.Bone.iyy = bpy.props.FloatProperty(name="Inertia value YY", default=1.0)
+    bpy.types.Bone.izz = bpy.props.FloatProperty(name="Inertia value ZZ", default=1.0)
+    bpy.types.Bone.ixy = bpy.props.FloatProperty(name="Inertia value XY", default=0.0)
+    bpy.types.Bone.ixz = bpy.props.FloatProperty(name="Inertia value XZ", default=0.0)
+    bpy.types.Bone.iyz = bpy.props.FloatProperty(name="Inertia value YZ", default=0.0)
     bpy.types.EditBone.body_segment_mass = bpy.props.FloatProperty(
         name="URDF body segment mass", default=5.0
     )
@@ -718,9 +697,7 @@ def main():
 
         bpy.ops.object.smplx_snap_ground_plane()
 
-        avatar_name = curr_body_info.get(
-            "name", "avatar_{}".format(index_body)
-        )
+        avatar_name = curr_body_info.get("name", "avatar_{}".format(index_body))
         avatar_dir = "{}/{}".format(output_path, avatar_name)
         if not os.path.isdir(avatar_dir):
             os.mkdir(avatar_dir)
@@ -752,9 +729,7 @@ def main():
         for fbx_name in fbx_names:
             cleanup()
             urdf_name = fbx_name.replace(".fbx", ".urdf")
-            bpy.ops.import_scene.fbx(
-                filepath=fbx_name, automatic_bone_orientation=True
-            )
+            bpy.ops.import_scene.fbx(filepath=fbx_name, automatic_bone_orientation=True)
             armature_object = None
             for obj in bpy.context.selected_objects:
                 if obj.type == "ARMATURE":

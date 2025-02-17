@@ -48,9 +48,7 @@ def execute_exp(config: "DictConfig", run_type: str) -> None:
 
     from habitat_baselines.common.baseline_registry import baseline_registry
 
-    trainer_init = baseline_registry.get_trainer(
-        config.habitat_baselines.trainer_name
-    )
+    trainer_init = baseline_registry.get_trainer(config.habitat_baselines.trainer_name)
     assert (
         trainer_init is not None
     ), f"{config.habitat_baselines.trainer_name} is not supported"

@@ -21,6 +21,7 @@ class BaseILTrainer(BaseTrainer):
     r"""Base trainer class for IL trainers. Future RL-specific
     methods should be hosted here.
     """
+
     device: torch.device
     config: "DictConfig"
     video_option: List[str]
@@ -62,9 +63,7 @@ class BaseILTrainer(BaseTrainer):
 
     def _make_results_dir(self) -> None:
         r"""Makes directory for saving eval results."""
-        dir_name = self.config.habitat_baselines.il.results_dir.format(
-            split="val"
-        )
+        dir_name = self.config.habitat_baselines.il.results_dir.format(split="val")
         os.makedirs(dir_name, exist_ok=True)
 
     def train(self) -> None:
@@ -101,9 +100,7 @@ class BaseILTrainer(BaseTrainer):
         """
         torch.save(
             state_dict,
-            os.path.join(
-                self.config.habitat_baselines.checkpoint_folder, file_name
-            ),
+            os.path.join(self.config.habitat_baselines.checkpoint_folder, file_name),
         )
 
     def load_checkpoint(self, checkpoint_path, *args, **kwargs) -> Dict:

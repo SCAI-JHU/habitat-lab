@@ -56,9 +56,7 @@ default_sim_settings = {
 def make_cfg(settings):
     sim_cfg = habitat_sim.SimulatorConfiguration()
     if "scene_dataset_config_file" in settings:
-        sim_cfg.scene_dataset_config_file = settings[
-            "scene_dataset_config_file"
-        ]
+        sim_cfg.scene_dataset_config_file = settings["scene_dataset_config_file"]
     sim_cfg.frustum_culling = settings.get("frustum_culling", False)
     if "enable_physics" in settings:
         sim_cfg.enable_physics = settings["enable_physics"]
@@ -179,9 +177,7 @@ def test_humanoid_controller(humanoid_name):
 
         # add a ground plane
         cube_handle = obj_template_mgr.get_template_handles("cubeSolid")[0]
-        cube_template_cpy = obj_template_mgr.get_template_by_handle(
-            cube_handle
-        )
+        cube_template_cpy = obj_template_mgr.get_template_by_handle(cube_handle)
         cube_template_cpy.scale = np.array([5.0, 0.2, 5.0])
         obj_template_mgr.register_template(cube_template_cpy)
         ground_plane = rigid_obj_mgr.add_object_by_template_handle(cube_handle)
@@ -196,7 +192,9 @@ def test_humanoid_controller(humanoid_name):
         sim.navmesh_visualization = True
 
         # add the humanoid to the world via the wrapper
-        humanoid_path = f"data/humanoids/humanoid_data/{humanoid_name}/{humanoid_name}.urdf"
+        humanoid_path = (
+            f"data/humanoids/humanoid_data/{humanoid_name}/{humanoid_name}.urdf"
+        )
         walk_pose_path = f"data/humanoids/humanoid_data/{humanoid_name}/{humanoid_name}_motion_data_smplx.pkl"
 
         agent_config = DictConfig(
@@ -219,9 +217,7 @@ def test_humanoid_controller(humanoid_name):
 
         # set base ground position from navmesh
         # NOTE: because the navmesh floats above the collision geometry we should see a pop/settle with dynamics and no fixed base
-        target_base_pos = sim.pathfinder.snap_point(
-            kin_humanoid.sim_obj.translation
-        )
+        target_base_pos = sim.pathfinder.snap_point(kin_humanoid.sim_obj.translation)
         kin_humanoid.base_pos = target_base_pos
         assert kin_humanoid.base_pos == target_base_pos
         observations += simulate(sim, 1.0, produce_debug_video)
@@ -301,7 +297,9 @@ def test_base_rot():
 
         # add the humanoid to the world via the wrapper
         humanoid_path = "data/humanoids/humanoid_data/female_2/female_2.urdf"
-        walk_pose_path = "data/humanoids/humanoid_data/female_2/female_2_motion_data_smplx.pkl"
+        walk_pose_path = (
+            "data/humanoids/humanoid_data/female_2/female_2_motion_data_smplx.pkl"
+        )
 
         agent_config = DictConfig(
             {
@@ -335,9 +333,7 @@ def test_base_rot():
             # NOTE: here we check that the angle is accurate (allow an offset of one full rotation to cover redundant options)
             accurate_angle = False
             for offset in [0, math.pi * 2, math.pi * -2]:
-                if np.allclose(
-                    rot_check, kin_humanoid.base_rot + offset, atol=1e-5
-                ):
+                if np.allclose(rot_check, kin_humanoid.base_rot + offset, atol=1e-5):
                     accurate_angle = True
                     break
             assert (
@@ -432,9 +428,7 @@ def test_humanoid_seqpose_controller(humanoid_name):
 
         # add a ground plane
         cube_handle = obj_template_mgr.get_template_handles("cubeSolid")[0]
-        cube_template_cpy = obj_template_mgr.get_template_by_handle(
-            cube_handle
-        )
+        cube_template_cpy = obj_template_mgr.get_template_by_handle(cube_handle)
         cube_template_cpy.scale = np.array([5.0, 0.2, 5.0])
         obj_template_mgr.register_template(cube_template_cpy)
         ground_plane = rigid_obj_mgr.add_object_by_template_handle(cube_handle)
@@ -449,7 +443,9 @@ def test_humanoid_seqpose_controller(humanoid_name):
         sim.navmesh_visualization = True
 
         # add the humanoid to the world via the wrapper
-        humanoid_path = f"data/humanoids/humanoid_data/{humanoid_name}/{humanoid_name}.urdf"
+        humanoid_path = (
+            f"data/humanoids/humanoid_data/{humanoid_name}/{humanoid_name}.urdf"
+        )
         walk_pose_path = f"data/humanoids/humanoid_data/{humanoid_name}/{humanoid_name}_motion_data_smplx.pkl"
 
         agent_config = DictConfig(
@@ -470,17 +466,13 @@ def test_humanoid_seqpose_controller(humanoid_name):
 
         # set base ground position from navmesh
         # NOTE: because the navmesh floats above the collision geometry we should see a pop/settle with dynamics and no fixed base
-        target_base_pos = sim.pathfinder.snap_point(
-            kin_humanoid.sim_obj.translation
-        )
+        target_base_pos = sim.pathfinder.snap_point(kin_humanoid.sim_obj.translation)
         kin_humanoid.base_pos = target_base_pos
         assert kin_humanoid.base_pos == target_base_pos
         observations += simulate(sim, 0.01, produce_debug_video)
 
         # Test controller
-        motion_path = (
-            "data/humanoids/humanoid_data/walk_motion/CMU_10_04_stageii.pkl"
-        )
+        motion_path = "data/humanoids/humanoid_data/walk_motion/CMU_10_04_stageii.pkl"
 
         if not osp.exists(motion_path):
             pytest.skip(

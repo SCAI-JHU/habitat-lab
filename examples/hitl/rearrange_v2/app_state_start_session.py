@@ -124,9 +124,7 @@ class AppStateStartSession(AppStateBase):
 
             # Validate that all users are requesting the same episodes.
             if user_index > 0 and episodes[user_index] != episodes[0]:
-                print(
-                    "Users are requesting different episodes. Cancelling session."
-                )
+                print("Users are requesting different episodes. Cancelling session.")
                 return None
 
         # Validate that the episodes are within range.

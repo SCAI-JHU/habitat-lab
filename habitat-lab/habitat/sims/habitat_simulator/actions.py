@@ -59,9 +59,7 @@ class HabitatSimActionsSingleton(metaclass=Singleton):
             HabitatSimActions.extend_action_space("MY_ACTION")
             print(HabitatSimActions.MY_ACTION)
         """
-        assert (
-            name not in self._known_actions
-        ), "Cannot register an action name twice"
+        assert name not in self._known_actions, "Cannot register an action name twice"
         self._known_actions[name] = len(self._known_actions)
 
         return self._known_actions[name]

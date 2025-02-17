@@ -23,31 +23,20 @@ def test_rnn_state_encoder():
     except AttributeError:
         pass
 
-    device = (
-        torch.device("cuda")
-        if torch.cuda.is_available()
-        else torch.device("cpu")
-    )
-    rnn_state_encoder = build_rnn_state_encoder(32, 32, num_layers=2).to(
-        device=device
-    )
+    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+    rnn_state_encoder = build_rnn_state_encoder(32, 32, num_layers=2).to(device=device)
     rnn = rnn_state_encoder.rnn
     with torch.no_grad():
         for T in [1, 2, 4, 8, 16, 32, 64, 3, 13, 31]:
             for N in [1, 2, 4, 8, 3, 5]:
-                not_done_masks = torch.rand((T, N, 1), device=device) > (
-                    1.0 / 25.0
-                )
+                not_done_masks = torch.rand((T, N, 1), device=device) > (1.0 / 25.0)
                 if T == 1:
                     rnn_build_seq_info = None
                 else:
                     rnn_build_seq_info = build_rnn_build_seq_info(
                         device,
                         build_fn_result=build_pack_info_from_dones(
-                            torch.logical_not(not_done_masks)
-                            .view(T, N)
-                            .cpu()
-                            .numpy()
+                            torch.logical_not(not_done_masks).view(T, N).cpu().numpy()
                         ),
                     )
 
@@ -76,15 +65,11 @@ def test_rnn_state_encoder():
                         reference_hiddens.new_zeros(()),
                     )
 
-                    x, reference_hiddens = rnn(
-                        inputs[t : t + 1], reference_hiddens
-                    )
+                    x, reference_hiddens = rnn(inputs[t : t + 1], reference_hiddens)
 
                     reference_outputs.append(x.squeeze(0))
 
-                reference_outputs = torch.stack(reference_outputs, 0).flatten(
-                    0, 1
-                )
+                reference_outputs = torch.stack(reference_outputs, 0).flatten(0, 1)
 
                 assert (
                     torch.linalg.norm(reference_outputs - outputs) < 0.001

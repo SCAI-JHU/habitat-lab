@@ -65,10 +65,7 @@ class HrlRolloutStorage(RolloutStorage):
 
         # The actions here could be Float instead of long because we previously
         # concatenated them with actions from other agents that have low level policies.
-        if (
-            type(self.buffers["actions"]) is torch.Tensor
-            and actions is not None
-        ):
+        if type(self.buffers["actions"]) is torch.Tensor and actions is not None:
             actions = actions.type(self.buffers["actions"].dtype)
 
         if next_masks is not None:
@@ -88,9 +85,7 @@ class HrlRolloutStorage(RolloutStorage):
             value_preds=value_preds,
         )
 
-        next_step = TensorDict(
-            {k: v for k, v in next_step.items() if v is not None}
-        )
+        next_step = TensorDict({k: v for k, v in next_step.items() if v is not None})
         current_step = TensorDict(
             {k: v for k, v in current_step.items() if v is not None}
         )
@@ -184,9 +179,7 @@ class HrlRolloutStorage(RolloutStorage):
         for inds in torch.randperm(num_environments).chunk(num_batches):
             batch = self.buffers[0 : self.num_steps, inds]
             batch["advantages"] = advantages[: self.num_steps, inds]
-            batch["recurrent_hidden_states"] = batch[
-                "recurrent_hidden_states"
-            ][0:1]
+            batch["recurrent_hidden_states"] = batch["recurrent_hidden_states"][0:1]
             batch["loss_mask"] = (
                 torch.arange(self.num_steps, device=advantages.device)
                 .view(-1, 1, 1)
@@ -204,9 +197,7 @@ class HrlRolloutStorage(RolloutStorage):
             batch["rnn_build_seq_info"] = build_rnn_build_seq_info(
                 device=self.device,
                 build_fn_result=build_pack_info_from_dones(
-                    dones_cpu[0 : self.num_steps, inds.numpy()].reshape(
-                        -1, len(inds)
-                    ),
+                    dones_cpu[0 : self.num_steps, inds.numpy()].reshape(-1, len(inds)),
                 ),
             )
 

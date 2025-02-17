@@ -79,9 +79,7 @@ class AppStateRearrange(AppState):
         self._camera_helper = CameraHelper(
             self._app_service.hitl_config, self._app_service.gui_input
         )
-        self._first_person_mode = (
-            self._app_service.hitl_config.camera.first_person_mode
-        )
+        self._first_person_mode = self._app_service.hitl_config.camera.first_person_mode
 
         self._nav_helper = GuiNavigationHelper(
             self._app_service,
@@ -97,9 +95,7 @@ class AppStateRearrange(AppState):
 
         sim = self.get_sim()
         temp_ids, goal_positions_np = sim.get_targets()
-        self._target_obj_ids = [
-            sim._scene_obj_ids[temp_id] for temp_id in temp_ids
-        ]
+        self._target_obj_ids = [sim._scene_obj_ids[temp_id] for temp_id in temp_ids]
         self._goal_positions = [mn.Vector3(pos) for pos in goal_positions_np]
 
         self._nav_helper.on_environment_reset()
@@ -122,9 +118,7 @@ class AppStateRearrange(AppState):
         if self._held_target_obj_idx is not None:
             color = mn.Color3(0, 255 / 255, 0)  # green
             goal_position = self._goal_positions[self._held_target_obj_idx]
-            self._app_service.gui_drawer.draw_circle(
-                goal_position, end_radius, color
-            )
+            self._app_service.gui_drawer.draw_circle(goal_position, end_radius, color)
 
             self._nav_helper.draw_nav_hint_from_agent(
                 self._camera_helper.get_xz_forward(),
@@ -246,9 +240,7 @@ class AppStateRearrange(AppState):
             if self._held_target_obj_idx is None:
                 this_target_pos = self._get_target_object_position(i)
                 box_half_size = 0.15
-                box_offset = mn.Vector3(
-                    box_half_size, box_half_size, box_half_size
-                )
+                box_offset = mn.Vector3(box_half_size, box_half_size, box_half_size)
                 self._app_service.gui_drawer.draw_box(
                     this_target_pos - box_offset,
                     this_target_pos + box_offset,
@@ -276,15 +268,11 @@ class AppStateRearrange(AppState):
 
     def _get_agent_translation(self):
         assert isinstance(self._gui_agent_ctrl, GuiHumanoidController)
-        return (
-            self._gui_agent_ctrl._humanoid_controller.obj_transform_base.translation
-        )
+        return self._gui_agent_ctrl._humanoid_controller.obj_transform_base.translation
 
     def _get_agent_feet_height(self):
         assert isinstance(self._gui_agent_ctrl, GuiHumanoidController)
-        base_offset = (
-            self._gui_agent_ctrl.get_articulated_agent().params.base_offset
-        )
+        base_offset = self._gui_agent_ctrl.get_articulated_agent().params.base_offset
         agent_feet_translation = self._get_agent_translation() + base_offset
         return agent_feet_translation[1]
 
@@ -331,9 +319,7 @@ class AppStateRearrange(AppState):
         1) not self._app_service.env.episode_over - none of the constraints is violated, or
         2) not self._env_task_complete - success measure value is not True
         """
-        return not (
-            self._app_service.env.episode_over or self._env_task_complete
-        )
+        return not (self._app_service.env.episode_over or self._env_task_complete)
 
     def _get_status_text(self):
         status_str = ""
@@ -406,9 +392,7 @@ class AppStateRearrange(AppState):
             pos = agent_root.translation
 
             snap_idx = (
-                self.get_sim()
-                .agents_mgr._all_agent_data[agent_idx]
-                .grasp_mgr.snap_idx
+                self.get_sim().agents_mgr._all_agent_data[agent_idx].grasp_mgr.snap_idx
             )
 
             agent_states.append(
@@ -474,9 +458,7 @@ class AppStateRearrangeTutorialTransition(AppState):
     def _start_tutorial(self):
         assert not self._is_tutorial_active
         final_eye_pos = self._app_state_rearrange._camera_helper.get_eye_pos()
-        final_lookat_pos = (
-            self._app_state_rearrange._camera_helper.get_lookat_pos()
-        )
+        final_lookat_pos = self._app_state_rearrange._camera_helper.get_lookat_pos()
         self._app_state_tutorial.on_enter(final_eye_pos, final_lookat_pos)
         self._is_tutorial_active = True
 
@@ -518,9 +500,7 @@ def create_app_state(app_service):
     return app_state_class(app_service)
 
 
-@hydra.main(
-    version_base=None, config_path="config", config_name="hitl_rearrange"
-)
+@hydra.main(version_base=None, config_path="config", config_name="hitl_rearrange")
 def main(config):
     hitl_main(config, create_app_state)
 

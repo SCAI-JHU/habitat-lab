@@ -32,6 +32,7 @@ class EQACNNPretrainTrainer(BaseILTrainer):
     used in EmbodiedQA (Das et. al.;CVPR 2018)
     Paper: https://embodiedqa.org/paper.pdf.
     """
+
     supported_tasks = ["EQA-v0"]
 
     def __init__(self, config=None):
@@ -98,9 +99,7 @@ class EQACNNPretrainTrainer(BaseILTrainer):
         )
 
         logger.info(
-            "[ train_loader has {} samples ]".format(
-                len(eqa_cnn_pretrain_dataset)
-            )
+            "[ train_loader has {} samples ]".format(len(eqa_cnn_pretrain_dataset))
         )
 
         model = MultitaskCNN()
@@ -120,10 +119,7 @@ class EQACNNPretrainTrainer(BaseILTrainer):
             config.habitat_baselines.tensorboard_dir,
             flush_secs=self.flush_secs,
         ) as writer:
-            while (
-                epoch
-                <= config.habitat_baselines.il.eqa_cnn_pretrain.max_epochs
-            ):
+            while epoch <= config.habitat_baselines.il.eqa_cnn_pretrain.max_epochs:
                 start_time = time.time()
                 avg_loss = 0.0
 
@@ -176,9 +172,7 @@ class EQACNNPretrainTrainer(BaseILTrainer):
 
                 print("-----------------------------------------")
 
-                self.save_checkpoint(
-                    model.state_dict(), "epoch_{}.ckpt".format(epoch)
-                )
+                self.save_checkpoint(model.state_dict(), "epoch_{}.ckpt".format(epoch))
 
                 epoch += 1
 
@@ -201,9 +195,7 @@ class EQACNNPretrainTrainer(BaseILTrainer):
         config = self.config
 
         with read_write(config):
-            config.habitat.dataset.split = (
-                self.config.habitat_baselines.eval.split
-            )
+            config.habitat.dataset.split = self.config.habitat_baselines.eval.split
 
         eqa_cnn_pretrain_dataset = EQACNNPretrainDataset(config, mode="val")
 
@@ -214,9 +206,7 @@ class EQACNNPretrainTrainer(BaseILTrainer):
         )
 
         logger.info(
-            "[ eval_loader has {} samples ]".format(
-                len(eqa_cnn_pretrain_dataset)
-            )
+            "[ eval_loader has {} samples ]".format(len(eqa_cnn_pretrain_dataset))
         )
 
         model = MultitaskCNN()
@@ -264,13 +254,9 @@ class EQACNNPretrainTrainer(BaseILTrainer):
 
                 if (
                     config.habitat_baselines.il.eval_save_results
-                    and t
-                    % config.habitat_baselines.il.eval_save_results_interval
-                    == 0
+                    and t % config.habitat_baselines.il.eval_save_results_interval == 0
                 ):
-                    result_id = "ckpt_{}_{}".format(
-                        checkpoint_index, idx[0].item()
-                    )
+                    result_id = "ckpt_{}_{}".format(checkpoint_index, idx[0].item())
                     result_path = os.path.join(
                         self.config.habitat_baselines.il.results_dir, result_id
                     )
@@ -290,9 +276,7 @@ class EQACNNPretrainTrainer(BaseILTrainer):
         avg_l2 /= len(eval_loader)
         avg_l3 /= len(eval_loader)
 
-        writer.add_scalar(
-            "avg_val_loss/total_loss", avg_loss, checkpoint_index
-        )
+        writer.add_scalar("avg_val_loss/total_loss", avg_loss, checkpoint_index)
         writer.add_scalar("avg_val_loss/seg_loss", avg_l1, checkpoint_index)
         writer.add_scalar("avg_val_loss/ae_loss", avg_l2, checkpoint_index)
         writer.add_scalar("avg_val_loss/depth_loss", avg_l3, checkpoint_index)

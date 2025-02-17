@@ -78,11 +78,7 @@ class CollisionDetails:
 
     @property
     def total_collisions(self):
-        return (
-            self.obj_scene_colls
-            + self.robot_obj_colls
-            + self.robot_scene_colls
-        )
+        return self.obj_scene_colls + self.robot_obj_colls + self.robot_scene_colls
 
     def __add__(self, other):
         return CollisionDetails(
@@ -171,9 +167,7 @@ def rearrange_collision(
     robot_scene_colls = 0
     robot_scene_matches = [c for c in colls if coll_name_matches(c, agent_id)]
     for match in robot_scene_matches:
-        reg_obj_coll = any(
-            coll_name_matches(match, obj_id) for obj_id in added_objs
-        )
+        reg_obj_coll = any(coll_name_matches(match, obj_id) for obj_id in added_objs)
         if reg_obj_coll:
             robot_obj_colls += 1
         else:
@@ -361,9 +355,7 @@ class IkHelper:
         lower = []
         upper = []
         for joint_i in range(self._arm_len):
-            ret = p.getJointInfo(
-                self.robo_id, joint_i, physicsClientId=self.pc_id
-            )
+            ret = p.getJointInfo(self.robo_id, joint_i, physicsClientId=self.pc_id)
             lower.append(ret[8])
             if ret[9] == -1:
                 upper.append(2 * np.pi)
@@ -406,9 +398,7 @@ def write_gfx_replay(gfx_keyframe_str, task_config, ep_id):
     # A gfx-replay list of keyframes for the episode. This is a JSON string that
     # should be saved to a file; the file can be read by visualization tools
     # (e.g. import into Blender for screenshots and videos).
-    filepath = osp.join(
-        task_config.gfx_replay_dir, f"episode{ep_id}.replay.json"
-    )
+    filepath = osp.join(task_config.gfx_replay_dir, f"episode{ep_id}.replay.json")
     with open(filepath, "w") as text_file:
         text_file.write(gfx_keyframe_str)
 
@@ -433,9 +423,7 @@ def place_agent_at_dist_from_pos(
                 target_position, sim, navmesh_offset, agent=agent
             )
         else:
-            return _place_robot_at_closest_point(
-                target_position, sim, agent=agent
-            )
+            return _place_robot_at_closest_point(target_position, sim, agent=agent)
     else:
         return _get_robot_spawns(
             target_position,
@@ -498,9 +486,7 @@ def place_robot_at_closest_point_with_navmesh(
     # Set the base pos of the agent
     trans.translation = agent_pos
     # Project the nav pos
-    nav_pos_3d = [
-        np.array([xz[0], cache_pos[1], xz[1]]) for xz in navmesh_offset
-    ]
+    nav_pos_3d = [np.array([xz[0], cache_pos[1], xz[1]]) for xz in navmesh_offset]
     # Do transformation to get the location
     center_pos_list = [trans.transform_point(xyz) for xyz in nav_pos_3d]
 
@@ -532,9 +518,7 @@ def set_agent_base_via_obj_trans(position: np.ndarray, rotation: float, agent):
     position = position - agent.sim_obj.transformation.transform_vector(
         agent.params.base_offset
     )
-    quat = mn.Quaternion.rotation(
-        mn.Rad(rotation), mn.Vector3(0, 1, 0)
-    ).to_matrix()
+    quat = mn.Quaternion.rotation(mn.Rad(rotation), mn.Vector3(0, 1, 0)).to_matrix()
     target_trans = mn.Matrix4.from_(quat, position)
     agent.sim_obj.transformation = target_trans
 
@@ -576,12 +560,10 @@ def _get_robot_spawns(
     # Try to place the robot.
     for _ in range(num_spawn_attempts):
         # Place within `distance_threshold` of the object.
-        candidate_navmesh_position = (
-            sim.pathfinder.get_random_navigable_point_near(
-                target_position,
-                distance_threshold,
-                island_index=sim.largest_island_idx,
-            )
+        candidate_navmesh_position = sim.pathfinder.get_random_navigable_point_near(
+            target_position,
+            distance_threshold,
+            island_index=sim.largest_island_idx,
         )
         # get_random_navigable_point_near() can return NaNs for start_position.
         # If we assign nan position into agent.base_pos, we cannot revert it back
@@ -604,9 +586,7 @@ def _get_robot_spawns(
         angle_to_object += rotation_noise
 
         # Set the agent position and rotation
-        set_agent_base_via_obj_trans(
-            candidate_navmesh_position, angle_to_object, agent
-        )
+        set_agent_base_via_obj_trans(candidate_navmesh_position, angle_to_object, agent)
 
         is_feasible_state = True
         if filter_colliding_states:
@@ -703,9 +683,7 @@ def add_perf_timing_func(name: Optional[str] = None):
 def get_camera_transform(cur_articulated_agent) -> mn.Matrix4:
     """Get the camera transformation"""
     if isinstance(cur_articulated_agent, SpotRobot):
-        cam_info = cur_articulated_agent.params.cameras[
-            "articulated_agent_arm_depth"
-        ]
+        cam_info = cur_articulated_agent.params.cameras["articulated_agent_arm_depth"]
     elif isinstance(cur_articulated_agent, StretchRobot):
         cam_info = cur_articulated_agent.params.cameras["head"]
     else:

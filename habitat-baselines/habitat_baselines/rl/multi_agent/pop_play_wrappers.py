@@ -75,13 +75,9 @@ class MultiAgentPolicyActionData(PolicyActionData):
             "actions": self._unpack(self.actions, self.length_actions),
             "value_preds": self._unpack(self.values),
             "action_log_probs": self._unpack(self.action_log_probs),
-            "take_actions": self._unpack(
-                self.take_actions, self.length_take_actions
-            ),
+            "take_actions": self._unpack(self.take_actions, self.length_take_actions),
             # This is numpy array and must be split differently.
-            "should_inserts": np.split(
-                self.should_inserts, self.num_agents, axis=-1
-            ),
+            "should_inserts": np.split(self.should_inserts, self.num_agents, axis=-1),
         }
 
 
@@ -92,9 +88,7 @@ def _merge_list_dict(inputs: List[List[Dict]]) -> List[Dict]:
             continue
         for env_i, env_d in enumerate(ac):
             if len(ret) <= env_i:
-                ret.append(
-                    {add_agent_prefix(k, agent_i): v for k, v in env_d.items()}
-                )
+                ret.append({add_agent_prefix(k, agent_i): v for k, v in env_d.items()})
             else:
                 for k, v in env_d.items():
                     ret[env_i][add_agent_prefix(k, agent_i)] = v
@@ -159,9 +153,7 @@ class MultiPolicy(Policy):
                 ]
 
                 ac_sel = slice(policy_i * ac_dim, (policy_i + 1) * ac_dim)
-                prev_actions[env_i, ac_sel].copy_(
-                    action_data.actions[env_i, ac_sel]
-                )
+                prev_actions[env_i, ac_sel].copy_(action_data.actions[env_i, ac_sel])
 
     def act(
         self,
@@ -185,9 +177,7 @@ class MultiPolicy(Policy):
         agent_masks = masks.split([1, 1], -1)
         agent_actions = []
         for agent_i, policy in enumerate(self._active_policies):
-            agent_obs = self._update_obs_with_agent_prefix_fn(
-                observations, agent_i
-            )
+            agent_obs = self._update_obs_with_agent_prefix_fn(observations, agent_i)
             agent_actions.append(
                 policy.act(
                     agent_obs,
@@ -197,9 +187,7 @@ class MultiPolicy(Policy):
                     deterministic,
                 )
             )
-        policy_info = _merge_list_dict(
-            [ac.policy_info for ac in agent_actions]
-        )
+        policy_info = _merge_list_dict([ac.policy_info for ac in agent_actions])
         batch_size = masks.shape[0]
         device = masks.device
 
@@ -218,25 +206,23 @@ class MultiPolicy(Policy):
             all_dat = [get_dat(ac) for ac in agent_actions]
             # Replace any None with dummy data.
             all_dat = [
-                torch.zeros(
-                    (batch_size, feature_dims[ind]), device=device, dtype=dtype
+                (
+                    torch.zeros(
+                        (batch_size, feature_dims[ind]), device=device, dtype=dtype
+                    )
+                    if dat is None
+                    else dat
                 )
-                if dat is None
-                else dat
                 for ind, dat in enumerate(all_dat)
             ]
             return torch.cat(all_dat, -1)
 
-        rnn_hidden_lengths = [
-            ac.rnn_hidden_states.shape[-1] for ac in agent_actions
-        ]
+        rnn_hidden_lengths = [ac.rnn_hidden_states.shape[-1] for ac in agent_actions]
         return MultiAgentPolicyActionData(
             rnn_hidden_states=torch.cat(
                 [ac.rnn_hidden_states for ac in agent_actions], -1
             ),
-            actions=_maybe_cat(
-                lambda ac: ac.actions, action_dims, prev_actions.dtype
-            ),
+            actions=_maybe_cat(lambda ac: ac.actions, action_dims, prev_actions.dtype),
             values=_maybe_cat(
                 lambda ac: ac.values, [1] * len(agent_actions), torch.float32
             ),
@@ -247,9 +233,7 @@ class MultiPolicy(Policy):
             ),
             take_actions=torch.cat(
                 [
-                    ac.take_actions
-                    if ac.take_actions is not None
-                    else ac.actions
+                    ac.take_actions if ac.take_actions is not None else ac.actions
                     for ac in agent_actions
                 ],
                 -1,
@@ -257,10 +241,10 @@ class MultiPolicy(Policy):
             policy_info=policy_info,
             should_inserts=np.concatenate(
                 [
-                    ac.should_inserts
-                    if ac.should_inserts is not None
-                    else np.ones(
-                        (batch_size, 1), dtype=bool
+                    (
+                        ac.should_inserts
+                        if ac.should_inserts is not None
+                        else np.ones((batch_size, 1), dtype=bool)
                     )  # None for monolithic policy, the buffer should be updated
                     for ac in agent_actions
                 ],
@@ -299,9 +283,7 @@ class MultiPolicy(Policy):
             split_index_dict[name_index] = split_indices
         return split_index_dict
 
-    def get_value(
-        self, observations, rnn_hidden_states, prev_actions, masks, **kwargs
-    ):
+    def get_value(self, observations, rnn_hidden_states, prev_actions, masks, **kwargs):
         split_index_dict = self._build_index_split(
             rnn_hidden_states, prev_actions, kwargs
         )
@@ -316,9 +298,7 @@ class MultiPolicy(Policy):
         agent_masks = torch.split(masks, [1, 1], dim=-1)
         all_value = []
         for agent_i, policy in enumerate(self._active_policies):
-            agent_obs = self._update_obs_with_agent_prefix_fn(
-                observations, agent_i
-            )
+            agent_obs = self._update_obs_with_agent_prefix_fn(observations, agent_i)
             all_value.append(
                 policy.get_value(
                     agent_obs,
@@ -355,10 +335,7 @@ class MultiPolicy(Policy):
         if all_discrete:
             return spaces.MultiDiscrete(
                 tuple(
-                    [
-                        policy.policy_action_space.n
-                        for policy in self._active_policies
-                    ]
+                    [policy.policy_action_space.n for policy in self._active_policies]
                 )
             )
         else:
@@ -379,8 +356,7 @@ class MultiPolicy(Policy):
                 lens.append(policy.policy_action_space.shape[0])
             else:
                 raise ValueError(
-                    f"Action distribution {policy.policy_action_space}"
-                    "not supported."
+                    f"Action distribution {policy.policy_action_space}" "not supported."
                 )
         return lens
 
@@ -446,16 +422,13 @@ class MultiStorage(Storage):
             # TODO: this only works if we assume that the policy will always be recurrent
             if (
                 "next_recurrent_hidden_states" in insert_d
-                and insert_d["next_recurrent_hidden_states"][agent_i].numel()
-                == 0
+                and insert_d["next_recurrent_hidden_states"][agent_i].numel() == 0
             ):
                 insert_d["next_recurrent_hidden_states"][agent_i] = None
 
             if next_observations is not None:
-                agent_next_observations = (
-                    self._update_obs_with_agent_prefix_fn(
-                        next_observations, agent_i
-                    )
+                agent_next_observations = self._update_obs_with_agent_prefix_fn(
+                    next_observations, agent_i
                 )
             else:
                 agent_next_observations = None
@@ -464,10 +437,7 @@ class MultiStorage(Storage):
                 rewards=rewards,
                 buffer_index=buffer_index,
                 next_masks=next_masks,
-                **{
-                    k: v[agent_i] if v is not None else v
-                    for k, v in insert_d.items()
-                },
+                **{k: v[agent_i] if v is not None else v for k, v in insert_d.items()},
             )
 
     def to(self, device):
@@ -514,9 +484,7 @@ class MultiStorage(Storage):
                 t.shape[-1] if t.numel() > 0 else 0 for t in agent_step_data[k]
             ]
             as_data_greater = [
-                as_data
-                for as_data in agent_step_data[k]
-                if as_data.numel() > 0
+                as_data for as_data in agent_step_data[k] if as_data.numel() > 0
             ]
             new_agent_step_data[k] = torch.cat(as_data_greater, dim=-1)
             new_agent_step_data[new_name] = lengths_data
@@ -532,9 +500,7 @@ class MultiStorage(Storage):
         )
 
     def get_last_step(self):
-        return self._merge_step_outputs(
-            lambda storage: storage.get_last_step()
-        )
+        return self._merge_step_outputs(lambda storage: storage.get_last_step())
 
     @classmethod
     def from_config(

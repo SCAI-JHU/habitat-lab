@@ -39,8 +39,6 @@ def get_grasped_objects_idxs(
             continue
         grasp_mgr = agents_mgr._all_agent_data[agent_idx].grasp_mgr
         if grasp_mgr.is_grasped:
-            grasped_objects_idxs.append(
-                sim.scene_obj_ids.index(grasp_mgr.snap_idx)
-            )
+            grasped_objects_idxs.append(sim.scene_obj_ids.index(grasp_mgr.snap_idx))
 
     return grasped_objects_idxs

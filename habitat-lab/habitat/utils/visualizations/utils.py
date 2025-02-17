@@ -59,14 +59,10 @@ def paste_overlapping_image(
 
     background_patch = background[
         (location[0] - foreground_size[0] // 2 + min_pad[0]) : (
-            location[0]
-            + (foreground_size[0] - foreground_size[0] // 2)
-            - max_pad[0]
+            location[0] + (foreground_size[0] - foreground_size[0] // 2) - max_pad[0]
         ),
         (location[1] - foreground_size[1] // 2 + min_pad[1]) : (
-            location[1]
-            + (foreground_size[1] - foreground_size[1] // 2)
-            - max_pad[1]
+            location[1] + (foreground_size[1] - foreground_size[1] // 2) - max_pad[1]
         ),
     ]
     foreground = foreground[
@@ -126,9 +122,7 @@ def images_to_video(
 
     # File names are not allowed to be over 255 characters
     video_name_split = video_name.split("/")
-    video_name = "/".join(
-        video_name_split[:-1] + [video_name_split[-1][:251] + ".mp4"]
-    )
+    video_name = "/".join(video_name_split[:-1] + [video_name_split[-1][:251] + ".mp4"])
 
     writer = imageio.get_writer(
         os.path.join(output_dir, video_name),
@@ -200,9 +194,7 @@ def tile_images(render_obs_images: List[np.ndarray]) -> np.ndarray:
     total_width = sum(col_widths)
 
     # Tile the images, pasting the columns side by side.
-    final_im = np.zeros(
-        (max_height, total_width, 3), dtype=render_obs_images[0].dtype
-    )
+    final_im = np.zeros((max_height, total_width, 3), dtype=render_obs_images[0].dtype)
     cur_x = 0
     for i in range(len(img_cols)):
         next_x = cur_x + col_widths[i]
@@ -236,9 +228,7 @@ def observations_to_image(observation: Dict, info: Dict) -> np.ndarray:
                 obs_k = np.concatenate([obs_k for _ in range(3)], axis=2)
             render_obs_images.append(obs_k)
 
-    assert (
-        len(render_obs_images) > 0
-    ), "Expected at least one visual sensor enabled."
+    assert len(render_obs_images) > 0, "Expected at least one visual sensor enabled."
 
     shapes_are_equal = len(set(x.shape for x in render_obs_images)) == 1
 
@@ -300,9 +290,7 @@ def append_text_underneath_image(image: np.ndarray, text: str):
     return final
 
 
-def overlay_text_to_image(
-    image: np.ndarray, text: List[str], font_size: float = 0.5
-):
+def overlay_text_to_image(image: np.ndarray, text: List[str], font_size: float = 0.5):
     r"""Overlays lines of text on top of an image.
 
     First this will render to the left-hand side of the image, once that column is full,

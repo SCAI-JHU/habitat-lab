@@ -22,9 +22,7 @@ except ImportError:
 CFG_TEST = "test/config/habitat/habitat_all_sensors_test.yaml"
 
 
-@pytest.mark.skipif(
-    not baseline_installed, reason="baseline sub-module not installed"
-)
+@pytest.mark.skipif(not baseline_installed, reason="baseline sub-module not installed")
 @pytest.mark.parametrize(
     "input_type,resolution",
     [
@@ -72,9 +70,7 @@ def test_ppo_agents(input_type, resolution):
         benchmark._env.close()
 
 
-@pytest.mark.skipif(
-    not baseline_installed, reason="baseline sub-module not installed"
-)
+@pytest.mark.skipif(not baseline_installed, reason="baseline sub-module not installed")
 def test_simple_agents():
     config_env = habitat.get_config(config_path=CFG_TEST)
 

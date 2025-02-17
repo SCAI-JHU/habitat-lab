@@ -74,10 +74,7 @@ def is_slurm_batch_job() -> bool:
 def resume_state_filename(config: DictConfig, filename_key: str = "") -> str:
     fname = RESUME_STATE_BASE_NAME
 
-    if (
-        is_slurm_job()
-        and config.habitat_baselines.rl.preemption.append_slurm_job_id
-    ):
+    if is_slurm_job() and config.habitat_baselines.rl.preemption.append_slurm_job_id:
         fname += "-{}".format(SLURM_JOBID)
 
     return (
@@ -88,13 +85,11 @@ def resume_state_filename(config: DictConfig, filename_key: str = "") -> str:
 
 
 @overload
-def rank0_only() -> bool:
-    ...
+def rank0_only() -> bool: ...
 
 
 @overload
-def rank0_only(fn: Callable) -> Callable:
-    ...
+def rank0_only(fn: Callable) -> Callable: ...
 
 
 def rank0_only(fn: Optional[Callable] = None) -> Union[Callable, bool]:
@@ -125,8 +120,7 @@ def rank0_only(fn: Optional[Callable] = None) -> Union[Callable, bool]:
     """
     if fn is None:
         return (
-            not torch.distributed.is_initialized()
-            or torch.distributed.get_rank() == 0
+            not torch.distributed.is_initialized() or torch.distributed.get_rank() == 0
         )
 
     @functools.wraps(fn)
@@ -280,9 +274,7 @@ def init_distrib_slurm(
     :returns: Tuple of the local_rank (aka which GPU to use for this process)
         and the TCPStore used for the rendezvous
     """
-    assert (
-        torch.distributed.is_available()
-    ), "torch.distributed must be available"
+    assert torch.distributed.is_available(), "torch.distributed must be available"
 
     if "GLOO_SOCKET_IFNAME" not in os.environ:
         os.environ["GLOO_SOCKET_IFNAME"] = get_ifname()
@@ -318,9 +310,7 @@ def find_free_port() -> int:
     just called `find_free_port()` on each rank independently, every
     rank will have a different port!
     """
-    with contextlib.closing(
-        socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    ) as sock:
+    with contextlib.closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as sock:
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.bind(("localhost", 0))
         _, port = sock.getsockname()
@@ -352,19 +342,13 @@ def get_free_port_distributed(
     return port
 
 
-def _rank_to_relative_rank(
-    rank: int, output_rank: int, world_size: int
-) -> int:
+def _rank_to_relative_rank(rank: int, output_rank: int, world_size: int) -> int:
     return (
-        rank - output_rank
-        if rank >= output_rank
-        else rank - output_rank + world_size
+        rank - output_rank if rank >= output_rank else rank - output_rank + world_size
     )
 
 
-def gatherv(
-    t: torch.Tensor, output_rank: int = 0
-) -> Optional[List[torch.Tensor]]:
+def gatherv(t: torch.Tensor, output_rank: int = 0) -> Optional[List[torch.Tensor]]:
     r"""Distributed gather that works on tensors of variable size.
 
     Currently on works on tensors with 1 dimension.
@@ -424,9 +408,7 @@ def gatherv(
                             )
                         )
                         handles.append(
-                            torch.distributed.irecv(
-                                output[-1], src_real, tag=i
-                            )
+                            torch.distributed.irecv(output[-1], src_real, tag=i)
                         )
             else:
                 dst = relative_rank ^ mask
@@ -476,9 +458,9 @@ def gather_objects(
 
     buf = io.BytesIO()
     pickle.Pickler(buf, protocol=pickle.HIGHEST_PROTOCOL).dump(obj)
-    encoded_obj = torch.from_numpy(
-        np.frombuffer(buf.getbuffer(), dtype=np.uint8)
-    ).to(device=device)
+    encoded_obj = torch.from_numpy(np.frombuffer(buf.getbuffer(), dtype=np.uint8)).to(
+        device=device
+    )
     buf = None
 
     output = gatherv(

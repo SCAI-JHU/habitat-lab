@@ -87,9 +87,7 @@ class GoalFollower(RandomAgent):
         return angle
 
     def turn_towards_goal(self, angle_to_goal: ndarray) -> int:
-        if angle_to_goal > pi or (
-            (angle_to_goal < 0) and (angle_to_goal > -pi)
-        ):
+        if angle_to_goal > pi or ((angle_to_goal < 0) and (angle_to_goal > -pi)):
             action = HabitatSimActions.turn_right
         else:
             action = HabitatSimActions.turn_left

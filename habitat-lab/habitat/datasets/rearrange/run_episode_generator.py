@@ -397,9 +397,7 @@ if __name__ == "__main__":
                 output_path = "rearrange_ep_dataset.json.gz"
             elif osp.isdir(output_path) or output_path.endswith("/"):
                 # append a default filename
-                output_path = (
-                    osp.abspath(output_path) + "/rearrange_ep_dataset.json.gz"
-                )
+                output_path = osp.abspath(output_path) + "/rearrange_ep_dataset.json.gz"
             else:
                 # filename
                 if not output_path.endswith(".json.gz"):
@@ -422,9 +420,7 @@ if __name__ == "__main__":
             logger.info(
                 f"RearrangeEpisodeGenerator generated {args.num_episodes} episodes in {time.time()-start_time} seconds."
             )
-            logger.info(
-                f"RearrangeDatasetV0 saved to '{osp.abspath(output_path)}'"
-            )
+            logger.info(f"RearrangeDatasetV0 saved to '{osp.abspath(output_path)}'")
             logger.info(
                 "=============================================================="
             )

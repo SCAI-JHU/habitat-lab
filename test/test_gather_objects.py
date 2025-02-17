@@ -16,9 +16,7 @@ import torch.distributed  # type: ignore[no-redef]
 from habitat_baselines.rl.ddppo.ddp_utils import find_free_port, gather_objects
 
 
-def _worker_fn(
-    world_rank: int, world_size: int, port: int, all_same_size: bool
-):
+def _worker_fn(world_rank: int, world_size: int, port: int, all_same_size: bool):
     tcp_store = torch.distributed.TCPStore(  # type: ignore
         "127.0.0.1", port, world_size, world_rank == 0
     )

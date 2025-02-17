@@ -14,9 +14,7 @@ from habitat.config.default_structured_configs import TeleportActionConfig
 from habitat.utils.test_utils import sample_non_stop_action
 
 CFG_TEST = "test/config/habitat/habitat_all_sensors_test.yaml"
-teleport_position = np.array(
-    [-3.2890449, 0.15067159, 11.124366], dtype=np.float32
-)
+teleport_position = np.array([-3.2890449, 0.15067159, 11.124366], dtype=np.float32)
 teleport_ROTATION = np.array([0.92035, 0, -0.39109465, 0], dtype=np.float32)
 
 
@@ -58,9 +56,7 @@ def test_task_actions_sampling_for_teleport():
             action = sample_non_stop_action(env.action_space)
             assert env.action_space.contains(action)
             habitat.logger.info(
-                f"Action : "
-                f"{action['action']}, "
-                f"args: {action['action_args']}."
+                f"Action : " f"{action['action']}, " f"args: {action['action_args']}."
             )
             env.step(action)
             agent_state = env.sim.get_agent_state()
@@ -78,9 +74,7 @@ def test_task_actions_sampling_for_teleport():
 def test_task_actions_sampling(config_file):
     config = habitat.get_config(config_path=config_file)
     if not os.path.exists(
-        config.habitat.dataset.data_path.format(
-            split=config.habitat.dataset.split
-        )
+        config.habitat.dataset.data_path.format(split=config.habitat.dataset.split)
     ):
         pytest.skip(
             f"Please download dataset to data folder "
@@ -93,9 +87,7 @@ def test_task_actions_sampling(config_file):
             action = sample_non_stop_action(env.action_space)
             assert env.action_space.contains(action)
             habitat.logger.info(
-                f"Action : "
-                f"{action['action']}, "
-                f"args: {action['action_args']}."
+                f"Action : " f"{action['action']}, " f"args: {action['action_args']}."
             )
             env.step(action)
             agent_state = env.sim.get_agent_state()

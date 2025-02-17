@@ -100,14 +100,12 @@ class HitlDriver(AppDriver):
 
         with habitat.config.read_write(config):  # type: ignore
             # needed so we can provide keyframes to GuiApplication
-            config.habitat.simulator.habitat_sim_v0.enable_gfx_replay_save = (
-                True
-            )
+            config.habitat.simulator.habitat_sim_v0.enable_gfx_replay_save = True
             config.habitat.simulator.concur_render = False
 
         dataset = self._make_dataset(config=config)
-        self.gym_habitat_env: "GymHabitatEnv" = (
-            habitat.gym.make_gym_from_config(config=config, dataset=dataset)
+        self.gym_habitat_env: "GymHabitatEnv" = habitat.gym.make_gym_from_config(
+            config=config, dataset=dataset
         )
         self.habitat_env: habitat.Env = (  # type: ignore
             self.gym_habitat_env.unwrapped.habitat_env
@@ -119,21 +117,14 @@ class HitlDriver(AppDriver):
         ):
             assert self.get_sim().renderer is None
 
-        for (
-            gui_controlled_agent_config
-        ) in self._hitl_config.gui_controlled_agents:
+        for gui_controlled_agent_config in self._hitl_config.gui_controlled_agents:
             sim_config = config.habitat.simulator
             gui_agent_key = sim_config.agents_order[
                 gui_controlled_agent_config.agent_index
             ]
             oracle_nav_sensor_key = f"{gui_agent_key}_has_finished_oracle_nav"
-            if (
-                oracle_nav_sensor_key
-                in self.habitat_env.task.sensor_suite.sensors
-            ):
-                del self.habitat_env.task.sensor_suite.sensors[
-                    oracle_nav_sensor_key
-                ]
+            if oracle_nav_sensor_key in self.habitat_env.task.sensor_suite.sensors:
+                del self.habitat_env.task.sensor_suite.sensors[oracle_nav_sensor_key]
 
         data_collection_config = self._hitl_config.data_collection
         if (
@@ -179,9 +170,7 @@ class HitlDriver(AppDriver):
         # In local mode, there is always 1 active user.
         # In remote mode, use 'activate_user()' and 'deactivate_user()' when handling connections.
         users = Users(
-            max_user_count=max(
-                self._hitl_config.networking.max_client_count, 1
-            ),
+            max_user_count=max(self._hitl_config.networking.max_client_count, 1),
             activate_users=not self._hitl_config.networking.enable,
         )
 
@@ -197,12 +186,10 @@ class HitlDriver(AppDriver):
         def local_end_episode(do_reset=False):
             self._end_episode(do_reset)
 
-        gui_agent_controllers: Any = (
-            self.ctrl_helper.get_gui_agent_controllers()
+        gui_agent_controllers: Any = self.ctrl_helper.get_gui_agent_controllers()
+        all_agent_controllers: List[Controller] = (
+            self.ctrl_helper.get_all_agent_controllers()
         )
-        all_agent_controllers: List[
-            Controller
-        ] = self.ctrl_helper.get_all_agent_controllers()
 
         # TODO: Dependency injection
         text_drawer._client_message_manager = self._client_message_manager
@@ -241,9 +228,7 @@ class HitlDriver(AppDriver):
         self._app_state = create_app_state_lambda(self._app_service)
 
         # Limit the number of float decimals in JSON transmissions
-        if hasattr(
-            self.get_sim().gfx_replay_manager, "set_max_decimal_places"
-        ):
+        if hasattr(self.get_sim().gfx_replay_manager, "set_max_decimal_places"):
             self.get_sim().gfx_replay_manager.set_max_decimal_places(4)
 
         self._reset_environment()
@@ -264,9 +249,7 @@ class HitlDriver(AppDriver):
         self._remote_client_state = None
         self._interprocess_record = None
         if self.network_server_enabled:
-            self._interprocess_record = InterprocessRecord(
-                self._hitl_config.networking
-            )
+            self._interprocess_record = InterprocessRecord(self._hitl_config.networking)
             launch_networking_process(self._interprocess_record)
             self._remote_client_state = RemoteClientState(
                 hitl_config=self._hitl_config,
@@ -287,13 +270,9 @@ class HitlDriver(AppDriver):
         from habitat.datasets import make_dataset  # type: ignore
 
         dataset_config = config.habitat.dataset
-        dataset = make_dataset(
-            id_dataset=dataset_config.type, config=dataset_config
-        )
+        dataset = make_dataset(id_dataset=dataset_config.type, config=dataset_config)
         if self._play_episodes_filter_str is not None:
-            self._play_episodes_filter_str = str(
-                self._play_episodes_filter_str
-            )
+            self._play_episodes_filter_str = str(self._play_episodes_filter_str)
             max_num_digits: int = len(str(len(dataset.episodes)))
 
             def get_play_episodes_ids(play_episodes_filter_str):
@@ -307,9 +286,7 @@ class HitlDriver(AppDriver):
                         )
                     else:
                         episode_id = ep_filter_str
-                        play_episodes_ids.append(
-                            episode_id.zfill(max_num_digits)
-                        )
+                        play_episodes_ids.append(episode_id.zfill(max_num_digits))
 
                 return play_episodes_ids
 
@@ -320,8 +297,7 @@ class HitlDriver(AppDriver):
             dataset.episodes = [
                 ep
                 for ep in dataset.episodes
-                if ep.episode_id.zfill(max_num_digits)
-                in play_episodes_ids_list
+                if ep.episode_id.zfill(max_num_digits) in play_episodes_ids_list
             ]
 
             dataset.episodes.sort(
@@ -358,9 +334,7 @@ class HitlDriver(AppDriver):
             self._step_recorder.finish_step()  # type: ignore
 
     def _find_episode_save_filepath_base(self):
-        retval = (
-            self._save_filepath_base + "." + str(self._num_recorded_episodes)
-        )
+        retval = self._save_filepath_base + "." + str(self._num_recorded_episodes)
         return retval
 
     def _save_episode_recorder_dict(self):
@@ -494,21 +468,16 @@ class HitlDriver(AppDriver):
 
         # _viz_anim_fraction goes from 0 to 1 over time and then resets to 0
         self._viz_anim_fraction = (
-            self._viz_anim_fraction
-            + dt * self._hitl_config.viz_animation_speed
+            self._viz_anim_fraction + dt * self._hitl_config.viz_animation_speed
         ) % 1.0
 
         self._app_state.sim_update(dt, post_sim_update_dict)
 
         if self._pending_cursor_style:
-            post_sim_update_dict[
-                "application_cursor"
-            ] = self._pending_cursor_style
+            post_sim_update_dict["application_cursor"] = self._pending_cursor_style
             self._pending_cursor_style = None
 
-        keyframes: List[
-            str
-        ] = (
+        keyframes: List[str] = (
             self.get_sim().gfx_replay_manager.write_incremental_saved_keyframes_to_string_array()
         )
 
@@ -559,9 +528,7 @@ class HitlDriver(AppDriver):
                     "cam_transform"
                 ]
                 if cam_transform is not None:
-                    self._client_message_manager.update_camera_transform(
-                        cam_transform
-                    )
+                    self._client_message_manager.update_camera_transform(cam_transform)
 
             self._remote_client_state.on_frame_end()
             self._send_keyframes(keyframes)

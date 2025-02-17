@@ -29,8 +29,8 @@ def test_state_getter_setter():
 
     with Simulator(hab_cfg) as sim:
         obj_template_mngr = sim.get_object_template_manager()
-        cube_obj_template = (
-            obj_template_mngr.get_first_matching_template_by_handle("cube")
+        cube_obj_template = obj_template_mngr.get_first_matching_template_by_handle(
+            "cube"
         )
         rom = sim.get_rigid_object_manager()
         new_obj = rom.add_object_by_template_handle(cube_obj_template.handle)
@@ -81,8 +81,8 @@ def test_object_state_machine():
 
     with Simulator(hab_cfg) as sim:
         obj_template_mngr = sim.get_object_template_manager()
-        cube_obj_template = (
-            obj_template_mngr.get_first_matching_template_by_handle("cube")
+        cube_obj_template = obj_template_mngr.get_first_matching_template_by_handle(
+            "cube"
         )
         rom = sim.get_rigid_object_manager()
         new_obj = rom.add_object_by_template_handle(cube_obj_template.handle)
@@ -98,9 +98,7 @@ def test_object_state_machine():
         # now the cube should be registered for TestObjectState because it has the correct semantic_class
         assert isinstance(osm.active_states[0], TestObjectState)
         assert new_obj.handle in osm.objects_with_states
-        assert isinstance(
-            osm.objects_with_states[new_obj.handle][0], TestObjectState
-        )
+        assert isinstance(osm.objects_with_states[new_obj.handle][0], TestObjectState)
 
         state_report_dict = osm.get_snapshot_dict(sim)
         assert "TestState" in state_report_dict

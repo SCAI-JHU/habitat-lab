@@ -56,9 +56,7 @@ def test_gym_wrapper_contract_continuous(
     env_class_name = _get_env_name(config.habitat)
     env_class = get_env_class(env_class_name)
 
-    env = habitat.utils.env_utils.make_env_fn(
-        env_class=env_class, config=config
-    )
+    env = habitat.utils.env_utils.make_env_fn(env_class=env_class, config=config)
 
     assert isinstance(env.action_space, spaces.Box)
     assert (
@@ -103,9 +101,7 @@ def test_gym_wrapper_contract_discrete(
     env_class_name = _get_env_name(config.habitat)
     env_class = get_env_class(env_class_name)
 
-    env = habitat.utils.env_utils.make_env_fn(
-        env_class=env_class, config=config
-    )
+    env = habitat.utils.env_utils.make_env_fn(env_class=env_class, config=config)
     assert isinstance(env.action_space, spaces.Discrete)
     assert (
         env.action_space.n == expected_action_dim

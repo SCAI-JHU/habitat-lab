@@ -42,9 +42,7 @@ converter = scene_converter_manager.load_and_instantiate("AnySceneConverter")
 
 # Image resizer. Size is picked for each image individually in order to avoid
 # upsampling but still target power-of-two textures.
-resizer = image_converter_manager.load_and_instantiate(
-    "StbResizeImageConverter"
-)
+resizer = image_converter_manager.load_and_instantiate("StbResizeImageConverter")
 
 # Meshoptimizer. Options set individually for each mesh.
 meshoptimizer = trade.SceneConverterManager().load_and_instantiate(
@@ -63,9 +61,9 @@ the_magic_constant = 42 * 42 * 4
 # glTF converter defaults. This makes it work with quantized inputs, however
 # decimation will un-quantize again.
 converter.configuration["textureCoordinateYFlipInMaterial"] = False
-converter.configuration[
-    "imageConverter"
-] = "PngImageConverter"  # 'BasisKtxImageConverter'
+converter.configuration["imageConverter"] = (
+    "PngImageConverter"  # 'BasisKtxImageConverter'
+)
 
 
 def decimate(
@@ -155,12 +153,8 @@ def decimate(
             target_size1 = 1.0
             target_count1 = 5000
             size = (dim.x + dim.y + dim.z) / 3
-            lerp_fraction = math.lerp_inverted(
-                target_size0, target_size1, size
-            )
-            target_count = math.lerp(
-                target_count0, target_count1, lerp_fraction
-            )
+            lerp_fraction = math.lerp_inverted(target_size0, target_size1, size)
+            target_count = math.lerp(target_count0, target_count1, lerp_fraction)
             total_target_tris += target_count
             target = target_count / triangle_count
 
@@ -170,9 +164,9 @@ def decimate(
                 # You might want to enable this if the non-sloppy simplification fails
                 # to reach the target by a wide margin
                 meshoptimizer.configuration["simplifySloppy"] = sloppy  # temp
-                meshoptimizer.configuration[
-                    "simplifyTargetIndexCountThreshold"
-                ] = target
+                meshoptimizer.configuration["simplifyTargetIndexCountThreshold"] = (
+                    target
+                )
                 decimated_mesh = meshoptimizer.convert(mesh)
 
             # If simplification isn't desired or if it caused the mesh to disappear, run
@@ -204,9 +198,7 @@ def decimate(
         nearest_smaller_power_of_two = math.clamp(
             1 << math.log2(image.size.min()), 4, 256
         )
-        resizer.configuration["size"] = "{0} {0}".format(
-            nearest_smaller_power_of_two
-        )
+        resizer.configuration["size"] = "{0} {0}".format(nearest_smaller_power_of_two)
         converter.add(resizer.convert(image), importer.image2d_name(i))
 
     # Add whatever else is there in the input file (materials, textures...) except

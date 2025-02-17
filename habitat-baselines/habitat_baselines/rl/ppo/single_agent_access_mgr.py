@@ -63,9 +63,7 @@ class SingleAgentAccessMgr(AgentAccessMgr):
         self._device = device
         self._ppo_cfg = self._config.habitat_baselines.rl.ppo
         self._is_distributed = is_distrib
-        self._is_static_encoder = (
-            not config.habitat_baselines.rl.ddppo.train_encoder
-        )
+        self._is_static_encoder = not config.habitat_baselines.rl.ddppo.train_encoder
 
         if agent_name is None:
             if len(config.habitat.simulator.agents_order) > 1:
@@ -96,10 +94,7 @@ class SingleAgentAccessMgr(AgentAccessMgr):
         if resume_state is not None:
             self._updater.load_state_dict(resume_state["state_dict"])
             self._updater.load_state_dict(
-                {
-                    "actor_critic." + k: v
-                    for k, v, in resume_state["state_dict"].items()
-                }
+                {"actor_critic." + k: v for k, v, in resume_state["state_dict"].items()}
             )
 
     @property
@@ -175,9 +170,7 @@ class SingleAgentAccessMgr(AgentAccessMgr):
 
     def init_distributed(self, find_unused_params: bool = True) -> None:
         if len(list(self._updater.parameters())) > 0:
-            self._updater.init_distributed(
-                find_unused_params=find_unused_params
-            )
+            self._updater.init_distributed(find_unused_params=find_unused_params)
 
     def _create_policy(self) -> NetPolicy:
         """
@@ -279,10 +272,7 @@ class SingleAgentAccessMgr(AgentAccessMgr):
                 self._lr_scheduler.load_state_dict(state["lr_sched_state"])
 
     def after_update(self):
-        if (
-            self._ppo_cfg.use_linear_lr_decay
-            and self._lr_scheduler is not None
-        ):
+        if self._ppo_cfg.use_linear_lr_decay and self._lr_scheduler is not None:
             self._lr_scheduler.step()  # type: ignore
         self._updater.after_update()
 

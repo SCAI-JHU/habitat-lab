@@ -44,9 +44,7 @@ class GuiNavigationHelper:
         assert forward_dir
         agent_idx = self._agent_idx
         assert agent_idx is not None
-        art_obj = (
-            self._get_sim().agents_mgr[agent_idx].articulated_agent.sim_obj
-        )
+        art_obj = self._get_sim().agents_mgr[agent_idx].articulated_agent.sim_obj
         agent_pos = art_obj.transformation.translation
 
         self._draw_nav_hint(
@@ -69,9 +67,7 @@ class GuiNavigationHelper:
         self, target_pos: mn.Vector3
     ) -> Tuple[bool, ShortestPath]:
         """Get the shorted path required for an agent to travel to."""
-        agent_root = get_agent_art_obj_transform(
-            self._get_sim(), self._agent_idx
-        )
+        agent_root = get_agent_art_obj_transform(self._get_sim(), self._agent_idx)
 
         pathfinder = self._get_sim().pathfinder
         # snap target to the selected island
@@ -90,9 +86,7 @@ class GuiNavigationHelper:
 
         return found_path, path
 
-    def _get_humanoid_walk_dir_from_path(
-        self, path: ShortestPath
-    ) -> mn.Vector3:
+    def _get_humanoid_walk_dir_from_path(self, path: ShortestPath) -> mn.Vector3:
         """Get the humanoid current walking direction from the specified path."""
         assert len(path.points) >= 2
         walk_dir = mn.Vector3(path.points[1]) - mn.Vector3(path.points[0])
@@ -128,9 +122,7 @@ class GuiNavigationHelper:
         (
             target_pos,
             target_rot_quat,
-        ) = self._app_service.remote_client_state.get_head_pose(
-            self._user_index
-        )
+        ) = self._app_service.remote_client_state.get_head_pose(self._user_index)
 
         forward_dir = None
         if target_pos and target_rot_quat:
@@ -197,10 +189,7 @@ class GuiNavigationHelper:
             distance_multiplier = 0.0
 
         # Only rotate humanoid is the goal is close enough.
-        if (
-            is_navigating
-            and path.geodesic_distance >= move_forward_dist_threshold
-        ):
+        if is_navigating and path.geodesic_distance >= move_forward_dist_threshold:
             target_rot_quat = None
 
         # Set forward gaze.
@@ -224,9 +213,7 @@ class GuiNavigationHelper:
 
         return target_on_floor
 
-    def _compute_forward_dir(
-        self, target_rot_quat: mn.Quaternion
-    ) -> mn.Vector3:
+    def _compute_forward_dir(self, target_rot_quat: mn.Quaternion) -> mn.Vector3:
         """Multiply a forward vector by the specified quaternion."""
         direction_vector = mn.Vector3(0.0, 0.0, 1.0)
         heading_vector = target_rot_quat.transform_vector(direction_vector)
@@ -236,9 +223,7 @@ class GuiNavigationHelper:
         return heading_vector
 
     @staticmethod
-    def _evaluate_cubic_bezier(
-        ctrl_pts: List[mn.Vector3], t: float
-    ) -> mn.Vector3:
+    def _evaluate_cubic_bezier(ctrl_pts: List[mn.Vector3], t: float) -> mn.Vector3:
         """Evaluate a cubic bezier spline."""
         assert len(ctrl_pts) == 4
         weights = (
@@ -282,16 +267,12 @@ class GuiNavigationHelper:
         alpha_ramp_dist = 1.0
         num_steps = max(
             2,
-            int(
-                ((end_pos - start_pos).length() + pad_meters) * steps_per_meter
-            ),
+            int(((end_pos - start_pos).length() + pad_meters) * steps_per_meter),
         )
 
         prev_pos = None
         for step_idx in range(num_steps):
-            t = step_idx / (num_steps - 1) + anim_fraction * (
-                1 / (num_steps - 1)
-            )
+            t = step_idx / (num_steps - 1) + anim_fraction * (1 / (num_steps - 1))
             pos = self._evaluate_cubic_bezier(ctrl_pts, t)
 
             if (pos - end_pos).length() < end_radius:

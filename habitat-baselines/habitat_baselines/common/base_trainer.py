@@ -36,6 +36,7 @@ class BaseTrainer:
     specific trainer classes like RL trainer, SLAM or imitation learner.
     Includes only the most basic functionality.
     """
+
     config: "DictConfig"
     flush_secs: float
     supported_tasks: ClassVar[List[str]]
@@ -43,9 +44,7 @@ class BaseTrainer:
     def train(self) -> None:
         raise NotImplementedError
 
-    def _get_resume_state_config_or_new_config(
-        self, resume_state_config: "DictConfig"
-    ):
+    def _get_resume_state_config_or_new_config(self, resume_state_config: "DictConfig"):
         if self.config.habitat_baselines.load_resume_state_config:
             if self.config != resume_state_config:
                 logger.warning(
@@ -97,9 +96,7 @@ class BaseTrainer:
             assert (
                 len(self.config.habitat_baselines.tensorboard_dir) > 0
             ), "Must specify a tensorboard directory for video display"
-            os.makedirs(
-                self.config.habitat_baselines.tensorboard_dir, exist_ok=True
-            )
+            os.makedirs(self.config.habitat_baselines.tensorboard_dir, exist_ok=True)
         if "disk" in self.config.habitat_baselines.eval.video_option:
             assert (
                 len(self.config.habitat_baselines.video_dir) > 0
@@ -107,9 +104,7 @@ class BaseTrainer:
 
         with get_writer(self.config, flush_secs=self.flush_secs) as writer:
             if (
-                os.path.isfile(
-                    self.config.habitat_baselines.eval_ckpt_path_dir
-                )
+                os.path.isfile(self.config.habitat_baselines.eval_ckpt_path_dir)
                 or not self.config.habitat_baselines.eval.should_load_ckpt
             ):
                 # evaluate single checkpoint. If `should_load_ckpt=False` then
@@ -185,6 +180,7 @@ class BaseRLTrainer(BaseTrainer):
     r"""Base trainer class for RL trainers. Future RL-specific
     methods should be hosted here.
     """
+
     device: torch.device  # type: ignore
     config: "DictConfig"
     video_option: List[str]
@@ -253,15 +249,9 @@ class BaseRLTrainer(BaseTrainer):
 
     def percent_done(self) -> float:
         if self.config.habitat_baselines.num_updates != -1:
-            return (
-                self.num_updates_done
-                / self.config.habitat_baselines.num_updates
-            )
+            return self.num_updates_done / self.config.habitat_baselines.num_updates
         else:
-            return (
-                self.num_steps_done
-                / self.config.habitat_baselines.total_num_steps
-            )
+            return self.num_steps_done / self.config.habitat_baselines.total_num_steps
 
     def is_done(self) -> bool:
         return self.percent_done() >= 1.0
@@ -269,13 +259,8 @@ class BaseRLTrainer(BaseTrainer):
     def should_checkpoint(self) -> bool:
         needs_checkpoint = False
         if self.config.habitat_baselines.num_checkpoints != -1:
-            checkpoint_every = (
-                1 / self.config.habitat_baselines.num_checkpoints
-            )
-            if (
-                self._last_checkpoint_percent + checkpoint_every
-                < self.percent_done()
-            ):
+            checkpoint_every = 1 / self.config.habitat_baselines.num_checkpoints
+            if self._last_checkpoint_percent + checkpoint_every < self.percent_done():
                 needs_checkpoint = True
                 self._last_checkpoint_percent = self.percent_done()
         else:

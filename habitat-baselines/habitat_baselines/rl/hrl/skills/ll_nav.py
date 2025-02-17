@@ -15,9 +15,7 @@ class MoveSkillPolicy(SkillPolicy):
         super().__init__(config, action_space, batch_size, True)
         self._turn_power_fwd = config.turn_power_x
         self._turn_power_side = config.turn_power_y
-        self._nav_ac_start, _ = find_action_range(
-            action_space, "base_velocity"
-        )
+        self._nav_ac_start, _ = find_action_range(action_space, "base_velocity")
 
     def _internal_act(
         self,

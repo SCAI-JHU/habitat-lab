@@ -49,20 +49,12 @@ class PlaceReward(RearrangeReward):
         self._prev_dropped = not self._sim.grasp_mgr.is_grasped
 
         super().reset_metric(
-            *args,
-            episode=episode,
-            task=task,
-            observations=observations,
-            **kwargs
+            *args, episode=episode, task=task, observations=observations, **kwargs
         )
 
     def update_metric(self, *args, episode, task, observations, **kwargs):
         super().update_metric(
-            *args,
-            episode=episode,
-            task=task,
-            observations=observations,
-            **kwargs
+            *args, episode=episode, task=task, observations=observations, **kwargs
         )
         reward = self._metric
         ee_to_goal_dist = task.measurements.measures[
@@ -74,9 +66,9 @@ class PlaceReward(RearrangeReward):
         ee_to_rest_distance = task.measurements.measures[
             EndEffectorToRestDistance.cls_uuid
         ].get_metric()
-        obj_at_goal = task.measurements.measures[
-            ObjAtGoal.cls_uuid
-        ].get_metric()[str(task.targ_idx)]
+        obj_at_goal = task.measurements.measures[ObjAtGoal.cls_uuid].get_metric()[
+            str(task.targ_idx)
+        ]
 
         snapped_id = self._sim.grasp_mgr.snap_idx
         cur_picked = snapped_id is not None
@@ -102,9 +94,7 @@ class PlaceReward(RearrangeReward):
                 # Dropped at wrong location
                 reward -= self._config.drop_pen
                 if self._config.wrong_drop_should_end:
-                    rearrange_logger.debug(
-                        "Dropped to wrong place, ending episode."
-                    )
+                    rearrange_logger.debug("Dropped to wrong place, ending episode.")
                     self._task.should_end = True
                     self._metric = reward
                     return
@@ -148,17 +138,13 @@ class PlaceSuccess(Measure):
             ],
         )
         self.update_metric(
-            *args,
-            episode=episode,
-            task=task,
-            observations=observations,
-            **kwargs
+            *args, episode=episode, task=task, observations=observations, **kwargs
         )
 
     def update_metric(self, *args, episode, task, observations, **kwargs):
-        is_obj_at_goal = task.measurements.measures[
-            ObjAtGoal.cls_uuid
-        ].get_metric()[str(task.targ_idx)]
+        is_obj_at_goal = task.measurements.measures[ObjAtGoal.cls_uuid].get_metric()[
+            str(task.targ_idx)
+        ]
         is_holding = self._sim.grasp_mgr.is_grasped
 
         ee_to_rest_distance = task.measurements.measures[

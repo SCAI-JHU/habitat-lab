@@ -38,9 +38,7 @@ class ObjectStateControl:
     enabled: bool
     available: bool
     callback: Optional[
-        Callable[
-            [str, str, Any], None  # object_handle  # state_name  # state_value
-        ]
+        Callable[[str, str, Any], None]  # object_handle  # state_name  # state_value
     ]
     tooltip: Optional[str]
     recently_changed: bool
@@ -182,9 +180,7 @@ class UIOverlay:
             if object_category_name is None:
                 return
 
-            ctx.canvas_properties(
-                padding=12, background_color=PANEL_BACKGROUND_COLOR
-            )
+            ctx.canvas_properties(padding=12, background_color=PANEL_BACKGROUND_COLOR)
 
             title = self._title_str(object_category_name)
 
@@ -233,9 +229,7 @@ class UIOverlay:
             if object_category_name is None:
                 return
 
-            ctx.canvas_properties(
-                padding=12, background_color=PANEL_BACKGROUND_COLOR
-            )
+            ctx.canvas_properties(padding=12, background_color=PANEL_BACKGROUND_COLOR)
 
             title = self._title_str(object_category_name)
 
@@ -293,9 +287,4 @@ class UIOverlay:
     @staticmethod
     def _title_str(string: str):
         """Convert 'snake_case' to 'Title Case'."""
-        return (
-            string.replace("_", " ")
-            .replace("-", " ")
-            .replace(".", " ")
-            .title()
-        )
+        return string.replace("_", " ").replace("-", " ").replace(".", " ").title()

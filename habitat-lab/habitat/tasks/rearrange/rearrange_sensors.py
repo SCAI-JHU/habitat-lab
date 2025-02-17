@@ -128,9 +128,7 @@ class PositionGpsCompassSensor(UsesArticulatedAgentInterface, Sensor):
             self.agent_id
         ).articulated_agent.base_transformation
 
-        rel_pos = batch_transform_point(
-            pos, articulated_agent_T.inverted(), np.float32
-        )
+        rel_pos = batch_transform_point(pos, articulated_agent_T.inverted(), np.float32)
 
         for i, rel_obj_pos in enumerate(rel_pos):
             rho, phi = cartesian_to_polar(rel_obj_pos[0], rel_obj_pos[1])
@@ -431,15 +429,11 @@ class LocalizationSensor(UsesArticulatedAgentInterface, Sensor):
         )
 
     def get_observation(self, observations, episode, *args, **kwargs):
-        articulated_agent = self._sim.get_agent_data(
-            self.agent_id
-        ).articulated_agent
+        articulated_agent = self._sim.get_agent_data(self.agent_id).articulated_agent
         T = articulated_agent.base_transformation
         forward = np.array([1.0, 0, 0])
         heading_angle = get_angle_to_pos(T.transform_vector(forward))
-        return np.array(
-            [*articulated_agent.base_pos, heading_angle], dtype=np.float32
-        )
+        return np.array([*articulated_agent.base_pos, heading_angle], dtype=np.float32)
 
 
 @registry.register_sensor
@@ -493,7 +487,7 @@ class ObjectToGoalDistance(Measure):
     def update_metric(self, *args, episode, **kwargs):
         idxs, goal_pos = self._sim.get_targets()
         scene_pos = self._sim.get_scene_pos()
-        print("xytestidxs",idxs,goal_pos)
+        print("xytestidxs", idxs, goal_pos)
         target_pos = scene_pos[idxs]
         distances = np.linalg.norm(target_pos - goal_pos, ord=2, axis=-1)
         self._metric = {str(idx): dist for idx, dist in enumerate(distances)}
@@ -528,9 +522,7 @@ class GfxReplayMeasure(Measure):
 
     def get_metric(self, force_get=False):
         if force_get and self._enable_gfx_replay_save:
-            return (
-                self._sim.gfx_replay_manager.write_saved_keyframes_to_string()
-            )
+            return self._sim.gfx_replay_manager.write_saved_keyframes_to_string()
         return super().get_metric()
 
 
@@ -646,9 +638,7 @@ class EndEffectorToObjectDistance(UsesArticulatedAgentInterface, Measure):
         distances = np.linalg.norm(target_pos - ee_pos, ord=2, axis=-1)
 
         # Ensure the gripper maintains a desirable distance
-        distances = abs(
-            distances - self._config.desire_distance_between_gripper_object
-        )
+        distances = abs(distances - self._config.desire_distance_between_gripper_object)
 
         if self._config.if_consider_gaze_angle:
             # Get the camera transformation
@@ -687,11 +677,7 @@ class BaseToObjectDistance(UsesArticulatedAgentInterface, Measure):
 
     def update_metric(self, *args, episode, **kwargs):
         base_pos = np.array(
-            (
-                self._sim.get_agent_data(
-                    self.agent_id
-                ).articulated_agent.base_pos
-            )
+            (self._sim.get_agent_data(self.agent_id).articulated_agent.base_pos)
         )
 
         idxs, _ = self._sim.get_targets()
@@ -954,9 +940,7 @@ class ForceTerminate(Measure):
         )
 
     def update_metric(self, *args, episode, task, observations, **kwargs):
-        force_info = task.measurements.measures[
-            RobotForce.cls_uuid
-        ].get_metric()
+        force_info = task.measurements.measures[RobotForce.cls_uuid].get_metric()
         accum_force = force_info["accum"]
         instant_force = force_info["instant"]
         if self._max_accum_force > 0 and accum_force > self._max_accum_force:
@@ -965,10 +949,7 @@ class ForceTerminate(Measure):
             )
             self._task.should_end = True
             self._metric = True
-        elif (
-            self._max_instant_force > 0
-            and instant_force > self._max_instant_force
-        ):
+        elif self._max_instant_force > 0 and instant_force > self._max_instant_force:
             rearrange_logger.debug(
                 f"Force instant threshold={self._max_instant_force} exceeded with {instant_force}, ending episode"
             )
@@ -1087,23 +1068,15 @@ class RearrangeReward(UsesArticulatedAgentInterface, Measure):
         """Count-based collision reward"""
         reward = 0
 
-        count_coll_metric = self._task.measurements.measures[
-            RobotCollisions.cls_uuid
-        ]
+        count_coll_metric = self._task.measurements.measures[RobotCollisions.cls_uuid]
         cur_total_colls = count_coll_metric.get_metric()["total_collisions"]
 
         # Check the step collision
-        if (
-            self._count_coll_pen != -1.0
-            and cur_total_colls - self._prev_count_coll > 0
-        ):
+        if self._count_coll_pen != -1.0 and cur_total_colls - self._prev_count_coll > 0:
             reward -= self._count_coll_pen
 
         # Check the max count collision
-        if (
-            self._max_count_colls != -1.0
-            and cur_total_colls > self._max_count_colls
-        ):
+        if self._max_count_colls != -1.0 and cur_total_colls > self._max_count_colls:
             reward -= self._config.count_coll_end_pen
             self._task.should_end = True
 
@@ -1162,9 +1135,7 @@ class BadCalledTerminate(Measure):
         does_action_want_stop = task.measurements.measures[
             DoesWantTerminate.cls_uuid
         ].get_metric()
-        is_succ = task.measurements.measures[
-            self._success_measure_name
-        ].get_metric()
+        is_succ = task.measurements.measures[self._success_measure_name].get_metric()
 
         self._metric = (not is_succ) and does_action_want_stop
 
@@ -1193,9 +1164,7 @@ class RuntimePerfStats(Measure):
         if self._disable_logging:
             self._metric = {}
         else:
-            self._metric = {
-                k: np.mean(v) for k, v in self._metric_queue.items()
-            }
+            self._metric = {k: np.mean(v) for k, v in self._metric_queue.items()}
 
 
 @registry.register_sensor
@@ -1310,18 +1279,13 @@ class ArmDepthBBoxSensor(UsesArticulatedAgentInterface, Sensor):
             target_key = "articulated_agent_arm_panoptic"
             assert target_key in observations
         else:
-            target_key = (
-                f"agent_{self.agent_id}_articulated_agent_arm_panoptic"
-            )
+            target_key = f"agent_{self.agent_id}_articulated_agent_arm_panoptic"
             assert target_key in observations
 
         img_seg = observations[target_key]
 
         # Check the size of the observation
-        assert (
-            img_seg.shape[0] == self._height
-            and img_seg.shape[1] == self._width
-        )
+        assert img_seg.shape[0] == self._height and img_seg.shape[1] == self._width
 
         # Check if task has the attribute of the abs_targ_idx
         assert hasattr(task, "abs_targ_idx")

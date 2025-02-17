@@ -28,9 +28,7 @@ class HumanoidPickAction(HumanoidJointAction):
         HumanoidJointAction.__init__(self, *args, **kwargs)
         self.dbv = None
 
-        self.humanoid_controller = self.lazy_inst_humanoid_controller(
-            task, config
-        )
+        self.humanoid_controller = self.lazy_inst_humanoid_controller(task, config)
 
         self._task = task
         self._entities = self._task.pddl_problem.get_ordered_entities_list()
@@ -51,14 +49,9 @@ class HumanoidPickAction(HumanoidJointAction):
         # We assign the task with the humanoid controller, so that multiple actions can
         # use it.
 
-        if (
-            not hasattr(task, "humanoid_controller")
-            or task.humanoid_controller is None
-        ):
+        if not hasattr(task, "humanoid_controller") or task.humanoid_controller is None:
             # Initialize humanoid controller
-            agent_name = self._sim.habitat_config.agents_order[
-                self._agent_index
-            ]
+            agent_name = self._sim.habitat_config.agents_order[self._agent_index]
             walk_pose_path = self._sim.habitat_config.agents[
                 agent_name
             ].motion_data_path
@@ -85,9 +78,7 @@ class HumanoidPickAction(HumanoidJointAction):
 
     def _get_coord_for_idx(self, object_target_idx):
         pick_obj_entity = self._entities[object_target_idx]
-        obj_pos = self._task.pddl_problem.sim_info.get_entity_pos(
-            pick_obj_entity
-        )
+        obj_pos = self._task.pddl_problem.sim_info.get_entity_pos(pick_obj_entity)
         return obj_pos
 
     def get_scene_index_obj(self, object_target_idx):
@@ -98,29 +89,22 @@ class HumanoidPickAction(HumanoidJointAction):
 
     def step(self, *args, **kwargs):
         self.skill_done = False
-        object_pick_idx = kwargs[
-            self._action_arg_prefix + "humanoid_pick_action"
-        ][0]
-        should_pick = kwargs[self._action_arg_prefix + "humanoid_pick_action"][
-            1
-        ]
+        object_pick_idx = kwargs[self._action_arg_prefix + "humanoid_pick_action"][0]
+        should_pick = kwargs[self._action_arg_prefix + "humanoid_pick_action"][1]
 
         if object_pick_idx <= 0 or object_pick_idx > len(self._entities):
             return
 
         object_coord = self._get_coord_for_idx(object_pick_idx)
-        init_coord_world = (
-            self.humanoid_controller.obj_transform_base.transform_point(
-                self._init_coord
-            )
+        init_coord_world = self.humanoid_controller.obj_transform_base.transform_point(
+            self._init_coord
         )
 
         hand_vector = (object_coord - init_coord_world) / np.linalg.norm(
             object_coord - init_coord_world
         )
         max_num_iters = int(
-            np.linalg.norm(object_coord - init_coord_world)
-            / self.dist_move_per_step
+            np.linalg.norm(object_coord - init_coord_world) / self.dist_move_per_step
         )
 
         should_rest = False
@@ -129,21 +113,15 @@ class HumanoidPickAction(HumanoidJointAction):
             if should_pick == 0 or self.cur_grasp_mgr.snap_idx is None:
                 new_hand_coord = (
                     init_coord_world
-                    + self._hand_pose_iter
-                    * self.dist_move_per_step
-                    * hand_vector
+                    + self._hand_pose_iter * self.dist_move_per_step * hand_vector
                 )
-                self._hand_pose_iter = min(
-                    self._hand_pose_iter + 1, max_num_iters
-                )
+                self._hand_pose_iter = min(self._hand_pose_iter + 1, max_num_iters)
                 dist_hand_obj = np.linalg.norm(object_coord - new_hand_coord)
                 if dist_hand_obj < self.dist_to_snap:
                     # snap,
                     self.hand_state = HandState.RETRACTING
                     if should_pick:
-                        object_index = self.get_scene_index_obj(
-                            object_pick_idx
-                        )
+                        object_index = self.get_scene_index_obj(object_pick_idx)
                         if self.cur_grasp_mgr.snap_idx is None:
                             self.cur_grasp_mgr.snap_to_obj(
                                 object_index,
@@ -153,8 +131,8 @@ class HumanoidPickAction(HumanoidJointAction):
                         obj_grabbed = self.cur_grasp_mgr.snap_rigid_obj()
                         self.cur_grasp_mgr.desnap(True)
                         if obj_grabbed is not None:
-                            obj_grabbed.transformation = (
-                                mn.Matrix4.translation(object_coord)
+                            obj_grabbed.transformation = mn.Matrix4.translation(
+                                object_coord
                             )
             else:
                 should_rest = True
@@ -197,9 +175,7 @@ class HumanoidPickObjIdAction(HumanoidPickAction):
         HumanoidJointAction.__init__(self, *args, **kwargs)
         self.vdb = None
 
-        self.humanoid_controller = self.lazy_inst_humanoid_controller(
-            task, config
-        )
+        self.humanoid_controller = self.lazy_inst_humanoid_controller(task, config)
 
         self._task = task
         self._prev_ep_id = None
@@ -238,23 +214,18 @@ class HumanoidPickObjIdAction(HumanoidPickAction):
 
     def step(self, *args, **kwargs):
         self.skill_done = False
-        object_pick_idx = kwargs[
-            self._action_arg_prefix + "humanoid_pick_obj_id"
-        ]
+        object_pick_idx = kwargs[self._action_arg_prefix + "humanoid_pick_obj_id"]
 
         object_coord = self._get_coord_for_idx(object_pick_idx)
-        init_coord_world = (
-            self.humanoid_controller.obj_transform_base.transform_point(
-                self._init_coord
-            )
+        init_coord_world = self.humanoid_controller.obj_transform_base.transform_point(
+            self._init_coord
         )
 
         hand_vector = (object_coord - init_coord_world) / np.linalg.norm(
             object_coord - init_coord_world
         )
         max_num_iters = int(
-            np.linalg.norm(object_coord - init_coord_world)
-            / self.dist_move_per_step
+            np.linalg.norm(object_coord - init_coord_world) / self.dist_move_per_step
         )
 
         should_rest = False
@@ -263,13 +234,9 @@ class HumanoidPickObjIdAction(HumanoidPickAction):
             if self.cur_grasp_mgr.snap_idx is None:
                 new_hand_coord = (
                     init_coord_world
-                    + self._hand_pose_iter
-                    * self.dist_move_per_step
-                    * hand_vector
+                    + self._hand_pose_iter * self.dist_move_per_step * hand_vector
                 )
-                self._hand_pose_iter = min(
-                    self._hand_pose_iter + 1, max_num_iters
-                )
+                self._hand_pose_iter = min(self._hand_pose_iter + 1, max_num_iters)
                 dist_hand_obj = np.linalg.norm(object_coord - new_hand_coord)
                 if dist_hand_obj < self.dist_to_snap:
                     # snap,

@@ -116,9 +116,7 @@ class RearrangePickReward(RearrangeReward):
                 # picked the wrong object
                 self._metric -= self._config.wrong_pick_pen
                 if self._config.wrong_pick_should_end:
-                    rearrange_logger.debug(
-                        "Grasped wrong object, ending episode."
-                    )
+                    rearrange_logger.debug("Grasped wrong object, ending episode.")
                     self._task.should_end = True
                 self._prev_picked = cur_picked
                 self.cur_dist = -1
@@ -167,8 +165,7 @@ class RearrangePickReward(RearrangeReward):
             ), "Please provide non_desire_ee_local_pos given non_desire_ee_local_pos_dis is non-negative"
             ee_local_pos = observations[EEPositionSensor.cls_uuid]
             distance = np.linalg.norm(
-                np.array(ee_local_pos)
-                - np.array(self._config.non_desire_ee_local_pos)
+                np.array(ee_local_pos) - np.array(self._config.non_desire_ee_local_pos)
             )
             if distance < self._config.non_desire_ee_local_pos_dis:
                 # The robot's EE is too closed to the non-desire ee pos
@@ -186,9 +183,7 @@ class RearrangePickReward(RearrangeReward):
             # Check if there is target obejct in frame
             is_there_an_target_in_bbox = True
             if len(get_bbox_keys) != 0:
-                is_there_an_target_in_bbox = (
-                    np.sum(observations[get_bbox_keys[0]]) > 0
-                )
+                is_there_an_target_in_bbox = np.sum(observations[get_bbox_keys[0]]) > 0
             if (
                 angle < self._config.camera_looking_down_angle
                 and not is_there_an_target_in_bbox

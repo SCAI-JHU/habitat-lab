@@ -47,13 +47,10 @@ class AppStateLobby(AppStateBase):
         # If all users are connected, start the session.
         # NOTE: We wait START_SESSION_DELAY to mitigate early disconnects.
         if (
-            len(self._app_data.connected_users)
-            == self._app_data.max_user_count
+            len(self._app_data.connected_users) == self._app_data.max_user_count
             and self._time_since_last_connection > START_SESSION_DELAY
         ):
-            return create_app_state_start_session(
-                self._app_service, self._app_data
-            )
+            return create_app_state_start_session(self._app_service, self._app_data)
         return None
 
     def sim_update(self, dt: float, post_sim_update_dict):

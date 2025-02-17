@@ -319,9 +319,7 @@ class Simulator:
     def geodesic_distance(
         self,
         position_a: Union[Sequence[float], np.ndarray],
-        position_b: Union[
-            Sequence[float], Sequence[Sequence[float]], np.ndarray
-        ],
+        position_b: Union[Sequence[float], Sequence[Sequence[float]], np.ndarray],
         episode: Optional[Episode] = None,
     ) -> float:
         """Calculates geodesic distance between two points.

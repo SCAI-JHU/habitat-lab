@@ -63,9 +63,7 @@ default_sim_settings = {
 def make_cfg(settings):
     sim_cfg = habitat_sim.SimulatorConfiguration()
     if "scene_dataset_config_file" in settings:
-        sim_cfg.scene_dataset_config_file = settings[
-            "scene_dataset_config_file"
-        ]
+        sim_cfg.scene_dataset_config_file = settings["scene_dataset_config_file"]
     sim_cfg.frustum_culling = settings.get("frustum_culling", False)
     if "enable_physics" in settings:
         sim_cfg.enable_physics = settings["enable_physics"]
@@ -179,9 +177,7 @@ def make_cfg(settings):
         return fisheye_sensor_spec
 
     if settings["fisheye_rgba_sensor"]:
-        fisheye_rgba_sensor_spec = create_fisheye_spec(
-            uuid="fisheye_rgba_sensor"
-        )
+        fisheye_rgba_sensor_spec = create_fisheye_spec(uuid="fisheye_rgba_sensor")
         sensor_specs.append(fisheye_rgba_sensor_spec)
     if settings["fisheye_depth_sensor"]:
         fisheye_depth_sensor_spec = create_fisheye_spec(
@@ -212,9 +208,7 @@ def make_cfg(settings):
         return equirect_sensor_spec
 
     if settings["equirect_rgba_sensor"]:
-        equirect_rgba_sensor_spec = create_equirect_spec(
-            uuid="equirect_rgba_sensor"
-        )
+        equirect_rgba_sensor_spec = create_equirect_spec(uuid="equirect_rgba_sensor")
         sensor_specs.append(equirect_rgba_sensor_spec)
 
     if settings["equirect_depth_sensor"]:
@@ -296,9 +290,7 @@ def test_fetch_robot_wrapper(fixed_base):
 
         # add a ground plane
         cube_handle = obj_template_mgr.get_template_handles("cubeSolid")[0]
-        cube_template_cpy = obj_template_mgr.get_template_by_handle(
-            cube_handle
-        )
+        cube_template_cpy = obj_template_mgr.get_template_by_handle(cube_handle)
         cube_template_cpy.scale = np.array([5.0, 0.2, 5.0])
         obj_template_mgr.register_template(cube_template_cpy)
         ground_plane = rigid_obj_mgr.add_object_by_template_handle(cube_handle)
@@ -315,9 +307,7 @@ def test_fetch_robot_wrapper(fixed_base):
         # add the robot to the world via the wrapper
         robot_path = "data/robots/hab_fetch/robots/hab_fetch.urdf"
         agent_config = DictConfig({"articulated_agent_urdf": robot_path})
-        fetch = fetch_robot.FetchRobot(
-            agent_config, sim, fixed_base=fixed_base
-        )
+        fetch = fetch_robot.FetchRobot(agent_config, sim, fixed_base=fixed_base)
         fetch.reconfigure()
         fetch.update()
         assert fetch.get_robot_sim_id() == ground_plane.object_id + 1
@@ -357,9 +347,7 @@ def test_fetch_robot_wrapper(fixed_base):
         # Note, don't test equivalency of pi, because that is the wrap point and is often negated.
         target_base_rots = [0.0, np.pi * 0.25, np.pi * 0.50, np.pi * 0.99]
         for target_base_rot in target_base_rots:
-            set_agent_base_via_obj_trans(
-                target_base_pos, target_base_rot, fetch
-            )
+            set_agent_base_via_obj_trans(target_base_pos, target_base_rot, fetch)
             assert fetch.base_pos == target_base_pos
             assert fetch.base_rot == pytest.approx(target_base_rot, 0.001)
 
@@ -465,9 +453,7 @@ def test_franka_robot_wrapper():
 
         # add a ground plane
         cube_handle = obj_template_mgr.get_template_handles("cubeSolid")[0]
-        cube_template_cpy = obj_template_mgr.get_template_by_handle(
-            cube_handle
-        )
+        cube_template_cpy = obj_template_mgr.get_template_by_handle(cube_handle)
         cube_template_cpy.scale = np.array([5.0, 0.2, 5.0])
         obj_template_mgr.register_template(cube_template_cpy)
         ground_plane = rigid_obj_mgr.add_object_by_template_handle(cube_handle)
@@ -526,9 +512,7 @@ def test_franka_robot_wrapper():
         print(f" Arm joint velocities = {franka.arm_velocity}")
         franka.arm_joint_pos = np.ones(len(franka.params.arm_joints))
         franka.arm_motor_pos = np.ones(len(franka.params.arm_joints))
-        print(
-            f" Arm joint positions (should be ones) = {franka.arm_joint_pos}"
-        )
+        print(f" Arm joint positions (should be ones) = {franka.arm_joint_pos}")
         print(f" Arm joint limits = {franka.arm_joint_limits}")
         franka.arm_motor_pos = franka.arm_motor_pos
         observations += simulate(sim, 1.0, produce_debug_video)
@@ -587,9 +571,7 @@ def test_spot_robot_wrapper(fixed_base):
 
         # add a ground plane
         cube_handle = obj_template_mgr.get_template_handles("cubeSolid")[0]
-        cube_template_cpy = obj_template_mgr.get_template_by_handle(
-            cube_handle
-        )
+        cube_template_cpy = obj_template_mgr.get_template_by_handle(cube_handle)
         cube_template_cpy.scale = np.array([5.0, 0.2, 5.0])
         obj_template_mgr.register_template(cube_template_cpy)
         ground_plane = rigid_obj_mgr.add_object_by_template_handle(cube_handle)
@@ -619,9 +601,7 @@ def test_spot_robot_wrapper(fixed_base):
         # Note, don't test equivalency of pi, because that is the wrap point and is often negated.
         target_base_rots = [0.0, np.pi * 0.25, np.pi * 0.50, np.pi * 0.99]
         for target_base_rot in target_base_rots:
-            set_agent_base_via_obj_trans(
-                target_base_pos, target_base_rot, spot
-            )
+            set_agent_base_via_obj_trans(target_base_pos, target_base_rot, spot)
             assert spot.base_pos == target_base_pos
             assert spot.base_rot == pytest.approx(target_base_rot, 0.001)
 
@@ -674,9 +654,7 @@ def test_spot_robot_wrapper(fixed_base):
 
         # kinematic open/close (checked before simulation)
         spot.gripper_joint_pos = spot.params.gripper_open_state
-        assert np.allclose(
-            spot.gripper_joint_pos, spot.params.gripper_open_state
-        )
+        assert np.allclose(spot.gripper_joint_pos, spot.params.gripper_open_state)
         assert spot.is_gripper_open
         observations += simulate(sim, 0.2, produce_debug_video)
         spot.gripper_joint_pos = spot.params.gripper_closed_state
@@ -760,9 +738,7 @@ def test_base_rot():
                 if np.allclose(rot_check, spot.base_rot + offset, atol=1e-5):
                     accurate_angle = True
                     break
-            assert (
-                accurate_angle
-            ), f"should be {rot_check}, but was {spot.base_rot}."
+            assert accurate_angle, f"should be {rot_check}, but was {spot.base_rot}."
             if produce_debug_video:
                 observations.append(sim.get_sensor_observations())
 
@@ -808,9 +784,7 @@ def test_stretch_robot_wrapper(fixed_base):
 
         # add a ground plane
         cube_handle = obj_template_mgr.get_template_handles("cubeSolid")[0]
-        cube_template_cpy = obj_template_mgr.get_template_by_handle(
-            cube_handle
-        )
+        cube_template_cpy = obj_template_mgr.get_template_by_handle(cube_handle)
         cube_template_cpy.scale = np.array([5.0, 0.2, 5.0])
         obj_template_mgr.register_template(cube_template_cpy)
         ground_plane = rigid_obj_mgr.add_object_by_template_handle(cube_handle)
@@ -826,30 +800,22 @@ def test_stretch_robot_wrapper(fixed_base):
         # add the robot to the world via the wrapper
         robot_path = "data/robots/hab_stretch/urdf/hab_stretch.urdf"
         agent_config = DictConfig({"articulated_agent_urdf": robot_path})
-        stretch = stretch_robot.StretchRobot(
-            agent_config, sim, fixed_base=fixed_base
-        )
+        stretch = stretch_robot.StretchRobot(agent_config, sim, fixed_base=fixed_base)
         stretch.reconfigure()
         stretch.update()
         assert stretch.get_robot_sim_id() == ground_plane.object_id + 1
 
         # set base ground position using object transformation approach
-        target_base_pos = sim.pathfinder.snap_point(
-            stretch.sim_obj.translation
-        )
+        target_base_pos = sim.pathfinder.snap_point(stretch.sim_obj.translation)
         # Note, don't test equivalency of pi, because that is the wrap point and is often negated.
         target_base_rots = [0.0, np.pi * 0.25, np.pi * 0.50, np.pi * 0.99]
         for target_base_rot in target_base_rots:
-            set_agent_base_via_obj_trans(
-                target_base_pos, target_base_rot, stretch
-            )
+            set_agent_base_via_obj_trans(target_base_pos, target_base_rot, stretch)
             assert stretch.base_pos == target_base_pos
             assert stretch.base_rot == pytest.approx(target_base_rot, 0.001)
 
         # set base ground position from navmesh
-        target_base_pos = sim.pathfinder.snap_point(
-            stretch.sim_obj.translation
-        )
+        target_base_pos = sim.pathfinder.snap_point(stretch.sim_obj.translation)
         stretch.base_pos = target_base_pos
         assert stretch.base_pos == target_base_pos
         observations += simulate(sim, 1.0, produce_debug_video)
@@ -905,9 +871,7 @@ def test_stretch_robot_wrapper(fixed_base):
 
         # kinematic open/close (checked before simulation)
         stretch.gripper_joint_pos = stretch.params.gripper_open_state
-        assert np.allclose(
-            stretch.gripper_joint_pos, stretch.params.gripper_open_state
-        )
+        assert np.allclose(stretch.gripper_joint_pos, stretch.params.gripper_open_state)
         assert stretch.is_gripper_open
         observations += simulate(sim, 0.2, produce_debug_video)
         stretch.gripper_joint_pos = stretch.params.gripper_closed_state

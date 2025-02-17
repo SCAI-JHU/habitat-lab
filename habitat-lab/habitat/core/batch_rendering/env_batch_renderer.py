@@ -46,6 +46,7 @@ class EnvBatchRenderer:
     When batch rendering, simulators produce keyframes and add them to observations as KEYFRAME_OBSERVATION_KEY.
     In "post_step", the renderer aggregates these observations, reconstitutes each state then renders them simultaneously.
     """
+
     _num_envs: int = 1
     _gpu_gpu: bool = False
 
@@ -87,21 +88,17 @@ class EnvBatchRenderer:
             raise NotImplementedError
 
         self._sensor_suite = EnvBatchRenderer._create_core_sensor_suite(config)
-        self._sensor_specifications = (
-            EnvBatchRenderer._create_sensor_specifications(
-                config, self._sensor_suite
-            )
+        self._sensor_specifications = EnvBatchRenderer._create_sensor_specifications(
+            config, self._sensor_suite
         )
         assert (
             len(self._sensor_specifications) == 1
         ), f"Batch renderer only supports one sensor but configuration specifies {len(self._sensor_specifications)} sensors. Either remove sensors or disable batch rendering."
 
-        self._replay_renderer_cfg = (
-            EnvBatchRenderer._create_replay_renderer_cfg(
-                config,
-                self._num_envs,
-                self._sensor_specifications,
-            )
+        self._replay_renderer_cfg = EnvBatchRenderer._create_replay_renderer_cfg(
+            config,
+            self._num_envs,
+            self._sensor_specifications,
         )
 
         replay_renderer_creation_fn: Callable[
@@ -112,9 +109,7 @@ class EnvBatchRenderer:
             else ReplayRenderer.create_classic_replay_renderer
         )
 
-        self._replay_renderer = replay_renderer_creation_fn(
-            self._replay_renderer_cfg
-        )
+        self._replay_renderer = replay_renderer_creation_fn(self._replay_renderer_cfg)
 
         # Pre-load graphics assets using composite GLTF files.
         EnvBatchRenderer._load_composite_files(config, self._replay_renderer)
@@ -151,9 +146,7 @@ class EnvBatchRenderer:
         # Render observations
         batch_observations: Dict[str, Union[np.ndarray, "Tensor"]] = {}
         for sensor_spec in self._sensor_specifications:
-            batch_observations[sensor_spec.uuid] = self._draw_observations(
-                sensor_spec
-            )
+            batch_observations[sensor_spec.uuid] = self._draw_observations(sensor_spec)
 
         # Process and format observations
         output: List[OrderedDict] = []
@@ -200,12 +193,8 @@ class EnvBatchRenderer:
         :return: ndarray containing renders.
         """
         # TODO: Currently one sensor is supported.
-        is_color_sensor = (
-            sensor_spec.sensor_type == habitat_sim.SensorType.COLOR
-        )
-        is_depth_sensor = (
-            sensor_spec.sensor_type == habitat_sim.SensorType.DEPTH
-        )
+        is_color_sensor = sensor_spec.sensor_type == habitat_sim.SensorType.COLOR
+        is_depth_sensor = sensor_spec.sensor_type == habitat_sim.SensorType.DEPTH
 
         if is_color_sensor or is_depth_sensor:
             if self._gpu_to_cpu_images is None:
@@ -271,9 +260,7 @@ class EnvBatchRenderer:
 
         return self._gpu_to_cpu_buffer
 
-    def _draw_observations_gpu_to_gpu(
-        self, sensor_spec: BackendSensorSpec
-    ) -> "Tensor":
+    def _draw_observations_gpu_to_gpu(self, sensor_spec: BackendSensorSpec) -> "Tensor":
         raise NotImplementedError
 
     def copy_output_to_image(self) -> List[np.ndarray]:
@@ -295,10 +282,8 @@ class EnvBatchRenderer:
                     output.append(self._gpu_to_cpu_buffer[env_idx][..., 0:3])
                 elif sensor_spec.sensor_type == habitat_sim.SensorType.DEPTH:
                     float_depth_image = self._gpu_to_cpu_buffer[env_idx]
-                    rgb_depth_image = (
-                        EnvBatchRenderer._float_image_to_rgb_image(
-                            float_depth_image
-                        )
+                    rgb_depth_image = EnvBatchRenderer._float_image_to_rgb_image(
+                        float_depth_image
                     )
                     output.append(rgb_depth_image)
         return output
@@ -351,15 +336,11 @@ class EnvBatchRenderer:
                     "sensor_model_type": lambda v: getattr(
                         habitat_sim.FisheyeSensorModelType, v
                     ),
-                    "sensor_subtype": lambda v: getattr(
-                        habitat_sim.SensorSubType, v
-                    ),
+                    "sensor_subtype": lambda v: getattr(habitat_sim.SensorSubType, v),
                 },
             )
             sim_sensor_cfg.uuid = sensor.uuid
-            sim_sensor_cfg.resolution = list(
-                sensor.observation_space.shape[:2]
-            )
+            sim_sensor_cfg.resolution = list(sensor.observation_space.shape[:2])
             sim_sensor_cfg.sensor_type = sensor.sim_sensor_type
             sim_sensor_cfg.gpu2gpu_transfer = (
                 config.habitat.simulator.habitat_sim_v0.gpu_gpu
@@ -387,9 +368,7 @@ class EnvBatchRenderer:
         :param sensor_specifications: Habitat-Sim visual sensor specifications. See _create_sensor_specifications().
         :return: Replay renderer configuration.
         """
-        replay_renderer_cfg: ReplayRendererConfiguration = (
-            ReplayRendererConfiguration()
-        )
+        replay_renderer_cfg: ReplayRendererConfiguration = ReplayRendererConfiguration()
         replay_renderer_cfg.num_environments = num_env
         replay_renderer_cfg.standalone = True
         replay_renderer_cfg.sensor_specifications = sensor_specifications
@@ -401,25 +380,17 @@ class EnvBatchRenderer:
         return replay_renderer_cfg
 
     @staticmethod
-    def _load_composite_files(
-        config: DictConfig, replay_renderer: ReplayRenderer
-    ):
+    def _load_composite_files(config: DictConfig, replay_renderer: ReplayRenderer):
         # Pre-load graphics assets using composite GLTF files.
         loaded_composite_file_count: int = 0
         if config.habitat.simulator.renderer.composite_files is not None:
-            for (
-                composite_file
-            ) in config.habitat.simulator.renderer.composite_files:
+            for composite_file in config.habitat.simulator.renderer.composite_files:
                 if os.path.isfile(composite_file):
-                    logger.info(
-                        "Pre-loading composite file: " + composite_file
-                    )
+                    logger.info("Pre-loading composite file: " + composite_file)
                     replay_renderer.preload_file(composite_file)
                     loaded_composite_file_count += 1
                 else:
-                    logger.error(
-                        "Failed to load composite file: " + composite_file
-                    )
+                    logger.error("Failed to load composite file: " + composite_file)
         if loaded_composite_file_count == 0:
             logger.warn(
                 "No composite file was pre-loaded. Expect lower batch rendering performance."
@@ -441,11 +412,7 @@ class EnvBatchRenderer:
         for y, x in np.ndindex(float_image.shape):
             distance_from_camera = float_image[y, x]
             normalized_color_value = np.uint8(
-                255.0
-                * (
-                    (distance_from_camera - float_min)
-                    / (float_max - float_min)
-                )
+                255.0 * ((distance_from_camera - float_min) / (float_max - float_min))
             )
             int_depth_image[y, x] = normalized_color_value
 

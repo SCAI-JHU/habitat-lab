@@ -54,7 +54,9 @@ from habitat_sim.utils.common import quat_from_magnum, quat_to_coeffs
 if TYPE_CHECKING:
     from habitat.tasks.rearrange.rearrange_sim import RearrangeSim
 
-PIP_VIEWPORT_ID = 0  # ID of the picture-in-picture viewport that shows other agent's perspective.
+PIP_VIEWPORT_ID = (
+    0  # ID of the picture-in-picture viewport that shows other agent's perspective.
+)
 
 
 class EpisodeCompletionStatus(Enum):
@@ -64,9 +66,7 @@ class EpisodeCompletionStatus(Enum):
 
 
 class FrameRecorder:
-    def __init__(
-        self, app_service: AppService, app_data: AppData, world: World
-    ):
+    def __init__(self, app_service: AppService, app_data: AppData, world: World):
         self._app_service = app_service
         self._app_data = app_data
         self._sim = app_service.sim
@@ -105,9 +105,7 @@ class FrameRecorder:
             rotation = quat_to_coeffs(quat_from_magnum(ro.rotation)).tolist()
 
             states: Dict[str, Any] = {}
-            state_infos = self._world.get_states_for_object_handle(
-                object_handle
-            )
+            state_infos = self._world.get_states_for_object_handle(object_handle)
             for state_info in state_infos:
                 spec = state_info.state_spec
                 state_name = spec.name
@@ -190,13 +188,9 @@ class AgentData:
         """
         if len(self.render_cameras) > 0:
             # NOTE: `camera_matrix` is a Magnum binding. Typing is not yet available.
-            self.cam_transform = self.render_cameras[
-                0
-            ].camera_matrix.inverted()
+            self.cam_transform = self.render_cameras[0].camera_matrix.inverted()
 
-    def update_camera_transform(
-        self, global_cam_transform: mn.Matrix4
-    ) -> None:
+    def update_camera_transform(self, global_cam_transform: mn.Matrix4) -> None:
         """
         Updates the camera transform of the agent.
         If the agent has 'head sensors', this will also update their transform.
@@ -219,9 +213,7 @@ class AgentData:
                 )
 
 
-def _get_rearrange_v2_agent_config(
-    root_config: Any, agent_key: str
-) -> Optional[Any]:
+def _get_rearrange_v2_agent_config(root_config: Any, agent_key: str) -> Optional[Any]:
     if not hasattr(root_config, "rearrange_v2"):
         return None
     agent_configs = vars(root_config.rearrange_v2.agents)
@@ -249,9 +241,7 @@ class UserData:
         self.world = world
         self.agent_data = agent_data
         self.server_sps_tracker = server_sps_tracker
-        self.client_helper = (
-            self.app_service.remote_client_state._client_helper
-        )
+        self.client_helper = self.app_service.remote_client_state._client_helper
         self.pip_initialized = False
 
         gui_agent_controller = agent_data.agent_controller
@@ -497,9 +487,7 @@ class UserData:
                 "type": "end_episode_form_cancelled",
             }
         )
-        self.agent_data.episode_completion_status = (
-            EpisodeCompletionStatus.PENDING
-        )
+        self.agent_data.episode_completion_status = EpisodeCompletionStatus.PENDING
 
     def _on_episode_finished(self, _e: Any = None):
         self.ui_events.append(
@@ -507,9 +495,7 @@ class UserData:
                 "type": "episode_finished",
             }
         )
-        self.agent_data.episode_completion_status = (
-            EpisodeCompletionStatus.SUCCESS
-        )
+        self.agent_data.episode_completion_status = EpisodeCompletionStatus.SUCCESS
         print(f"User {self.user_index} has signaled the episode as completed.")
 
     def _on_error_reported(self, error_report: ErrorReport):
@@ -519,9 +505,7 @@ class UserData:
                 "error_report": error_report.user_message,
             }
         )
-        self.agent_data.episode_completion_status = (
-            EpisodeCompletionStatus.FAILURE
-        )
+        self.agent_data.episode_completion_status = EpisodeCompletionStatus.FAILURE
         print(
             f"User {self.user_index} has signaled a problem with the episode: '{error_report.user_message}'."
         )
@@ -547,9 +531,7 @@ class RearrangeV2Config:
     highlight_default_receptacles: bool
 
     @staticmethod
-    def load(
-        raw_config: Dict[str, Any], sim: "RearrangeSim"
-    ) -> RearrangeV2Config:
+    def load(raw_config: Dict[str, Any], sim: "RearrangeSim") -> RearrangeV2Config:
         output = RearrangeV2Config(
             agents={},
             highlight_default_receptacles=raw_config.get(
@@ -575,9 +557,7 @@ class AppStateRearrangeV2(AppStateBase):
     Multiplayer rearrangement HITL application.
     """
 
-    def __init__(
-        self, app_service: AppService, app_data: AppData, session: Session
-    ):
+    def __init__(self, app_service: AppService, app_data: AppData, session: Session):
         super().__init__(app_service, app_data)
         sim = app_service.sim
         agent_mgr = sim.agents_mgr
@@ -589,9 +569,7 @@ class AppStateRearrangeV2(AppStateBase):
 
         self._users = app_service.users
         self._num_users = self._users.max_user_count
-        self._agents = Users(
-            len(agent_mgr._all_agent_data), activate_users=True
-        )
+        self._agents = Users(len(agent_mgr._all_agent_data), activate_users=True)
         self._num_agents = self._agents.max_user_count
 
         self._sps_tracker = AverageRateTracker(2.0)
@@ -654,9 +632,7 @@ class AppStateRearrangeV2(AppStateBase):
 
         self._user_data: List[UserData] = []
         for user_index in range(self._users.max_user_count):
-            agent_data = self._agent_data[
-                self._user_to_agent_index[user_index]
-            ]
+            agent_data = self._agent_data[self._user_to_agent_index[user_index]]
             self._user_data.append(
                 UserData(
                     app_service=app_service,
@@ -668,9 +644,7 @@ class AppStateRearrangeV2(AppStateBase):
                 )
             )
 
-        self._frame_recorder = FrameRecorder(
-            app_service, app_data, self._world
-        )
+        self._frame_recorder = FrameRecorder(app_service, app_data, self._world)
 
         # Reset the environment immediately.
         self.on_environment_reset(None)
@@ -734,9 +708,9 @@ class AppStateRearrangeV2(AppStateBase):
 
         self._session.session_recorder.end_episode(
             episode_finished=episode_finished,
-            task_percent_complete=task_percent_complete
-            if task_percent_complete is not None
-            else 1.0,
+            task_percent_complete=(
+                task_percent_complete if task_percent_complete is not None else 1.0
+            ),
             metrics=metrics,
         )
 
@@ -756,9 +730,7 @@ class AppStateRearrangeV2(AppStateBase):
             task_instruction = current_episode.instruction
             # TODO: Agents will have different instructions.
             for agent_index in self._agents.indices(Mask.ALL):
-                self._agent_data[
-                    agent_index
-                ].task_instruction = task_instruction
+                self._agent_data[agent_index].task_instruction = task_instruction
 
         # Insert a keyframe immediately.
         self._app_service.sim.gfx_replay_manager.save_keyframe()
@@ -774,9 +746,7 @@ class AppStateRearrangeV2(AppStateBase):
             distance_multiplier=1.0,
             grasp_obj_idx=None,
             do_drop=None,
-            cam_yaw=self._user_data[
-                user_index
-            ].camera_helper.lookat_offset_yaw,
+            cam_yaw=self._user_data[user_index].camera_helper.lookat_offset_yaw,
             throw_vel=None,
             reach_pos=None,
         )
@@ -785,16 +755,12 @@ class AppStateRearrangeV2(AppStateBase):
         """
         Update the UI overlay content for a specific user.
         """
-        task_instruction = self._user_data[
-            user_index
-        ].agent_data.task_instruction
+        task_instruction = self._user_data[user_index].agent_data.task_instruction
 
         status_str = ""
         if (
             self._users.max_user_count > 1
-            and self._user_data[
-                user_index
-            ].agent_data.episode_completion_status
+            and self._user_data[user_index].agent_data.episode_completion_status
             == EpisodeCompletionStatus.PENDING
         ):
             if self._has_any_agent_finished_success():
@@ -804,9 +770,7 @@ class AppStateRearrangeV2(AppStateBase):
 
         client_helper = self._app_service.remote_client_state._client_helper
         if client_helper.do_show_idle_kick_warning(user_index):
-            remaining_time = str(
-                client_helper.get_remaining_idle_time(user_index)
-            )
+            remaining_time = str(client_helper.get_remaining_idle_time(user_index))
             status_str += f"Are you still there?\nPress any key in the next {remaining_time}s to keep playing!\n"
 
         self._user_data[user_index].ui.update_overlay_instructions(
@@ -834,9 +798,7 @@ class AppStateRearrangeV2(AppStateBase):
                     server_user._on_episode_finished()
 
             # Switch the server-controlled user.
-            if self._num_users > 0 and self._server_gui_input.get_key_down(
-                KeyCode.TAB
-            ):
+            if self._num_users > 0 and self._server_gui_input.get_key_down(KeyCode.TAB):
                 self._server_user_index = (
                     self._server_user_index + 1
                 ) % self._num_users
@@ -846,9 +808,7 @@ class AppStateRearrangeV2(AppStateBase):
 
         # Copy server input to user input when server input is active.
         if self._app_service.hitl_config.networking.enable:
-            server_user_input = self._user_data[
-                self._server_user_index
-            ].gui_input
+            server_user_input = self._user_data[self._server_user_index].gui_input
             if server_user_input.get_any_input():
                 self._server_input_enabled = False
             elif self._server_gui_input.get_any_input():

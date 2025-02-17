@@ -51,9 +51,7 @@ class MagicGraspAction(GripSimulatorTaskAction):
                 np.linalg.norm(scene_obj_pos - ee_pos, ord=2, axis=-1)
             )
 
-            to_target = np.linalg.norm(
-                ee_pos - scene_obj_pos[closest_obj_idx], ord=2
-            )
+            to_target = np.linalg.norm(ee_pos - scene_obj_pos[closest_obj_idx], ord=2)
 
             keep_T = mn.Matrix4.translation(mn.Vector3(0.1, 0.0, 0.0))
 
@@ -72,9 +70,7 @@ class MagicGraspAction(GripSimulatorTaskAction):
             names = list(markers.keys())
             pos = np.array([markers[k].get_current_position() for k in names])
 
-            closest_idx = np.argmin(
-                np.linalg.norm(pos - ee_pos, ord=2, axis=-1)
-            )
+            closest_idx = np.argmin(np.linalg.norm(pos - ee_pos, ord=2, axis=-1))
 
             to_target = np.linalg.norm(ee_pos - pos[closest_idx], ord=2)
 
@@ -111,9 +107,7 @@ class SuctionGraspAction(MagicGraspAction):
         index_grasp_manager = 0
 
         robot_id = self._sim.articulated_agent.sim_obj.object_id
-        all_gripper_links = list(
-            self._sim.articulated_agent.params.gripper_joints
-        )
+        all_gripper_links = list(self._sim.articulated_agent.params.gripper_joints)
         robot_contacts = [
             c
             for c in contacts
@@ -182,9 +176,7 @@ class GazeGraspAction(MagicGraspAction):
         self.center_cone_angle_threshold = np.deg2rad(
             config.center_cone_angle_threshold
         )
-        self.center_cone_vector = mn.Vector3(
-            config.center_cone_vector
-        ).normalized()
+        self.center_cone_vector = mn.Vector3(config.center_cone_vector).normalized()
         self.auto_grasp = config.auto_grasp
 
     @property
@@ -201,9 +193,7 @@ class GazeGraspAction(MagicGraspAction):
 
         # Get angle between (normalized) location and the vector that the camera should
         # look at
-        obj_angle = get_camera_object_angle(
-            cam_T, obj_pos, self.center_cone_vector
-        )
+        obj_angle = get_camera_object_angle(cam_T, obj_pos, self.center_cone_vector)
 
         return obj_angle
 
@@ -217,16 +207,9 @@ class GazeGraspAction(MagicGraspAction):
                 .position
             )
         elif isinstance(self.cur_articulated_agent, StretchRobot):
-            cam_pos = (
-                self._sim.agents[0]
-                .get_state()
-                .sensor_states["head_rgb"]
-                .position
-            )
+            cam_pos = self._sim.agents[0].get_state().sensor_states["head_rgb"].position
         else:
-            raise NotImplementedError(
-                "This robot does not have GazeGraspAction."
-            )
+            raise NotImplementedError("This robot does not have GazeGraspAction.")
 
         if isinstance(self.cur_articulated_agent, SpotRobot):
             panoptic_img = self._sim._sensor_suite.get_observations(
@@ -237,9 +220,7 @@ class GazeGraspAction(MagicGraspAction):
                 self._sim.get_sensor_observations()
             )["head_panoptic"]
         else:
-            raise NotImplementedError(
-                "This robot does not have GazeGraspAction."
-            )
+            raise NotImplementedError("This robot does not have GazeGraspAction.")
 
         height, width = panoptic_img.shape[:2]
         # Note that panoptic_img is a 3D array

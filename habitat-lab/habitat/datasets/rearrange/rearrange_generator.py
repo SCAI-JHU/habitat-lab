@@ -44,9 +44,7 @@ from habitat_sim.nav import NavMeshSettings
 
 def get_sample_region_ratios(load_dict) -> Dict[str, float]:
     sample_region_ratios: Dict[str, float] = defaultdict(lambda: 1.0)
-    sample_region_ratios.update(
-        load_dict["params"].get("sample_region_ratio", {})
-    )
+    sample_region_ratios.update(load_dict["params"].get("sample_region_ratio", {}))
     return sample_region_ratios
 
 
@@ -91,9 +89,7 @@ class RearrangeEpisodeGenerator:
 
         # debug visualization settings
         self._render_debug_obs = self._make_debug_video = debug_visualization
-        self.dbv: DebugVisualizer = (
-            None  # visual debugger initialized with sim
-        )
+        self.dbv: DebugVisualizer = None  # visual debugger initialized with sim
 
         # hold a habitat Simulator object for efficient re-use
         self.sim: habitat_sim.Simulator = None
@@ -107,9 +103,7 @@ class RearrangeEpisodeGenerator:
         self._get_ao_state_samplers()
 
         # cache objects sampled by this generator for the most recent episode
-        self.ep_sampled_objects: List[
-            habitat_sim.physics.ManagedRigidObject
-        ] = []
+        self.ep_sampled_objects: List[habitat_sim.physics.ManagedRigidObject] = []
         self.num_ep_generated = 0
 
     def _get_resource_sets(self) -> None:
@@ -134,15 +128,11 @@ class RearrangeEpisodeGenerator:
                 scene_set["name"] not in self._scene_sets
             ), f"cfg.scene_sets - Duplicate name ('{scene_set['name']}') detected."
             for list_key in expected_list_keys:
-                assert (
-                    list_key in scene_set
-                ), f"Expected list key '{list_key}'."
+                assert list_key in scene_set, f"Expected list key '{list_key}'."
                 assert isinstance(
                     scene_set[list_key], Sequence
                 ), f"cfg.scene_sets - '{scene_set['name']}' '{list_key}' must be a list of strings."
-            self._scene_sets[
-                scene_set["name"]
-            ] = cull_string_list_by_substrings(
+            self._scene_sets[scene_set["name"]] = cull_string_list_by_substrings(
                 self.sim.metadata_mediator.get_scene_handles(),
                 scene_set["included_substrings"],
                 scene_set["excluded_substrings"],
@@ -155,15 +145,11 @@ class RearrangeEpisodeGenerator:
                 object_set["name"] not in self._obj_sets
             ), f"cfg.object_sets - Duplicate name ('{object_set['name']}') detected."
             for list_key in expected_list_keys:
-                assert (
-                    list_key in object_set
-                ), f"Expected list key '{list_key}'."
+                assert list_key in object_set, f"Expected list key '{list_key}'."
                 assert isinstance(
                     object_set[list_key], Sequence
                 ), f"cfg.object_sets - '{object_set['name']}' '{list_key}' must be a list of strings."
-            self._obj_sets[
-                object_set["name"]
-            ] = cull_string_list_by_substrings(
+            self._obj_sets[object_set["name"]] = cull_string_list_by_substrings(
                 self.sim.get_object_template_manager().get_template_handles(),
                 object_set["included_substrings"],
                 object_set["excluded_substrings"],
@@ -182,9 +168,7 @@ class RearrangeEpisodeGenerator:
                 receptacle_set["name"] not in self._receptacle_sets
             ), f"cfg.receptacle_sets - Duplicate name ('{receptacle_set['name']}') detected."
             for list_key in expected_list_keys:
-                assert (
-                    list_key in receptacle_set
-                ), f"Expected list key '{list_key}'."
+                assert list_key in receptacle_set, f"Expected list key '{list_key}'."
                 assert isinstance(
                     receptacle_set[list_key], Sequence
                 ), f"cfg.receptacle_sets - '{receptacle_set['name']}' '{list_key}' must be a list of strings."
@@ -219,12 +203,8 @@ class RearrangeEpisodeGenerator:
                 ]
                 object_handles = sorted(set(object_handles))
                 if len(object_handles) == 0:
-                    raise ValueError(
-                        f"Found no object handles for {obj_sampler_info}"
-                    )
-                self._obj_samplers[
-                    obj_sampler_info["name"]
-                ] = samplers.ObjectSampler(
+                    raise ValueError(f"Found no object handles for {obj_sampler_info}")
+                self._obj_samplers[obj_sampler_info["name"]] = samplers.ObjectSampler(
                     object_set=object_handles,
                     allowed_recep_set_names=obj_sampler_info["params"][
                         "receptacle_sets"
@@ -236,18 +216,16 @@ class RearrangeEpisodeGenerator:
                     orientation_sample=obj_sampler_info["params"][
                         "orientation_sampling"
                     ],
-                    sample_region_ratio=get_sample_region_ratios(
-                        obj_sampler_info
-                    ),
+                    sample_region_ratio=get_sample_region_ratios(obj_sampler_info),
                     nav_to_min_distance=obj_sampler_info["params"].get(
                         "nav_to_min_distance", -1.0
                     ),
                     recep_set_sample_probs=obj_sampler_info["params"].get(
                         "sample_probs", None
                     ),
-                    constrain_to_largest_nav_island=obj_sampler_info[
-                        "params"
-                    ].get("constrain_to_largest_nav_island", False),
+                    constrain_to_largest_nav_island=obj_sampler_info["params"].get(
+                        "constrain_to_largest_nav_island", False
+                    ),
                 )
             else:
                 logger.info(
@@ -271,33 +249,33 @@ class RearrangeEpisodeGenerator:
             if target_sampler_info["type"] == "uniform":
                 # merge and flatten receptacle sets
 
-                self._target_samplers[
-                    target_sampler_info["name"]
-                ] = samplers.ObjectTargetSampler(
-                    # Add object set later
-                    object_instance_set=[],
-                    allowed_recep_set_names=target_sampler_info["params"][
-                        "receptacle_sets"
-                    ],
-                    num_objects=(
-                        target_sampler_info["params"]["num_samples"][0],
-                        target_sampler_info["params"]["num_samples"][1],
-                    ),
-                    orientation_sample=target_sampler_info["params"][
-                        "orientation_sampling"
-                    ],
-                    sample_region_ratio=get_sample_region_ratios(
-                        target_sampler_info
-                    ),
-                    nav_to_min_distance=target_sampler_info["params"].get(
-                        "nav_to_min_distance", -1.0
-                    ),
-                    recep_set_sample_probs=target_sampler_info["params"].get(
-                        "sample_probs", None
-                    ),
-                    constrain_to_largest_nav_island=target_sampler_info[
-                        "params"
-                    ].get("constrain_to_largest_nav_island", False),
+                self._target_samplers[target_sampler_info["name"]] = (
+                    samplers.ObjectTargetSampler(
+                        # Add object set later
+                        object_instance_set=[],
+                        allowed_recep_set_names=target_sampler_info["params"][
+                            "receptacle_sets"
+                        ],
+                        num_objects=(
+                            target_sampler_info["params"]["num_samples"][0],
+                            target_sampler_info["params"]["num_samples"][1],
+                        ),
+                        orientation_sample=target_sampler_info["params"][
+                            "orientation_sampling"
+                        ],
+                        sample_region_ratio=get_sample_region_ratios(
+                            target_sampler_info
+                        ),
+                        nav_to_min_distance=target_sampler_info["params"].get(
+                            "nav_to_min_distance", -1.0
+                        ),
+                        recep_set_sample_probs=target_sampler_info["params"].get(
+                            "sample_probs", None
+                        ),
+                        constrain_to_largest_nav_island=target_sampler_info[
+                            "params"
+                        ].get("constrain_to_largest_nav_island", False),
+                    )
                 )
             else:
                 logger.info(
@@ -333,9 +311,7 @@ class RearrangeEpisodeGenerator:
             # cull duplicates
             unified_scene_set = sorted(set(unified_scene_set))
             if self.cfg.scene_sampler.type == "subset":
-                self._scene_sampler = samplers.MultiSceneSampler(
-                    unified_scene_set
-                )
+                self._scene_sampler = samplers.MultiSceneSampler(unified_scene_set)
             elif self.cfg.scene_sampler.type == "scene_balanced":
                 self._scene_sampler = samplers.BalancedSceneSampler(
                     unified_scene_set, num_episodes
@@ -350,9 +326,7 @@ class RearrangeEpisodeGenerator:
         """
         Initialize and cache all ArticulatedObject state samplers from configuration.
         """
-        self._ao_state_samplers: Dict[
-            str, samplers.ArticulatedObjectStateSampler
-        ] = {}
+        self._ao_state_samplers: Dict[str, samplers.ArticulatedObjectStateSampler] = {}
         for ao_info in self.cfg.ao_state_samplers:
             assert "name" in ao_info
             assert "type" in ao_info
@@ -362,20 +336,20 @@ class RearrangeEpisodeGenerator:
             ), f"Duplicate AO state sampler name {ao_info['name']} in config."
 
             if ao_info["type"] == "uniform":
-                self._ao_state_samplers[
-                    ao_info["name"]
-                ] = samplers.ArticulatedObjectStateSampler(
-                    ao_info["params"][0],
-                    ao_info["params"][1],
-                    (ao_info["params"][2], ao_info["params"][3]),
+                self._ao_state_samplers[ao_info["name"]] = (
+                    samplers.ArticulatedObjectStateSampler(
+                        ao_info["params"][0],
+                        ao_info["params"][1],
+                        (ao_info["params"][2], ao_info["params"][3]),
+                    )
                 )
             elif ao_info["type"] == "categorical":
-                self._ao_state_samplers[
-                    ao_info["name"]
-                ] = samplers.ArtObjCatStateSampler(
-                    ao_info["params"][0],
-                    ao_info["params"][1],
-                    (ao_info["params"][2], ao_info["params"][3]),
+                self._ao_state_samplers[ao_info["name"]] = (
+                    samplers.ArtObjCatStateSampler(
+                        ao_info["params"][0],
+                        ao_info["params"][1],
+                        (ao_info["params"][2], ao_info["params"][3]),
+                    )
                 )
             elif ao_info["type"] == "composite":
                 composite_ao_sampler_params: Dict[
@@ -394,19 +368,18 @@ class RearrangeEpisodeGenerator:
                     for link_params in link_sample_params:
                         link_name = link_params[0]
                         assert (
-                            link_name
-                            not in composite_ao_sampler_params[ao_handle]
+                            link_name not in composite_ao_sampler_params[ao_handle]
                         ), f"Duplicate link name '{link_name}' for handle '{ao_handle} in composite AO sampler config."
                         composite_ao_sampler_params[ao_handle][link_name] = (
                             link_params[1],
                             link_params[2],
                             should_sample_all_joints,
                         )
-                self._ao_state_samplers[
-                    ao_info["name"]
-                ] = samplers.CompositeArticulatedObjectStateSampler(
-                    composite_ao_sampler_params,
-                    ao_info.get("apply_prob", None),
+                self._ao_state_samplers[ao_info["name"]] = (
+                    samplers.CompositeArticulatedObjectStateSampler(
+                        composite_ao_sampler_params,
+                        ao_info.get("apply_prob", None),
+                    )
                 )
             else:
                 logger.error(
@@ -443,9 +416,7 @@ class RearrangeEpisodeGenerator:
             logger.info("receptacle processing")
             receptacle.debug_draw(self.sim)
             # Receptacle does not have a position cached relative to the object it is attached to, so sample a position from it instead
-            sampled_look_target = receptacle.sample_uniform_global(
-                self.sim, 1.0
-            )
+            sampled_look_target = receptacle.sample_uniform_global(self.sim, 1.0)
             self.dbv.look_at(sampled_look_target)
             self.dbv.debug_obs.append(self.dbv.get_observation())
 
@@ -506,9 +477,7 @@ class RearrangeEpisodeGenerator:
         )
 
         scene_name = ep_scene_handle.split(".")[0]
-        navmesh_path = osp.join(
-            scene_base_dir, "navmeshes", scene_name + ".navmesh"
-        )
+        navmesh_path = osp.join(scene_base_dir, "navmeshes", scene_name + ".navmesh")
 
         # Load navmesh
         regenerate_navmesh = self.cfg.regenerate_new_mesh
@@ -543,9 +512,9 @@ class RearrangeEpisodeGenerator:
         targ_sampler_name_to_obj_sampler_names: Dict[str, List[str]] = {}
         for targ_sampler_cfg in self.cfg.object_target_samplers:
             sampler_name = targ_sampler_cfg["name"]
-            targ_sampler_name_to_obj_sampler_names[
-                sampler_name
-            ] = targ_sampler_cfg["params"]["object_samplers"]
+            targ_sampler_name_to_obj_sampler_names[sampler_name] = targ_sampler_cfg[
+                "params"
+            ]["object_samplers"]
 
         # get the largest indoor island to constrain target navigability check
         largest_indoor_island_id = get_largest_island_index(
@@ -569,9 +538,7 @@ class RearrangeEpisodeGenerator:
                 sampler = self._obj_samplers[obj_sampler_name]
                 new_receptacle = None
                 try:
-                    new_receptacle = sampler.sample_receptacle(
-                        self.sim, recep_tracker
-                    )
+                    new_receptacle = sampler.sample_receptacle(self.sim, recep_tracker)
                 except AssertionError:
                     # No receptacle instances found matching this sampler's requirements, likely ran out of allocations and a different sampler should be tried
                     failed_samplers[obj_sampler_name]
@@ -675,22 +642,16 @@ class RearrangeEpisodeGenerator:
             target_object_names.extend(
                 [
                     obj.handle
-                    for obj in new_objects[
-                        : len(target_receptacles[sampler_name])
-                    ]
+                    for obj in new_objects[: len(target_receptacles[sampler_name])]
                 ]
             )
             for obj, rec in zip(new_objects, receptacles):
                 self.object_to_containing_receptacle[obj.handle] = rec
             if sampler_name not in self.episode_data["sampled_objects"]:
-                self.episode_data["sampled_objects"][
-                    sampler_name
-                ] = new_objects
+                self.episode_data["sampled_objects"][sampler_name] = new_objects
             else:
                 # handle duplicate sampler names
-                self.episode_data["sampled_objects"][
-                    sampler_name
-                ] += new_objects
+                self.episode_data["sampled_objects"][sampler_name] += new_objects
             self.ep_sampled_objects += new_objects
             logger.info(
                 f"Sampler {sampler_name} generated {len(new_objects)} new object placements."
@@ -711,9 +672,7 @@ class RearrangeEpisodeGenerator:
         if self.cfg.enable_check_obj_stability and not self.settle_sim(
             target_object_names
         ):
-            logger.warning(
-                "Aborting episode generation due to unstable state."
-            )
+            logger.warning("Aborting episode generation due to unstable state.")
             return None
 
         for sampler, target_sampler_info in zip(
@@ -725,8 +684,7 @@ class RearrangeEpisodeGenerator:
                 for x in self.episode_data["sampled_objects"][y]
             ]
             sampler.object_set = [
-                x.creation_attributes.handle
-                for x in sampler.object_instance_set
+                x.creation_attributes.handle for x in sampler.object_instance_set
             ]
 
         target_refs: Dict[str, str] = {}
@@ -734,9 +692,7 @@ class RearrangeEpisodeGenerator:
         # sample goal positions for target objects after all other clutter is placed and validated
         handle_to_obj = {obj.handle: obj for obj in self.ep_sampled_objects}
         for sampler_name, target_sampler in self._target_samplers.items():
-            obj_sampler_name = targ_sampler_name_to_obj_sampler_names[
-                sampler_name
-            ][0]
+            obj_sampler_name = targ_sampler_name_to_obj_sampler_names[sampler_name][0]
             new_target_objects = target_sampler.sample(
                 self.sim,
                 recep_tracker,
@@ -784,9 +740,7 @@ class RearrangeEpisodeGenerator:
                         return None
 
             # cache transforms and add visualizations
-            for i, (instance_handle, value) in enumerate(
-                new_target_objects.items()
-            ):
+            for i, (instance_handle, value) in enumerate(new_target_objects.items()):
                 target_object, target_receptacle = value
                 target_receptacles[obj_sampler_name][i] = target_receptacle
                 assert (
@@ -794,12 +748,10 @@ class RearrangeEpisodeGenerator:
                 ), f"Duplicate target for instance '{instance_handle}'."
                 rom = self.sim.get_rigid_object_manager()
                 target_transform = target_object.transformation
-                self.episode_data["sampled_targets"][
-                    instance_handle
-                ] = np.array(target_transform)
-                target_refs[
-                    instance_handle
-                ] = f"{sampler_name}|{len(target_refs)}"
+                self.episode_data["sampled_targets"][instance_handle] = np.array(
+                    target_transform
+                )
+                target_refs[instance_handle] = f"{sampler_name}|{len(target_refs)}"
                 rom.remove_object_by_handle(target_object.handle)
 
         # collect final object states and serialize the episode
@@ -807,9 +759,9 @@ class RearrangeEpisodeGenerator:
         sampled_rigid_object_states = []
         for sampled_obj in self.ep_sampled_objects:
             creation_attrib = sampled_obj.creation_attributes
-            file_handle = creation_attrib.handle.split(
-                creation_attrib.file_directory
-            )[-1].split("/")[-1]
+            file_handle = creation_attrib.handle.split(creation_attrib.file_directory)[
+                -1
+            ].split("/")[-1]
             sampled_rigid_object_states.append(
                 (
                     file_handle,
@@ -822,16 +774,11 @@ class RearrangeEpisodeGenerator:
         def extract_recep_info(recep):
             return (recep.parent_object_handle, recep.parent_link)
 
-        save_target_receps = [
-            extract_recep_info(x) for x in all_target_receptacles
-        ]
-        save_goal_receps = [
-            extract_recep_info(x) for x in all_goal_receptacles
-        ]
+        save_target_receps = [extract_recep_info(x) for x in all_target_receptacles]
+        save_goal_receps = [extract_recep_info(x) for x in all_goal_receptacles]
 
         name_to_receptacle = {
-            k: v.unique_name
-            for k, v in self.object_to_containing_receptacle.items()
+            k: v.unique_name for k, v in self.object_to_containing_receptacle.items()
         }
 
         return RearrangeEpisode(
@@ -890,9 +837,7 @@ class RearrangeEpisodeGenerator:
             sensor_spec.resolution = sensor_params["resolution"]
             sensor_spec.position = sensor_params["position"]
             sensor_spec.orientation = sensor_params["orientation"]
-            sensor_spec.sensor_subtype = (
-                habitat_sim.SensorSubType.EQUIRECTANGULAR
-            )
+            sensor_spec.sensor_subtype = habitat_sim.SensorSubType.EQUIRECTANGULAR
             sensor_spec.sensor_subtype = habitat_sim.SensorSubType.PINHOLE
             sensor_specs.append(sensor_spec)
 
@@ -922,16 +867,12 @@ class RearrangeEpisodeGenerator:
             self.sim.reconfigure(hab_cfg)
 
         # setup the debug camera state to the center of the scene bounding box
-        scene_bb = (
-            self.sim.get_active_scene_graph().get_root_node().cumulative_bb
-        )
+        scene_bb = self.sim.get_active_scene_graph().get_root_node().cumulative_bb
         self.sim.agents[0].scene_node.translation = scene_bb.center()
 
         # initialize the debug visualizer
         output_path = (
-            "rearrange_ep_gen_output/"
-            if self.dbv is None
-            else self.dbv.output_path
+            "rearrange_ep_gen_output/" if self.dbv is None else self.dbv.output_path
         )
         self.dbv = DebugVisualizer(self.sim, output_path=output_path)
 
@@ -951,9 +892,7 @@ class RearrangeEpisodeGenerator:
         settle_start_time = time.time()
         logger.info("Running placement stability analysis...")
 
-        scene_bb = (
-            self.sim.get_active_scene_graph().get_root_node().cumulative_bb
-        )
+        scene_bb = self.sim.get_active_scene_graph().get_root_node().cumulative_bb
         new_obj_centroid = mn.Vector3()
         spawn_positions = {}
         for new_object in self.ep_sampled_objects:
@@ -1017,9 +956,7 @@ class RearrangeEpisodeGenerator:
         # TODO: maybe draw/display trajectory tubes for the displacements?
 
         if self._render_debug_obs and make_video:
-            self.dbv.make_debug_video(
-                prefix="settle_", fps=30, obs_cache=settle_db_obs
-            )
+            self.dbv.make_debug_video(prefix="settle_", fps=30, obs_cache=settle_db_obs)
 
         # collect detailed receptacle stability report log
         detailed_receptacle_stability_report = (
@@ -1049,9 +986,7 @@ class RearrangeEpisodeGenerator:
             for obj_name in unstable_placements
             if obj_name in target_object_names
         ]
-        logger.info(
-            f"{len(unstable_target_objects)} target objects are unstable."
-        )
+        logger.info(f"{len(unstable_target_objects)} target objects are unstable.")
 
         # optionally salvage the episode by removing unstable objects
         if (
@@ -1062,9 +997,7 @@ class RearrangeEpisodeGenerator:
             detailed_receptacle_stability_report += (
                 "\n  attempting to correct unstable placements..."
             )
-            for sampler_name, objects in self.episode_data[
-                "sampled_objects"
-            ].items():
+            for sampler_name, objects in self.episode_data["sampled_objects"].items():
                 obj_names = [obj.handle for obj in objects]
                 sampler = self._obj_samplers[sampler_name]
                 unstable_subset = [
@@ -1080,9 +1013,7 @@ class RearrangeEpisodeGenerator:
                     # remove the unstable objects from datastructures
                     self.episode_data["sampled_objects"][sampler_name] = [
                         obj
-                        for obj in self.episode_data["sampled_objects"][
-                            sampler_name
-                        ]
+                        for obj in self.episode_data["sampled_objects"][sampler_name]
                         if obj.handle not in unstable_subset
                     ]
                     self.ep_sampled_objects = [
@@ -1109,9 +1040,7 @@ class RearrangeEpisodeGenerator:
         # generate debug images of all final object placements
         if self._render_debug_obs and success:
             for obj in self.ep_sampled_objects:
-                self.dbv.peek(obj, peek_all_axis=True).save(
-                    self.dbv.output_path
-                )
+                self.dbv.peek(obj, peek_all_axis=True).save(self.dbv.output_path)
 
         # return success or failure
         return success

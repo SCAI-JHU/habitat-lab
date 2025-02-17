@@ -30,9 +30,7 @@ def masked_mean(t, valids):
     return t.mean() * (valids.float().sum() / valids.numel())
 
 
-def masked_index_select(
-    t, indexer, valids, dim: int = 0, fill_value: float = 0.0
-):
+def masked_index_select(t, indexer, valids, dim: int = 0, fill_value: float = 0.0):
     r"""Selects the indices of t specified by indexer. Masks
     out invalid values and replaces them with fill_value.
 
@@ -89,9 +87,7 @@ class ActionConditionedForwardModelingLoss(nn.Module):
 
         self._action_embed = ActionEmbedding(action_space)
 
-        self._future_predictor = nn.LSTM(
-            self._action_embed.output_size, hidden_size
-        )
+        self._future_predictor = nn.LSTM(self._action_embed.output_size, hidden_size)
 
         self.k = k
         self.time_subsample = time_subsample
@@ -115,9 +111,7 @@ class ActionConditionedForwardModelingLoss(nn.Module):
         shortest_seq = sequence_lengths.min()
         longest_seq = sequence_lengths.max()
         n_seqs = sequence_lengths.size(0)
-        shortest_seq, longest_seq = map(
-            lambda t: t.item(), (shortest_seq, longest_seq)
-        )
+        shortest_seq, longest_seq = map(lambda t: t.item(), (shortest_seq, longest_seq))
 
         start_times = []
         seq_offsets = []
@@ -140,17 +134,15 @@ class ActionConditionedForwardModelingLoss(nn.Module):
                 )
 
             seq_offsets.append(torch.full_like(start_times[-1], i))
-            max_valid.append(
-                torch.full_like(start_times[-1], sequence_lengths[i] - 1)
-            )
+            max_valid.append(torch.full_like(start_times[-1], sequence_lengths[i] - 1))
 
         start_times = torch.cat(start_times, dim=0)
         seq_offsets = torch.cat(seq_offsets, dim=0)
         max_valid = torch.cat(max_valid, dim=0)
 
-        all_times = torch.arange(
-            self.k, dtype=torch.int64, device=device
-        ).view(-1, 1) + start_times.view(1, -1)
+        all_times = torch.arange(self.k, dtype=torch.int64, device=device).view(
+            -1, 1
+        ) + start_times.view(1, -1)
 
         action_valids = all_times < max_valid.view(1, -1)
         target_valids = (all_times + 1) < max_valid.view(1, -1)
@@ -184,9 +176,7 @@ class ActionConditionedForwardModelingLoss(nn.Module):
         ).unsqueeze(0)
         action = masked_index_select(action, action_inds, action_valids)
 
-        future_preds, _ = self._future_predictor(
-            action, (hidden_states, hidden_states)
-        )
+        future_preds, _ = self._future_predictor(action, (hidden_states, hidden_states))
 
         k = action.size(0)
         num_samples = self.future_subsample
@@ -248,15 +238,11 @@ class CPCA(ActionConditionedForwardModelingLoss):
         num_negatives: int = 20,
         loss_scale: float = 0.1,
     ):
-        assert (
-            not net.is_blind
-        ), "CPCA only works for networks with a visual encoder"
+        assert not net.is_blind, "CPCA only works for networks with a visual encoder"
         hidden_size = net.output_size
         input_size = net.perception_embedding_size
 
-        super().__init__(
-            action_space, hidden_size, k, time_subsample, future_subsample
-        )
+        super().__init__(action_space, hidden_size, k, time_subsample, future_subsample)
 
         self._predictor_first_layers = nn.ModuleList(
             [
@@ -296,9 +282,7 @@ class CPCA(ActionConditionedForwardModelingLoss):
         action_valids = action_valids.flatten()[future_inds]
         target_valids = target_valids.flatten()[future_inds]
 
-        positive_targets = masked_index_select(
-            targets, positive_inds, target_valids
-        )
+        positive_targets = masked_index_select(targets, positive_inds, target_valids)
         positive_logits = self._predictor(
             future_preds + self._predictor_first_layers[1](positive_targets)
         )
@@ -316,9 +300,7 @@ class CPCA(ActionConditionedForwardModelingLoss):
             (positive_inds.size(0), targets.size(0)), 1.0
         )
         negative_inds_probs[
-            torch.arange(
-                positive_inds.size(0), device=device, dtype=torch.int64
-            ),
+            torch.arange(positive_inds.size(0), device=device, dtype=torch.int64),
             positive_inds,
         ] = 0.0
         negative_inds_probs = negative_inds_probs / negative_inds_probs.sum(
@@ -346,9 +328,7 @@ class CPCA(ActionConditionedForwardModelingLoss):
             negative_logits.new_zeros(()).expand_as(negative_logits),
             reduction="none",
         )
-        negative_loss = masked_mean(
-            negative_loss, target_valids.view(-1, 1, 1)
-        )
+        negative_loss = masked_mean(negative_loss, target_valids.view(-1, 1, 1))
 
         loss = self.loss_scale * (positive_loss + negative_loss)
 

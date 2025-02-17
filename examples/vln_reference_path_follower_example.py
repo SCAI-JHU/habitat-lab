@@ -73,9 +73,7 @@ def reference_path_example(mode):
         for episode in range(3):
             env.reset()
             episode_id = env.habitat_env.current_episode.episode_id
-            print(
-                f"Agent stepping around inside environment. Episode id: {episode_id}"
-            )
+            print(f"Agent stepping around inside environment. Episode id: {episode_id}")
 
             dirname = os.path.join(
                 IMAGE_DIR, "vln_reference_path_example", mode, "%02d" % episode
@@ -93,10 +91,7 @@ def reference_path_example(mode):
                 done = False
                 while not done:
                     best_action = follower.get_next_action(point)
-                    if (
-                        best_action is None
-                        or best_action == HabitatSimActions.stop
-                    ):
+                    if best_action is None or best_action == HabitatSimActions.stop:
                         done = True
                         continue
                     observations, reward, done, info = env.step(best_action)

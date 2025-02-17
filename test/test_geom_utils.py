@@ -47,9 +47,7 @@ def test_point_in_triangle_test():
     ]
     for test_pair in test_pairs:
         assert (
-            is_point_in_triangle(
-                test_pair[0], test_tri[0], test_tri[1], test_tri[2]
-            )
+            is_point_in_triangle(test_pair[0], test_tri[0], test_tri[1], test_tri[2])
             == test_pair[1]
         )
 

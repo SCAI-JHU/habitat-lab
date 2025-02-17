@@ -38,9 +38,7 @@ def safe_mkdir(path):
 
 
 def _generate_fn(scene):
-    cfg = habitat.get_config(
-        "benchmark/nav/pointnav/pointnav_habitat_test.yaml"
-    )
+    cfg = habitat.get_config("benchmark/nav/pointnav/pointnav_habitat_test.yaml")
     with habitat.config.read_write(cfg):
         cfg.habitat.simulator.scene = scene
         agent_config = get_agent_config(cfg.habitat.simulator)
@@ -69,19 +67,13 @@ def _generate_fn(scene):
 
 def generate_gibson_large_dataset():
     # Load train / val statistics
-    with open(
-        osp.join(osp.dirname(__file__), "gibson_dset_with_qual.json"), "r"
-    ) as f:
+    with open(osp.join(osp.dirname(__file__), "gibson_dset_with_qual.json"), "r") as f:
         dataset_statistics = json.load(f)
 
     gibson_large_scene_keys = []
     for k, v in dataset_statistics.items():
         qual = v["qual"]
-        if (
-            v["split_full+"] == "train"
-            and qual is not None
-            and qual >= QUAL_THRESH
-        ):
+        if v["split_full+"] == "train" and qual is not None and qual >= QUAL_THRESH:
             gibson_large_scene_keys.append(k)
 
     scenes = glob.glob("./data/scene_datasets/gibson/*.glb")

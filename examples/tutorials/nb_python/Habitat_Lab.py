@@ -85,9 +85,7 @@ def display_sample(
     arr = [rgb_img]
     titles = ["rgb"]
     if semantic_obs.size != 0:
-        semantic_img = Image.new(
-            "P", (semantic_obs.shape[1], semantic_obs.shape[0])
-        )
+        semantic_img = Image.new("P", (semantic_obs.shape[1], semantic_obs.shape[0]))
         semantic_img.putpalette(d3_40_colors_rgb.flatten())
         semantic_img.putdata((semantic_obs.flatten() % 40).astype(np.uint8))
         semantic_img = semantic_img.convert("RGBA")
@@ -95,9 +93,7 @@ def display_sample(
         titles.append("semantic")
 
     if depth_obs.size != 0:
-        depth_img = Image.fromarray(
-            (depth_obs / 10 * 255).astype(np.uint8), mode="L"
-        )
+        depth_img = Image.fromarray((depth_obs / 10 * 255).astype(np.uint8), mode="L")
         arr.append(depth_img)
         titles.append("depth")
 
@@ -139,20 +135,14 @@ if __name__ == "__main__":
     interactive_control = False  # @param {type:"boolean"}
     while action != "stop":
         display_sample(obs["rgb"])
-        print(
-            "distance to goal: {:.2f}".format(
-                obs["pointgoal_with_gps_compass"][0]
-            )
-        )
+        print("distance to goal: {:.2f}".format(obs["pointgoal_with_gps_compass"][0]))
         print(
             "angle to goal (radians): {:.2f}".format(
                 obs["pointgoal_with_gps_compass"][1]
             )
         )
         if interactive_control:
-            action = input(
-                "enter action out of {}:\n".format(", ".join(valid_actions))
-            )
+            action = input("enter action out of {}:\n".format(", ".join(valid_actions)))
             assert (
                 action in valid_actions
             ), "invalid action {} entered, choose one amongst " + ",".join(
@@ -194,9 +184,7 @@ if __name__ == "__main__":
 
 # %%
 if __name__ == "__main__":
-    trainer_init = baseline_registry.get_trainer(
-        config.habitat_baselines.trainer_name
-    )
+    trainer_init = baseline_registry.get_trainer(config.habitat_baselines.trainer_name)
     trainer = trainer_init(config)
     trainer.train()
 
@@ -269,9 +257,7 @@ class NewNavigationTask(NavigationTask):
         super().__init__(config=config, sim=sim, dataset=dataset)
 
     def _check_episode_is_active(self, *args, **kwargs):
-        logger.info(
-            "Current agent position: {}".format(self._sim.get_agent_state())
-        )
+        logger.info("Current agent position: {}".format(self._sim.get_agent_state()))
         collision = self._sim.previous_step_collided
         stop_called = not getattr(self, "is_stop_called", False)
         return collision or stop_called
@@ -295,9 +281,7 @@ if __name__ == "__main__":
     while env.episode_over is not True:
         display_sample(obs["rgb"])
         if interactive_control:
-            action = input(
-                "enter action out of {}:\n".format(", ".join(valid_actions))
-            )
+            action = input("enter action out of {}:\n".format(", ".join(valid_actions)))
             assert (
                 action in valid_actions
             ), "invalid action {} entered, choose one amongst " + ",".join(
@@ -369,9 +353,9 @@ if __name__ == "__main__":
 
     with habitat.config.read_write(config):
         # Now define the config for the sensor
-        config.habitat.task.lab_sensors[
-            "agent_position_sensor"
-        ] = LabSensorConfig(type="agent_position_sensor")
+        config.habitat.task.lab_sensors["agent_position_sensor"] = LabSensorConfig(
+            type="agent_position_sensor"
+        )
 
     try:
         env.close()

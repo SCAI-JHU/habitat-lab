@@ -90,9 +90,7 @@ class VERTrainer(PPOTrainer):
 
             with read_write(self.config):
                 self.config.habitat_baselines.torch_gpu_id = local_rank
-                self.config.habitat.simulator.habitat_sim_v0.gpu_device_id = (
-                    local_rank
-                )
+                self.config.habitat.simulator.habitat_sim_v0.gpu_device_id = local_rank
                 # Multiply by the number of simulators to make sure they also get unique seeds
                 self.config.habitat.seed += (
                     world_rank * self.config.habitat_baselines.num_environments
@@ -103,9 +101,7 @@ class VERTrainer(PPOTrainer):
         torch.manual_seed(self.config.habitat.seed)
 
         self.mp_ctx = torch.multiprocessing.get_context("forkserver")
-        self.queues = WorkerQueues(
-            self.config.habitat_baselines.num_environments
-        )
+        self.queues = WorkerQueues(self.config.habitat_baselines.num_environments)
         self.environment_workers = construct_environment_workers(
             self.config,
             self.mp_ctx,
@@ -173,12 +169,9 @@ class VERTrainer(PPOTrainer):
         run_id = None
         if (
             has_report_resume_state
-            and resume_state["requeue_stats"]["report_worker_state"]
-            is not None
+            and resume_state["requeue_stats"]["report_worker_state"] is not None
         ):
-            run_id = resume_state["requeue_stats"]["report_worker_state"][
-                "run_id"
-            ]
+            run_id = resume_state["requeue_stats"]["report_worker_state"]["run_id"]
 
         self.report_worker = ReportWorker(
             self.mp_ctx,
@@ -228,9 +221,7 @@ class VERTrainer(PPOTrainer):
         )
         self.ver_config = self.config.habitat_baselines.rl.ver
 
-        self._agent = self._create_agent(
-            resume_state, lr_schedule_fn=cosine_decay
-        )
+        self._agent = self._create_agent(resume_state, lr_schedule_fn=cosine_decay)
 
         rollouts_obs_space = get_rollout_obs_space(
             copy.deepcopy(self._env_spec.observation_space),
@@ -284,9 +275,11 @@ class VERTrainer(PPOTrainer):
                 )
                 .map_in_place(lambda t: t.share_memory_())
             )[
-                slice(0, len(self.environment_workers))
-                if self.ver_config.variable_experience
-                else 0
+                (
+                    slice(0, len(self.environment_workers))
+                    if self.ver_config.variable_experience
+                    else 0
+                )
             ]
 
         self._agent.actor_critic.share_memory()
@@ -457,9 +450,7 @@ class VERTrainer(PPOTrainer):
 
         if resume_state is not None:
             requeue_stats = resume_state["requeue_stats"]
-            self._last_checkpoint_percent = requeue_stats[
-                "_last_checkpoint_percent"
-            ]
+            self._last_checkpoint_percent = requeue_stats["_last_checkpoint_percent"]
             count_checkpoints = requeue_stats["count_checkpoints"]
 
         if self.ver_config.overlap_rollouts_and_learn:
@@ -569,9 +560,7 @@ class VERTrainer(PPOTrainer):
                 )
                 count_checkpoints += 1
 
-        self.window_episode_stats = (
-            self.report_worker.get_window_episode_stats()
-        )
+        self.window_episode_stats = self.report_worker.get_window_episode_stats()
 
         [w.close() for w in self._all_workers]
         [w.join() for w in self._all_workers]

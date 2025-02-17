@@ -100,9 +100,7 @@ class AppStateFeedback(AppStateBase):
             with self._app_service.ui_manager.update_canvas(
                 "top_left", Mask.from_index(user_index)
             ) as ctx:
-                ctx.canvas_properties(
-                    padding=12, background_color=[0.3, 0.3, 0.3, 0.7]
-                )
+                ctx.canvas_properties(padding=12, background_color=[0.3, 0.3, 0.3, 0.7])
 
                 ctx.label(
                     text=title,

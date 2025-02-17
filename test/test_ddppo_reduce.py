@@ -25,14 +25,8 @@ from habitat_baselines.rl.ddppo.ddp_utils import find_free_port
 from habitat_baselines.rl.ppo.policy import PointNavBaselinePolicy
 
 
-def _worker_fn(
-    world_rank: int, world_size: int, port: int, unused_params: bool
-):
-    device = (
-        torch.device("cuda")
-        if torch.cuda.is_available()
-        else torch.device("cpu")
-    )
+def _worker_fn(world_rank: int, world_size: int, port: int, unused_params: bool):
+    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
     tcp_store = distrib.TCPStore(  # type: ignore
         "127.0.0.1", port, world_size, world_rank == 0
     )
@@ -52,9 +46,7 @@ def _worker_fn(
         }
     )
     action_space = gym.spaces.Discrete(1)
-    actor_critic = PointNavBaselinePolicy.from_config(
-        config, obs_space, action_space
-    )
+    actor_critic = PointNavBaselinePolicy.from_config(config, obs_space, action_space)
     # This use adds some arbitrary parameters that aren't part of the computation
     # graph, so they will mess up DDP if they aren't correctly ignored by it
     if unused_params:

@@ -160,9 +160,7 @@ smplx_body_joint_names = [
 ]
 
 
-def global_correction_quat(
-    up_v: mn.Vector3, forward_v: mn.Vector3
-) -> mn.Quaternion:
+def global_correction_quat(up_v: mn.Vector3, forward_v: mn.Vector3) -> mn.Quaternion:
     """
     Given the upward direction and the forward direction of a local space frame, this method produces
     the correction quaternion to convert the frame to global space (+Y up, -Z forward).
@@ -199,17 +197,14 @@ class MotionConverterSMPLX:
 
         self.link_ids = list(range(p.getNumJoints(self.human_bullet_id)))
         self.joint_info = [
-            p.getJointInfo(self.human_bullet_id, index)
-            for index in self.link_ids
+            p.getJointInfo(self.human_bullet_id, index) for index in self.link_ids
         ]
 
         self.final_rotation_correction = global_correction_quat(
             mn.Vector3.z_axis(), mn.Vector3.x_axis()
         )
 
-    def convert_pose_to_rotation(
-        self, root_translation, root_orientation, pose_joints
-    ):
+    def convert_pose_to_rotation(self, root_translation, root_orientation, pose_joints):
         """
         Converts a single pose from SMPL-X format to Habitat format. The input pose assumes that
         character faces +X and Z is up.
@@ -237,9 +232,7 @@ class MotionConverterSMPLX:
         else:
             root_T = self.final_rotation_correction
         root_rotation = root_T.to_matrix()
-        root_translation = self.final_rotation_correction.transform_vector(
-            root_trans
-        )
+        root_translation = self.final_rotation_correction.transform_vector(root_trans)
         new_pose = []
         for model_link_id in range(len(self.joint_info)):
             joint_type = self.joint_info[model_link_id][2]
@@ -267,13 +260,9 @@ class MotionConverterSMPLX:
                 # get_transform(pose_joint_index, local=True)
 
                 if joint_type == p.JOINT_SPHERICAL:
-                    axis_angle_rotation = mn.Vector3(
-                        pose_joints[pose_joint_indices]
-                    )
+                    axis_angle_rotation = mn.Vector3(pose_joints[pose_joint_indices])
                     if axis_angle_rotation.length() > 0:
-                        axis_angle_rotation_ang = mn.Rad(
-                            axis_angle_rotation.length()
-                        )
+                        axis_angle_rotation_ang = mn.Rad(axis_angle_rotation.length())
                         Q = mn.Quaternion.rotation(
                             axis_angle_rotation_ang,
                             axis_angle_rotation.normalized(),

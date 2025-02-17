@@ -109,12 +109,8 @@ class MultitaskCNN(nn.Module):
 
         if self.only_encoder:
             if pretrained:
-                logger.info(
-                    "Loading CNN weights from {}".format(checkpoint_path)
-                )
-                checkpoint = torch.load(
-                    checkpoint_path, map_location={"cuda:0": "cpu"}
-                )
+                logger.info("Loading CNN weights from {}".format(checkpoint_path))
+                checkpoint = torch.load(checkpoint_path, map_location={"cuda:0": "cpu"})
                 self.load_state_dict(checkpoint)
 
                 if freeze_encoder:
@@ -210,9 +206,7 @@ class MultitaskCNN(nn.Module):
         )
         score_ae += score_pool2_ae
         out_ae = torch.sigmoid(
-            F.interpolate(
-                score_ae, x.size()[2:], mode="bilinear", align_corners=True
-            )
+            F.interpolate(score_ae, x.size()[2:], mode="bilinear", align_corners=True)
         )
 
         return out_seg, out_depth, out_ae
@@ -318,19 +312,13 @@ class VqaLstmCnnAttentionModel(nn.Module):
         }
         self.classifier = build_mlp(**classifier_kwargs)  # type:ignore
 
-        self.att = nn.Sequential(
-            nn.Tanh(), nn.Dropout(p=0.5), nn.Linear(128, 1)
-        )
+        self.att = nn.Sequential(nn.Tanh(), nn.Dropout(p=0.5), nn.Linear(128, 1))
 
-    def forward(
-        self, images: Tensor, questions: Tensor
-    ) -> Tuple[Tensor, Tensor]:
+    def forward(self, images: Tensor, questions: Tensor) -> Tuple[Tensor, Tensor]:
         N, T, _, _, _ = images.size()
         # bs x 5 x 3 x 256 x 256
         img_feats = self.cnn(
-            images.contiguous().view(
-                -1, images.size(2), images.size(3), images.size(4)
-            )
+            images.contiguous().view(-1, images.size(2), images.size(3), images.size(4))
         )
 
         img_feats = self.cnn_fc_layer(img_feats)
@@ -480,17 +468,13 @@ class NavPlannerControllerModel(nn.Module):
             .repeat(1, 1, planner_states.size(2))
         )
 
-        controller_hidden_in = planner_states.gather(
-            1, planner_hidden_index.long()
-        )
+        controller_hidden_in = planner_states.gather(1, planner_hidden_index.long())
 
         controller_hidden_in = controller_hidden_in.view(
             N_c * T_c, controller_hidden_in.size(2)
         )
 
-        controller_img_feats = controller_img_feats.contiguous().view(
-            N_c * T_c, -1
-        )
+        controller_img_feats = controller_img_feats.contiguous().view(N_c * T_c, -1)
 
         controller_actions_embed = self.planner_nav_rnn.action_embed(
             controller_actions_in.long()
@@ -609,30 +593,20 @@ class NavRnn(nn.Module):
             batch_first=True,
         )
         logger.info(
-            "Building {} with hidden dim: {}".format(
-                self.rnn_type, rnn_hidden_dim
-            )
+            "Building {} with hidden dim: {}".format(self.rnn_type, rnn_hidden_dim)
         )
 
         self.decoder = nn.Linear(self.rnn_hidden_dim, self.num_actions)
 
-    def init_hidden(
-        self, bsz: int
-    ) -> Union[Tuple[Tensor, Tensor], Tensor, None]:
+    def init_hidden(self, bsz: int) -> Union[Tuple[Tensor, Tensor], Tensor, None]:
         weight = next(self.parameters()).data
         if self.rnn_type == "LSTM":
             return (
-                weight.new(
-                    self.rnn_num_layers, bsz, self.rnn_hidden_dim
-                ).zero_(),
-                weight.new(
-                    self.rnn_num_layers, bsz, self.rnn_hidden_dim
-                ).zero_(),
+                weight.new(self.rnn_num_layers, bsz, self.rnn_hidden_dim).zero_(),
+                weight.new(self.rnn_num_layers, bsz, self.rnn_hidden_dim).zero_(),
             )
         elif self.rnn_type == "GRU":
-            return weight.new(
-                self.rnn_num_layers, bsz, self.rnn_hidden_dim
-            ).zero_()
+            return weight.new(self.rnn_num_layers, bsz, self.rnn_hidden_dim).zero_()
         else:
             return None
 
@@ -712,15 +686,11 @@ class NavRnn(nn.Module):
                 input_feats = self.action_embed(actions_in)
             else:
                 actions_in = actions_in.long()
-                input_feats = torch.cat(
-                    [input_feats, self.action_embed(actions_in)], 2
-                )
+                input_feats = torch.cat([input_feats, self.action_embed(actions_in)], 2)
 
         output, hidden = self.rnn(input_feats, hidden)
         output = self.decoder(
-            output.contiguous().view(
-                output.size(0) * output.size(1), output.size(2)
-            )
+            output.contiguous().view(output.size(0) * output.size(1), output.size(2))
         )
 
         return output, hidden

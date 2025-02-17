@@ -85,9 +85,7 @@ def generate_ver_mini_batches(
     # as this is the step we collected for bootstrapping the return.
     sequence_lengths[last_sequence_in_batch_mask] -= 1
 
-    offset_to_step = (
-        np.cumsum(num_seqs_at_step, dtype=np.int64) - num_seqs_at_step
-    )
+    offset_to_step = np.cumsum(num_seqs_at_step, dtype=np.int64) - num_seqs_at_step
     seq_ordering = np.random.permutation(len(sequence_lengths))
 
     all_seq_steps_l = [
@@ -101,9 +99,7 @@ def generate_ver_mini_batches(
 
         assert len(np.unique(episode_ids[s_steps])) == 1, episode_ids[s_steps]
 
-    all_seq_steps = np.concatenate(
-        [all_seq_steps_l[seq] for seq in seq_ordering]
-    )
+    all_seq_steps = np.concatenate([all_seq_steps_l[seq] for seq in seq_ordering])
 
     mb_sizes = np.array(
         partition_n_into_p(int(np.sum(sequence_lengths)), num_mini_batch),
@@ -114,13 +110,12 @@ def generate_ver_mini_batches(
     # Yield the mini-batches in random order since where each mb is cut
     # isn't random otherwise
     for mb_idx in np.random.permutation(num_mini_batch):
-        yield all_seq_steps[
-            mb_starts[mb_idx] : mb_starts[mb_idx] + mb_sizes[mb_idx]
-        ]
+        yield all_seq_steps[mb_starts[mb_idx] : mb_starts[mb_idx] + mb_sizes[mb_idx]]
 
 
 class VERRolloutStorage(RolloutStorage):
     r"""Rollout storage for VER."""
+
     ptr: np.ndarray
     prev_inds: np.ndarray
     num_steps_collected: np.ndarray
@@ -156,9 +151,7 @@ class VERRolloutStorage(RolloutStorage):
         self.use_is_coeffs = variable_experience
 
         if self.use_is_coeffs:
-            self.buffers["is_coeffs"] = torch.ones_like(
-                self.buffers["returns"]
-            )
+            self.buffers["is_coeffs"] = torch.ones_like(self.buffers["returns"])
 
         for k in (
             "policy_version",
@@ -186,16 +179,12 @@ class VERRolloutStorage(RolloutStorage):
         self._aux_buffers = TensorDict()
         self.aux_buffers_on_device = set()
 
-        assert isinstance(
-            self.buffers["recurrent_hidden_states"], torch.Tensor
-        )
+        assert isinstance(self.buffers["recurrent_hidden_states"], torch.Tensor)
         self._aux_buffers["next_hidden_states"] = self.buffers[
             "recurrent_hidden_states"
         ][0].clone()
         assert isinstance(self.buffers["prev_actions"], torch.Tensor)
-        self._aux_buffers["next_prev_actions"] = self.buffers["prev_actions"][
-            0
-        ].clone()
+        self._aux_buffers["next_prev_actions"] = self.buffers["prev_actions"][0].clone()
         self._aux_buffers["current_policy_version"] = torch.ones(
             (1, 1), dtype=torch.int64
         )
@@ -206,24 +195,16 @@ class VERRolloutStorage(RolloutStorage):
             (1, 1), dtype=torch.int64
         )
 
-        self._aux_buffers["num_steps_collected"] = torch.zeros(
-            (1,), dtype=torch.int64
-        )
+        self._aux_buffers["num_steps_collected"] = torch.zeros((1,), dtype=torch.int64)
         self._aux_buffers["rollout_done"] = torch.zeros((1,), dtype=torch.bool)
-        self._aux_buffers["current_steps"] = torch.zeros(
-            (num_envs,), dtype=torch.int64
-        )
+        self._aux_buffers["current_steps"] = torch.zeros((num_envs,), dtype=torch.int64)
         self._aux_buffers["actor_steps_collected"] = torch.zeros(
             (num_envs,), dtype=torch.int64
         )
 
         self._aux_buffers["ptr"] = torch.zeros((1,), dtype=torch.int64)
-        self._aux_buffers["prev_inds"] = torch.full(
-            (num_envs,), -1, dtype=torch.int64
-        )
-        self._aux_buffers["_first_rollout"] = torch.full(
-            (1,), True, dtype=torch.bool
-        )
+        self._aux_buffers["prev_inds"] = torch.full((num_envs,), -1, dtype=torch.int64)
+        self._aux_buffers["_first_rollout"] = torch.full((1,), True, dtype=torch.bool)
         self._aux_buffers["will_replay_step"] = torch.zeros(
             (num_envs,), dtype=torch.bool
         )
@@ -309,9 +290,7 @@ class VERRolloutStorage(RolloutStorage):
 
         if not self.variable_experience:
             assert np.all(self.will_replay_step)
-            self.next_hidden_states[:] = self.buffers[
-                "recurrent_hidden_states"
-            ][-1]
+            self.next_hidden_states[:] = self.buffers["recurrent_hidden_states"][-1]
             self.next_prev_actions[:] = self.buffers["prev_actions"][-1]
         else:
             # With ver, we will have some actions
@@ -406,9 +385,7 @@ class VERRolloutStorage(RolloutStorage):
             environment_ids = self.buffers["environment_ids"].view(-1)
             unique_envs = torch.unique(environment_ids, sorted=False)
             samples_per_env = (
-                (environment_ids.view(1, -1) == unique_envs.view(-1, 1))
-                .float()
-                .sum(-1)
+                (environment_ids.view(1, -1) == unique_envs.view(-1, 1)).float().sum(-1)
             )
             is_per_env = torch.empty(
                 (self._num_envs,), dtype=torch.float32, device=self.device
@@ -423,9 +400,7 @@ class VERRolloutStorage(RolloutStorage):
                 (self.num_steps + 1) / samples_per_env,
             )
             assert isinstance(self.buffers["is_coeffs"], torch.Tensor)
-            self.buffers["is_coeffs"].copy_(
-                is_per_env[environment_ids].view(-1, 1)
-            )
+            self.buffers["is_coeffs"].copy_(is_per_env[environment_ids].view(-1, 1))
 
     def compute_returns(
         self,
@@ -449,9 +424,7 @@ class VERRolloutStorage(RolloutStorage):
             device="cpu", non_blocking=True
         )
         assert isinstance(self.buffers["step_ids"], torch.Tensor)
-        step_ids_cpu_t = self.buffers["step_ids"].to(
-            device="cpu", non_blocking=True
-        )
+        step_ids_cpu_t = self.buffers["step_ids"].to(device="cpu", non_blocking=True)
 
         if self.device.type == "cuda":
             torch.cuda.synchronize(self.device)
@@ -470,9 +443,7 @@ class VERRolloutStorage(RolloutStorage):
             device="cpu", non_blocking=True
         )
         assert isinstance(self.buffers["value_preds"], torch.Tensor)
-        values_t = self.buffers["value_preds"].to(
-            device="cpu", non_blocking=True
-        )
+        values_t = self.buffers["value_preds"].to(device="cpu", non_blocking=True)
 
         rnn_build_seq_info = build_pack_info_from_episode_ids(
             self.episode_ids_cpu,
@@ -507,18 +478,14 @@ class VERRolloutStorage(RolloutStorage):
         gae = np.zeros((self.num_seqs_at_step[0], 1))
         last_values = gae.copy()
         ptr = returns.size
-        for len_minus_1, n_seqs in reversed(
-            list(enumerate(self.num_seqs_at_step))
-        ):
+        for len_minus_1, n_seqs in reversed(list(enumerate(self.num_seqs_at_step))):
             curr_slice = slice(ptr - n_seqs, ptr)
             q_est = rewards[curr_slice] + gamma * last_values[:n_seqs]
             delta = q_est - values[curr_slice]
             gae[:n_seqs] = delta + (tau * gamma) * gae[:n_seqs]
 
             is_last_step = self.sequence_lengths == (len_minus_1 + 1)
-            is_last_step_for_env = (
-                is_last_step & self.last_sequence_in_batch_mask
-            )
+            is_last_step_for_env = is_last_step & self.last_sequence_in_batch_mask
 
             # For the last step from each worker, we do an extra loop
             # to fill last_values with the bootstrap.  So we re-zero
@@ -531,9 +498,9 @@ class VERRolloutStorage(RolloutStorage):
             use_new_value = is_not_stale[curr_slice] | np.logical_not(
                 np.isfinite(returns[curr_slice])
             )
-            returns[curr_slice][use_new_value] = (
-                gae[:n_seqs] + values[curr_slice]
-            )[use_new_value]
+            returns[curr_slice][use_new_value] = (gae[:n_seqs] + values[curr_slice])[
+                use_new_value
+            ]
 
             # We also mark these with a nan
             returns[curr_slice][is_last_step_for_env[:n_seqs]] = float("nan")
@@ -551,9 +518,7 @@ class VERRolloutStorage(RolloutStorage):
                 returns=returns_t.squeeze(),
                 dones=self.dones_cpu,
                 episode_ids=self.episode_ids_cpu.reshape(-1, self._num_envs),
-                environment_ids=self.environment_ids_cpu.reshape(
-                    -1, self._num_envs
-                ),
+                environment_ids=self.environment_ids_cpu.reshape(-1, self._num_envs),
                 step_ids=self.step_ids_cpu.reshape(-1, self._num_envs),
                 is_not_stale=is_not_stale[
                     _np_invert_permutation(self.select_inds)
@@ -587,9 +552,7 @@ class VERRolloutStorage(RolloutStorage):
                 mb_inds = mb_inds_cpu.to(device=self.device)
 
                 if not self.variable_experience:
-                    batch = self.buffers.map(lambda t: t.flatten(0, 1))[
-                        mb_inds
-                    ]
+                    batch = self.buffers.map(lambda t: t.flatten(0, 1))[mb_inds]
                     if advantages is not None:
                         batch["advantages"] = advantages.flatten(0, 1)[mb_inds]
                 else:
@@ -607,9 +570,7 @@ class VERRolloutStorage(RolloutStorage):
                 )
 
                 rnn_build_seq_info = batch["rnn_build_seq_info"]
-                assert isinstance(
-                    batch["recurrent_hidden_states"], torch.Tensor
-                )
+                assert isinstance(batch["recurrent_hidden_states"], torch.Tensor)
                 batch["recurrent_hidden_states"] = batch[
                     "recurrent_hidden_states"
                 ].index_select(

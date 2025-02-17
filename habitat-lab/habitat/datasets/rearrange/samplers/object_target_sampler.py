@@ -32,9 +32,7 @@ class ObjectTargetSampler(ObjectSampler):
         """
 
         self.object_instance_set = object_instance_set
-        object_set = [
-            x.creation_attributes.handle for x in self.object_instance_set
-        ]
+        object_set = [x.creation_attributes.handle for x in self.object_instance_set]
         super().__init__(object_set, *args, **kwargs)
 
     def sample(
@@ -46,9 +44,7 @@ class ObjectTargetSampler(ObjectSampler):
         target_receptacles=None,
         goal_receptacles=None,
         object_to_containing_receptacle=None,
-    ) -> Optional[
-        Dict[str, Tuple[habitat_sim.physics.ManagedRigidObject, Receptacle]]
-    ]:
+    ) -> Optional[Dict[str, Tuple[habitat_sim.physics.ManagedRigidObject, Receptacle]]]:
         """
         Overridden sampler maps to instances without replacement.
 
@@ -110,7 +106,5 @@ class ObjectTargetSampler(ObjectSampler):
         )
         # cleanup
         for new_object, _ in new_target_objects.values():
-            sim.get_rigid_object_manager().remove_object_by_handle(
-                new_object.handle
-            )
+            sim.get_rigid_object_manager().remove_object_by_handle(new_object.handle)
         return None

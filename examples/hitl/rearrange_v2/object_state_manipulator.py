@@ -143,9 +143,7 @@ class ObjectStateManipulator:
                 self._maximum_distance,
                 self._world._metadata_interface,
             )
-            return ObjectStateChangeResult(
-                result.succeeded, result.error_message_user
-            )
+            return ObjectStateChangeResult(result.succeeded, result.error_message_user)
         return ObjectStateChangeResult(
             False, f"Undefined action: '{state_name} -> {state_value}'."
         )
@@ -157,9 +155,7 @@ class ObjectStateManipulator:
         Try executing an action on the specified object.
         Returns whether the action was successful, and an error message if it wasn't.
         """
-        result = self.can_execute_action(
-            state_name, state_value, object_handle
-        )
+        result = self.can_execute_action(state_name, state_value, object_handle)
         if result.success:
             self.set_object_state(object_handle, state_name, state_value)
         return ObjectStateChangeResult(result.success, result.error_message)
@@ -184,9 +180,7 @@ class ObjectStateManipulator:
                 action_enabled = False
                 error = None
                 if action_available:
-                    result = self.can_execute_action(
-                        name, target_value, object_handle
-                    )
+                    result = self.can_execute_action(name, target_value, object_handle)
                     action_enabled = result.success
                     error = result.error_message
                 actions.append(

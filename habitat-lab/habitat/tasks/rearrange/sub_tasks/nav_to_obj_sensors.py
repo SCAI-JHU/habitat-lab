@@ -63,9 +63,7 @@ class NavGoalPointGoalSensor(UsesArticulatedAgentInterface, Sensor):
             ).articulated_agent.base_pos
             task.nav_goal_pos = np.array(human_pos)
 
-        dir_vector = articulated_agent_T.inverted().transform_point(
-            task.nav_goal_pos
-        )
+        dir_vector = articulated_agent_T.inverted().transform_point(task.nav_goal_pos)
 
         rho, phi = cartesian_to_polar(dir_vector[0], dir_vector[1])
         return np.array([rho, -phi], dtype=np.float32)
@@ -147,13 +145,8 @@ class NavToObjReward(RearrangeReward):
         reward += self._config.dist_reward * dist_diff
         self._prev_dist = cur_dist
 
-        if (
-            self._config.should_reward_turn
-            and cur_dist < self._config.turn_reward_dist
-        ):
-            angle_dist = task.measurements.measures[
-                RotDistToGoal.cls_uuid
-            ].get_metric()
+        if self._config.should_reward_turn and cur_dist < self._config.turn_reward_dist:
+            angle_dist = task.measurements.measures[RotDistToGoal.cls_uuid].get_metric()
 
             if self._cur_angle_dist < 0:
                 angle_diff = 0.0
@@ -189,9 +182,7 @@ class DistToGoal(UsesArticulatedAgentInterface, Measure):
     def _get_cur_geo_dist(self, task):
         return np.linalg.norm(
             np.array(
-                self._sim.get_agent_data(
-                    self.agent_id
-                ).articulated_agent.base_pos
+                self._sim.get_agent_data(self.agent_id).articulated_agent.base_pos
             )[[0, 2]]
             - task.nav_goal_pos[[0, 2]]
         )
@@ -285,22 +276,16 @@ class NavToObjSuccess(Measure):
         super().__init__(*args, config=config, **kwargs)
 
     def update_metric(self, *args, episode, task, observations, **kwargs):
-        angle_dist = task.measurements.measures[
-            RotDistToGoal.cls_uuid
-        ].get_metric()
+        angle_dist = task.measurements.measures[RotDistToGoal.cls_uuid].get_metric()
 
-        nav_pos_succ = task.measurements.measures[
-            NavToPosSucc.cls_uuid
-        ].get_metric()
+        nav_pos_succ = task.measurements.measures[NavToPosSucc.cls_uuid].get_metric()
 
         called_stop = task.measurements.measures[
             DoesWantTerminate.cls_uuid
         ].get_metric()
 
         if self._config.must_look_at_targ:
-            self._metric = (
-                nav_pos_succ and angle_dist < self._config.success_angle_dist
-            )
+            self._metric = nav_pos_succ and angle_dist < self._config.success_angle_dist
         else:
             self._metric = nav_pos_succ
 

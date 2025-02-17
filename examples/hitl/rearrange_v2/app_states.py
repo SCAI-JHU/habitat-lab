@@ -15,17 +15,13 @@ from session import Session
 from habitat_hitl.app_states.app_service import AppService
 
 
-def create_app_state_reset(
-    app_service: AppService, app_data: AppData
-) -> AppStateBase:
+def create_app_state_reset(app_service: AppService, app_data: AppData) -> AppStateBase:
     from app_state_reset import AppStateReset
 
     return AppStateReset(app_service, app_data)
 
 
-def create_app_state_lobby(
-    app_service: AppService, app_data: AppData
-) -> AppStateBase:
+def create_app_state_lobby(app_service: AppService, app_data: AppData) -> AppStateBase:
     from app_state_lobby import AppStateLobby
 
     return AppStateLobby(app_service, app_data)

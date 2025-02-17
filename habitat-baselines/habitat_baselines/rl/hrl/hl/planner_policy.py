@@ -49,13 +49,9 @@ class PlannerHighLevelPolicy(HighLevelPolicy):
         self._reactive_planner = self._config.is_reactive
 
         self._next_sol_idxs = torch.zeros(self._num_envs, dtype=torch.int32)
-        self._plans: List[List[PddlAction]] = [
-            [] for _ in range(self._num_envs)
-        ]
+        self._plans: List[List[PddlAction]] = [[] for _ in range(self._num_envs)]
         self._should_replan = torch.zeros(self._num_envs, dtype=torch.bool)
-        self.gen_plan_ids_batch = torch.zeros(
-            self._num_envs, dtype=torch.int32
-        )
+        self.gen_plan_ids_batch = torch.zeros(self._num_envs, dtype=torch.int32)
         self._plan_idx = self._config.plan_idx
         self._select_random_goal = self._config.select_random_goal
         assert self._plan_idx >= 0
@@ -82,17 +78,13 @@ class PlannerHighLevelPolicy(HighLevelPolicy):
         they match with the active environments
         """
         self._should_replan = self._should_replan[curr_envs_to_keep_active]
-        self.gen_plan_ids_batch = self.gen_plan_ids_batch[
-            curr_envs_to_keep_active
-        ]
+        self.gen_plan_ids_batch = self.gen_plan_ids_batch[curr_envs_to_keep_active]
         self._next_sol_idxs = self._next_sol_idxs[curr_envs_to_keep_active]
 
     def create_hl_info(self):
         return {"actions": None}
 
-    def get_policy_action_space(
-        self, env_action_space: spaces.Space
-    ) -> spaces.Space:
+    def get_policy_action_space(self, env_action_space: spaces.Space) -> spaces.Space:
         """
         Fetches the policy action space for learning. If we are learning the HL
         policy, it will return its custom action space for learning.
@@ -110,13 +102,9 @@ class PlannerHighLevelPolicy(HighLevelPolicy):
     def get_value(self, observations, rnn_hidden_states, prev_actions, masks):
         # We assign a value of 0. This is needed so that we can concatenate values in multiagent
         # policies
-        return torch.zeros(rnn_hidden_states.shape[0], 1).to(
-            rnn_hidden_states.device
-        )
+        return torch.zeros(rnn_hidden_states.shape[0], 1).to(rnn_hidden_states.device)
 
-    def _get_solution_nodes(
-        self, pred_vals, pddl_goal: LogicalExpr
-    ) -> List[PlanNode]:
+    def _get_solution_nodes(self, pred_vals, pddl_goal: LogicalExpr) -> List[PlanNode]:
         """
         Based on the truth values in `pred_vals`, plan a sequence of
         PddlActions (returned in a list of `PlanNodes`) that describe how to
@@ -132,9 +120,7 @@ class PlannerHighLevelPolicy(HighLevelPolicy):
         ]
 
         def _is_pred_at(pred, robot_type):
-            return (
-                pred.name == "robot_at" and pred._arg_values[-1] == robot_type
-            )
+            return pred.name == "robot_at" and pred._arg_values[-1] == robot_type
 
         def _get_pred_hash(preds):
             return ",".join(sorted([p.compact_str for p in preds]))
@@ -162,9 +148,7 @@ class PlannerHighLevelPolicy(HighLevelPolicy):
                     # Remove the at precondition, since we are walking somewhere else
                     robot_to_nav = action._param_values[-1]
                     pred_set = [
-                        pred
-                        for pred in pred_set
-                        if not _is_pred_at(pred, robot_to_nav)
+                        pred for pred in pred_set if not _is_pred_at(pred, robot_to_nav)
                     ]
 
                 for p in action.post_cond:
@@ -196,9 +180,7 @@ class PlannerHighLevelPolicy(HighLevelPolicy):
 
                 if pred_hash not in visited:
                     visited.add(pred_hash)
-                    add_node = PlanNode(
-                        pred_set, cur_node, cur_node.depth + 1, action
-                    )
+                    add_node = PlanNode(pred_set, cur_node, cur_node.depth + 1, action)
                     if pddl_goal.is_true_from_predicates(pred_set):
                         # Found a goal, we can stop searching.
                         sol_nodes.append(add_node)

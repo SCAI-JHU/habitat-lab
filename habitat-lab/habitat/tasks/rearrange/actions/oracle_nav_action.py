@@ -38,17 +38,13 @@ class OracleNavAction(BaseVelAction, HumanoidJointAction):
 
         elif self.motion_type == "human_joints":
             HumanoidJointAction.__init__(self, *args, **kwargs)
-            self.humanoid_controller = self.lazy_inst_humanoid_controller(
-                task, config
-            )
+            self.humanoid_controller = self.lazy_inst_humanoid_controller(task, config)
 
         else:
             raise ValueError("Unrecognized motion type for oracle nav  action")
 
         self._task = task
-        self._poss_entities = (
-            self._task.pddl_problem.get_ordered_entities_list()
-        )
+        self._poss_entities = self._task.pddl_problem.get_ordered_entities_list()
         self._prev_ep_id = None
         self.skill_done = False
         self._targets = {}
@@ -58,14 +54,9 @@ class OracleNavAction(BaseVelAction, HumanoidJointAction):
         # We assign the task with the humanoid controller, so that multiple actions can
         # use it.
 
-        if (
-            not hasattr(task, "humanoid_controller")
-            or task.humanoid_controller is None
-        ):
+        if not hasattr(task, "humanoid_controller") or task.humanoid_controller is None:
             # Initialize humanoid controller
-            agent_name = self._sim.habitat_config.agents_order[
-                self._agent_index
-            ]
+            agent_name = self._sim.habitat_config.agents_order[self._agent_index]
             walk_pose_path = self._sim.habitat_config.agents[
                 agent_name
             ].motion_data_path
@@ -81,13 +72,10 @@ class OracleNavAction(BaseVelAction, HumanoidJointAction):
         base_offset = self.cur_articulated_agent.params.base_offset
         prev_query_pos = self.cur_articulated_agent.base_pos
         target_query_pos = (
-            self.humanoid_controller.obj_transform_base.translation
-            + base_offset
+            self.humanoid_controller.obj_transform_base.translation + base_offset
         )
 
-        filtered_query_pos = self._sim.step_filter(
-            prev_query_pos, target_query_pos
-        )
+        filtered_query_pos = self._sim.step_filter(prev_query_pos, target_query_pos)
         fixup = filtered_query_pos - target_query_pos
         self.humanoid_controller.obj_transform_base.translation += fixup
 
@@ -115,9 +103,7 @@ class OracleNavAction(BaseVelAction, HumanoidJointAction):
     def _get_target_for_idx(self, nav_to_target_idx: int):
         if nav_to_target_idx not in self._targets:
             nav_to_obj = self._poss_entities[nav_to_target_idx]
-            obj_pos = self._task.pddl_problem.sim_info.get_entity_pos(
-                nav_to_obj
-            )
+            obj_pos = self._task.pddl_problem.sim_info.get_entity_pos(nav_to_obj)
             start_pos, _, _ = place_agent_at_dist_from_pos(
                 np.array(obj_pos),
                 0.0,
@@ -156,18 +142,12 @@ class OracleNavAction(BaseVelAction, HumanoidJointAction):
 
     def step(self, *args, **kwargs):
         self.skill_done = False
-        nav_to_target_idx = kwargs[
-            self._action_arg_prefix + "oracle_nav_action"
-        ]
-        if nav_to_target_idx <= 0 or nav_to_target_idx > len(
-            self._poss_entities
-        ):
+        nav_to_target_idx = kwargs[self._action_arg_prefix + "oracle_nav_action"]
+        if nav_to_target_idx <= 0 or nav_to_target_idx > len(self._poss_entities):
             return
         nav_to_target_idx = int(nav_to_target_idx[0]) - 1
 
-        final_nav_targ, obj_targ_pos = self._get_target_for_idx(
-            nav_to_target_idx
-        )
+        final_nav_targ, obj_targ_pos = self._get_target_for_idx(nav_to_target_idx)
         base_T = self.cur_articulated_agent.base_transformation
         curr_path_points = self._path_to_point(final_nav_targ)
         robot_pos = np.array(self.cur_articulated_agent.base_pos)
@@ -240,16 +220,12 @@ class OracleNavAction(BaseVelAction, HumanoidJointAction):
                     self.skill_done = True
 
                 base_action = self.humanoid_controller.get_pose()
-                kwargs[
-                    f"{self._action_arg_prefix}human_joints_trans"
-                ] = base_action
+                kwargs[f"{self._action_arg_prefix}human_joints_trans"] = base_action
 
                 HumanoidJointAction.step(self, *args, **kwargs)
                 return
             else:
-                raise ValueError(
-                    "Unrecognized motion type for oracle nav action"
-                )
+                raise ValueError("Unrecognized motion type for oracle nav action")
 
 
 @registry.register_task_action
@@ -267,9 +243,7 @@ class OracleNavCoordinateAction(BaseVelAction, HumanoidJointAction):  # type: ig
 
         elif self.motion_type == "human_joints":
             HumanoidJointAction.__init__(self, *args, **kwargs)
-            self.humanoid_controller = self.lazy_inst_humanoid_controller(
-                task, config
-            )
+            self.humanoid_controller = self.lazy_inst_humanoid_controller(task, config)
 
         else:
             raise ValueError("Unrecognized motion type for oracle nav  action")
@@ -279,14 +253,9 @@ class OracleNavCoordinateAction(BaseVelAction, HumanoidJointAction):  # type: ig
         # We assign the task with the humanoid controller, so that multiple actions can
         # use it.
 
-        if (
-            not hasattr(task, "humanoid_controller")
-            or task.humanoid_controller is None
-        ):
+        if not hasattr(task, "humanoid_controller") or task.humanoid_controller is None:
             # Initialize humanoid controller
-            agent_name = self._sim.habitat_config.agents_order[
-                self._agent_index
-            ]
+            agent_name = self._sim.habitat_config.agents_order[self._agent_index]
             walk_pose_path = self._sim.habitat_config.agents[
                 agent_name
             ].motion_data_path
@@ -302,13 +271,10 @@ class OracleNavCoordinateAction(BaseVelAction, HumanoidJointAction):  # type: ig
         base_offset = self.cur_articulated_agent.params.base_offset
         prev_query_pos = self.cur_articulated_agent.base_pos
         target_query_pos = (
-            self.humanoid_controller.obj_transform_base.translation
-            + base_offset
+            self.humanoid_controller.obj_transform_base.translation + base_offset
         )
 
-        filtered_query_pos = self._sim.step_filter(
-            prev_query_pos, target_query_pos
-        )
+        filtered_query_pos = self._sim.step_filter(prev_query_pos, target_query_pos)
         fixup = filtered_query_pos - target_query_pos
         self.humanoid_controller.obj_transform_base.translation += fixup
 
@@ -484,12 +450,8 @@ class OracleNavCoordinateAction(BaseVelAction, HumanoidJointAction):  # type: ig
                 # This line is important to reset the controller
                 self._update_controller_to_navmesh()
                 base_action = self.humanoid_controller.get_pose()
-                kwargs[
-                    f"{self._action_arg_prefix}human_joints_trans"
-                ] = base_action
+                kwargs[f"{self._action_arg_prefix}human_joints_trans"] = base_action
 
                 return HumanoidJointAction.step(self, *args, **kwargs)
             else:
-                raise ValueError(
-                    "Unrecognized motion type for oracle nav action"
-                )
+                raise ValueError("Unrecognized motion type for oracle nav action")

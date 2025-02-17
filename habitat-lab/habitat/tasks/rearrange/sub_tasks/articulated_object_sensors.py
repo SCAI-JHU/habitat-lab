@@ -139,11 +139,7 @@ class ArtObjState(Measure):
 
     def reset_metric(self, *args, episode, task, observations, **kwargs):
         self.update_metric(
-            *args,
-            episode=episode,
-            task=task,
-            observations=observations,
-            **kwargs
+            *args, episode=episode, task=task, observations=observations, **kwargs
         )
 
     def update_metric(self, *args, episode, task, observations, **kwargs):
@@ -164,11 +160,7 @@ class ArtObjAtDesiredState(Measure):
 
     def reset_metric(self, *args, episode, task, observations, **kwargs):
         self.update_metric(
-            *args,
-            episode=episode,
-            task=task,
-            observations=observations,
-            **kwargs
+            *args, episode=episode, task=task, observations=observations, **kwargs
         )
 
     def update_metric(self, *args, episode, task, observations, **kwargs):
@@ -201,11 +193,7 @@ class ArtObjSuccess(Measure):
 
     def reset_metric(self, *args, episode, task, observations, **kwargs):
         self.update_metric(
-            *args,
-            episode=episode,
-            task=task,
-            observations=observations,
-            **kwargs
+            *args, episode=episode, task=task, observations=observations, **kwargs
         )
 
     def update_metric(self, *args, episode, task, observations, **kwargs):
@@ -248,11 +236,7 @@ class EndEffectorDistToMarker(UsesArticulatedAgentInterface, Measure):
 
     def reset_metric(self, *args, episode, task, observations, **kwargs):
         self.update_metric(
-            *args,
-            episode=episode,
-            task=task,
-            observations=observations,
-            **kwargs
+            *args, episode=episode, task=task, observations=observations, **kwargs
         )
 
     def update_metric(self, *args, task, **kwargs):
@@ -294,9 +278,7 @@ class ArtObjReward(RearrangeReward):
                 ArtObjAtDesiredState.cls_uuid,
             ],
         )
-        link_state = task.measurements.measures[
-            ArtObjState.cls_uuid
-        ].get_metric()
+        link_state = task.measurements.measures[ArtObjState.cls_uuid].get_metric()
 
         dist_to_marker = task.measurements.measures[
             EndEffectorDistToMarker.cls_uuid
@@ -312,25 +294,15 @@ class ArtObjReward(RearrangeReward):
         self._prev_ee_to_rest = ee_to_rest_distance
         self._any_at_desired_state = False
         super().reset_metric(
-            *args,
-            episode=episode,
-            task=task,
-            observations=observations,
-            **kwargs
+            *args, episode=episode, task=task, observations=observations, **kwargs
         )
 
     def update_metric(self, *args, episode, task, observations, **kwargs):
         super().update_metric(
-            *args,
-            episode=episode,
-            task=task,
-            observations=observations,
-            **kwargs
+            *args, episode=episode, task=task, observations=observations, **kwargs
         )
         reward = self._metric
-        link_state = task.measurements.measures[
-            ArtObjState.cls_uuid
-        ].get_metric()
+        link_state = task.measurements.measures[ArtObjState.cls_uuid].get_metric()
 
         ee_to_rest_distance = task.measurements.measures[
             EndEffectorToRestDistance.cls_uuid
@@ -358,9 +330,7 @@ class ArtObjReward(RearrangeReward):
                 # Grasped wrong marker
                 reward -= self._config.wrong_grasp_pen
                 if self._config.wrong_grasp_end:
-                    rearrange_logger.debug(
-                        "Grasped wrong marker, ending episode."
-                    )
+                    rearrange_logger.debug("Grasped wrong marker, ending episode.")
                     task.should_end = True
             else:
                 # Grasped right marker

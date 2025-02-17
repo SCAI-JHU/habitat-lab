@@ -20,9 +20,7 @@ except ImportError:
     import cv2
 
 
-def save_rgb_results(
-    gt_rgb: torch.Tensor, pred_rgb: torch.Tensor, path: str
-) -> None:
+def save_rgb_results(gt_rgb: torch.Tensor, pred_rgb: torch.Tensor, path: str) -> None:
     r"""For saving RGB reconstruction results during EQA-CNN-Pretrain eval.
 
     Args:
@@ -36,9 +34,7 @@ def save_rgb_results(
     cv2.imwrite(path + "_pred.jpg", pred_bgr)
 
 
-def save_seg_results(
-    gt_seg: torch.Tensor, pred_seg: torch.Tensor, path: str
-) -> None:
+def save_seg_results(gt_seg: torch.Tensor, pred_seg: torch.Tensor, path: str) -> None:
     r"""For saving predicted and ground truth seg maps during
     EQA-CNN-Pretrain eval.
 
@@ -163,8 +159,6 @@ def save_vqa_image_results(
         value=(255, 255, 255),
     )
 
-    image = put_vqa_text_on_image(
-        collage_image, question, prediction, ground_truth
-    )
+    image = put_vqa_text_on_image(collage_image, question, prediction, ground_truth)
 
     cv2.imwrite(path, image)

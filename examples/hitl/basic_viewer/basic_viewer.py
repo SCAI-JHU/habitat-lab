@@ -88,9 +88,7 @@ class AppStateBasicViewer(AppState):
         1) not self._app_service.env.episode_over - none of the constraints is violated, or
         2) not self._env_task_complete - success measure value is not True
         """
-        return not (
-            self._app_service.env.episode_over or self._env_task_complete
-        )
+        return not (self._app_service.env.episode_over or self._env_task_complete)
 
     def _get_camera_lookat_pos(self):
         return self._lookat_pos
@@ -117,7 +115,9 @@ class AppStateBasicViewer(AppState):
         return controls_str
 
     def _get_status_text(self):
-        progress_str = f"episode {self._app_service.episode_helper.current_episode.episode_id}"
+        progress_str = (
+            f"episode {self._app_service.episode_helper.current_episode.episode_id}"
+        )
         if not self._env_episode_active():
             progress_str += (
                 " - task succeeded!"
@@ -130,8 +130,7 @@ class AppStateBasicViewer(AppState):
         # center align the status_str
         max_status_str_len = 50
         status_str = "/n".join(
-            line.center(max_status_str_len)
-            for line in progress_str.split("/n")
+            line.center(max_status_str_len) for line in progress_str.split("/n")
         )
 
         return status_str
@@ -163,9 +162,8 @@ class AppStateBasicViewer(AppState):
             self._app_service.end_episode()
             post_sim_update_dict["application_exit"] = True
 
-        if (
-            self._env_episode_active()
-            and self._app_service.gui_input.get_key_down(KeyCode.P)
+        if self._env_episode_active() and self._app_service.gui_input.get_key_down(
+            KeyCode.P
         ):
             self._paused = not self._paused
 
@@ -195,9 +193,7 @@ class AppStateBasicViewer(AppState):
         self._update_help_text()
 
 
-@hydra.main(
-    version_base=None, config_path="config", config_name="basic_viewer"
-)
+@hydra.main(version_base=None, config_path="config", config_name="basic_viewer")
 def main(config):
     if len(config.habitat_hitl.gui_controlled_agents) > 0:
         raise ValueError(

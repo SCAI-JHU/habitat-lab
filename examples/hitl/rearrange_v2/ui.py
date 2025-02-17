@@ -154,9 +154,7 @@ class UI:
         # Set up UI overlay
         self._ui_overlay = UIOverlay(app_service, user_index)
         self._is_help_shown = True
-        self._last_changed_state_timestamp: Optional[
-            Tuple[str, datetime]
-        ] = None
+        self._last_changed_state_timestamp: Optional[Tuple[str, datetime]] = None
 
         # Set up user events
         self._on_pick = Event()
@@ -169,9 +167,7 @@ class UI:
         self._get_grasp_manager()._automatically_update_snapped_object = False
 
         # Set up object state manipulation.
-        self._object_state_manipulator: Optional[
-            "ObjectStateManipulator"
-        ] = None
+        self._object_state_manipulator: Optional["ObjectStateManipulator"] = None
         try:
             from object_state_manipulator import ObjectStateManipulator
 
@@ -366,13 +362,10 @@ class UI:
 
         eye_position = self._camera_helper.get_eye_pos()
         forward_vector = (
-            self._camera_helper.get_lookat_pos()
-            - self._camera_helper.get_eye_pos()
+            self._camera_helper.get_lookat_pos() - self._camera_helper.get_eye_pos()
         ).normalized()
 
-        rigid_object = self._sim.get_rigid_object_manager().get_object_by_id(
-            object_id
-        )
+        rigid_object = self._sim.get_rigid_object_manager().get_object_by_id(object_id)
         rigid_object.translation = eye_position + forward_vector
 
     def _place_object(self) -> None:
@@ -519,10 +512,7 @@ class UI:
 
     def _is_object_pickable(self, object_id: int) -> bool:
         """Returns true if the object can be picked."""
-        return (
-            object_id is not None
-            and object_id in self._world._pickable_object_ids
-        )
+        return object_id is not None and object_id in self._world._pickable_object_ids
 
     def _is_object_interactable(self, object_id: int) -> bool:
         """Returns true if the object can be opened or closed."""
@@ -611,9 +601,7 @@ class UI:
         cam_translation = self._camera_helper.get_eye_pos()
         obj_translation = sutils.get_obj_from_id(sim, object_id).translation
         ray_direction = obj_translation - cam_translation
-        return mn.math.dot(
-            cam_direction.normalized(), ray_direction.normalized()
-        )
+        return mn.math.dot(cam_direction.normalized(), ray_direction.normalized())
 
     def _is_object_visible(self, object_id: int) -> bool:
         """
@@ -655,9 +643,7 @@ class UI:
         if object_id is not None:
             world = self._world
             sim = self._sim
-            obj = sutils.get_obj_from_id(
-                sim, object_id, world._link_id_to_ao_map
-            )
+            obj = sutils.get_obj_from_id(sim, object_id, world._link_id_to_ao_map)
             if obj is not None:
                 object_category = world.get_category_from_handle(obj.handle)
 
@@ -699,21 +685,15 @@ class UI:
         if object_id is not None:
             world = self._world
             sim = self._sim
-            obj = sutils.get_obj_from_id(
-                sim, object_id, world._link_id_to_ao_map
-            )
+            obj = sutils.get_obj_from_id(sim, object_id, world._link_id_to_ao_map)
             if obj is not None:
                 # Get object category name.
-                object_category_name = world.get_category_from_handle(
-                    obj.handle
-                )
+                object_category_name = world.get_category_from_handle(obj.handle)
                 if object_category_name is None:
                     object_category_name = "Object"
 
                 # Get object state controls.
-                object_state_controls = self._get_object_state_controls(
-                    obj.handle
-                )
+                object_state_controls = self._get_object_state_controls(obj.handle)
 
                 # Get the primary region name.
                 primary_region = world.get_primary_object_region(obj)
@@ -750,13 +730,9 @@ class UI:
                         if self._place_selection.point is not None:
                             point = self._place_selection.point
                             normal = self._place_selection.normal
-                            receptacle_object_id = (
-                                self._place_selection.object_id
-                            )
-                            placement_valid = (
-                                self._is_location_suitable_for_placement(
-                                    point, normal, receptacle_object_id
-                                )
+                            receptacle_object_id = self._place_selection.object_id
+                            placement_valid = self._is_location_suitable_for_placement(
+                                point, normal, receptacle_object_id
                             )
                             if placement_valid:
                                 contextual_info.append(
@@ -778,9 +754,7 @@ class UI:
                     link_index = self._world.get_link_index(link_id)
                     if link_index:
                         action_name = (
-                            "close"
-                            if object_id in world._opened_link_set
-                            else "open"
+                            "close" if object_id in world._opened_link_set else "open"
                         )
 
                         # Get parent articulated object.
@@ -843,9 +817,7 @@ class UI:
         object_state_controls: List[ObjectStateControl] = []
 
         # Get all possible actions for this object.
-        all_possible_actions = osm.get_all_available_boolean_actions(
-            object_handle
-        )
+        all_possible_actions = osm.get_all_available_boolean_actions(object_handle)
         for action in all_possible_actions:
             spec = action.state_spec
             recently_changed = False
@@ -854,9 +826,7 @@ class UI:
             if self._ui_settings.can_change_object_states:
                 enabled = action.enabled
                 available = action.available
-                tooltip = (
-                    action.error if action.available else "Action unavailable."
-                )
+                tooltip = action.error if action.available else "Action unavailable."
                 callback = partial(
                     self._state_change_callback,
                     spec.name,
@@ -871,8 +841,8 @@ class UI:
                     time_since_last_state_change = (
                         datetime.now() - self._last_changed_state_timestamp[1]
                     )
-                    recently_changed = (
-                        time_since_last_state_change < timedelta(seconds=2.0)
+                    recently_changed = time_since_last_state_change < timedelta(
+                        seconds=2.0
                     )
                     if recently_changed:
                         tooltip = "Action executed."
@@ -905,9 +875,7 @@ class UI:
         if osm is None or not self._ui_settings.can_change_object_states:
             return
 
-        result = osm.try_execute_action(
-            state_name, target_value, object_handle
-        )
+        result = osm.try_execute_action(state_name, target_value, object_handle)
         if result.success:
             self._on_object_state_change.invoke(
                 UI.StateChangeEventData(
@@ -923,9 +891,7 @@ class UI:
         self, aabb: mn.Range3D, transform: mn.Matrix4, color: mn.Color3
     ) -> None:
         """Draw an AABB."""
-        self._gui_drawer.push_transform(
-            transform, destination_mask=self._dest_mask
-        )
+        self._gui_drawer.push_transform(transform, destination_mask=self._dest_mask)
         self._gui_drawer.draw_box(
             min_extent=aabb.back_bottom_left,
             max_extent=aabb.front_top_right,
@@ -990,9 +956,7 @@ class UI:
                     reachable = self._is_within_reach(obj.translation)
                     color = COLOR_VALID if reachable else COLOR_INVALID
                     color[3] = (
-                        0.3
-                        if self._click_selection.object_id != object_id
-                        else 1.0
+                        0.3 if self._click_selection.object_id != object_id else 1.0
                     )
                 else:
                     color = COLOR_HIGHLIGHT
@@ -1012,9 +976,7 @@ class UI:
             return
 
         sim = self._sim
-        obj = sutils.get_obj_from_id(
-            sim, object_id, self._world._link_id_to_ao_map
-        )
+        obj = sutils.get_obj_from_id(sim, object_id, self._world._link_id_to_ao_map)
         if obj is None:
             return
 
@@ -1023,9 +985,7 @@ class UI:
             link_index = self._world.get_link_index(object_id)
             if link_index:
                 link_node = obj.get_link_scene_node(link_index)
-                reachable = self._can_open_close_receptacle(
-                    link_node.translation
-                )
+                reachable = self._can_open_close_receptacle(link_node.translation)
                 color = COLOR_VALID if reachable else COLOR_INVALID
                 color = self._to_color_array(color)
                 color[3] = 0.3  # Make hover color dimmer than selection.
@@ -1044,9 +1004,7 @@ class UI:
             return
 
         sim = self._sim
-        obj = sutils.get_obj_from_id(
-            sim, object_id, self._world._link_id_to_ao_map
-        )
+        obj = sutils.get_obj_from_id(sim, object_id, self._world._link_id_to_ao_map)
         if obj is None:
             return
 
@@ -1057,9 +1015,7 @@ class UI:
             link_index = self._world.get_link_index(object_id)
             if link_index:
                 link_node = obj.get_link_scene_node(link_index)
-                reachable = self._can_open_close_receptacle(
-                    link_node.translation
-                )
+                reachable = self._can_open_close_receptacle(link_node.translation)
                 color = COLOR_VALID if reachable else COLOR_INVALID
                 color = self._to_color_array(color)
                 self._gui_drawer._client_message_manager.draw_object_outline(
@@ -1088,20 +1044,13 @@ class UI:
                 default_link_index = sutils.get_ao_default_link(
                     ao, compute_if_not_found=True
                 )
-                if (
-                    default_link_index is not None
-                    and default_link_index != link_index
-                ):
-                    default_link_node = obj.get_link_scene_node(
-                        default_link_index
-                    )
+                if default_link_index is not None and default_link_index != link_index:
+                    default_link_node = obj.get_link_scene_node(default_link_index)
                     if (
                         default_link_node.object_semantic_id
                         not in self._world._opened_link_set
                     ):
-                        color_default_link = self._to_color_array(
-                            COLOR_HIGHLIGHT
-                        )
+                        color_default_link = self._to_color_array(COLOR_HIGHLIGHT)
                         color_default_link[3] = 0.75
                         self._gui_drawer._client_message_manager.draw_object_outline(
                             priority=-10,

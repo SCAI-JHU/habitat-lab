@@ -51,6 +51,7 @@ class PreemptionDeciderProcess(ProcessBase):
     sending a report to the PreemptionDecider after it has collected a step of experience and written
     it into the learning buffer.
     """
+
     hostname: str
     port: int
     world_rank: int
@@ -65,9 +66,7 @@ class PreemptionDeciderProcess(ProcessBase):
     preemption_error_time_avg: WindowedRunningMean = attr.Factory(
         lambda: WindowedRunningMean(16)
     )
-    learner_time_avg: WindowedRunningMean = attr.Factory(
-        lambda: WindowedRunningMean(5)
-    )
+    learner_time_avg: WindowedRunningMean = attr.Factory(lambda: WindowedRunningMean(5))
     my_opt_rollout_steps: float = 0.0
     start_time: float = 0.0
     expected_steps_collected: int = 0
@@ -90,18 +89,18 @@ class PreemptionDeciderProcess(ProcessBase):
 
         torch.distributed.gather(
             torch.from_numpy(arr),
-            gather_list=list(torch.from_numpy(all_arr).unbind(0))
-            if self.world_rank == 0
-            else None,
+            gather_list=(
+                list(torch.from_numpy(all_arr).unbind(0))
+                if self.world_rank == 0
+                else None
+            ),
             dst=0,
         )
 
         return all_arr
 
     def _gather_all_step_averages(self):
-        my_averages = np.array(
-            [float(v) for v in self.step_averages], dtype=np.float64
-        )
+        my_averages = np.array([float(v) for v in self.step_averages], dtype=np.float64)
         return self._gather(my_averages), my_averages
 
     def _all_reduce(self, val, reduce_op=torch.distributed.ReduceOp.SUM):
@@ -141,9 +140,7 @@ class PreemptionDeciderProcess(ProcessBase):
         # The maximum number of steps we can collect from 1 env. This
         # is rollout length + 1 times the maximum difference in
         # env speed. We also have an additional scaling factor
-        max_possible_steps = (
-            self.config.habitat_baselines.rl.ppo.num_steps + 1
-        ) * (
+        max_possible_steps = (self.config.habitat_baselines.rl.ppo.num_steps + 1) * (
             self._ver_extra_steps_scaling
             * np.max(all_step_averages)
             / np.min(all_step_averages)
@@ -192,9 +189,7 @@ class PreemptionDeciderProcess(ProcessBase):
             # The total rollout time is time to collect + learning
             # + some error factor
             total_time = (
-                candidate_lengths
-                + lt
-                + max(float(self.preemption_error_time_avg), 0.0)
+                candidate_lengths + lt + max(float(self.preemption_error_time_avg), 0.0)
             )
         else:
             # If we are overlapping, it's the
@@ -218,9 +213,7 @@ class PreemptionDeciderProcess(ProcessBase):
         return target_length_time, max_possible_steps
 
     def update(self, num_next_steps: int):
-        all_num_next_steps = self._gather(
-            np.array([num_next_steps], dtype=np.int64)
-        )
+        all_num_next_steps = self._gather(np.array([num_next_steps], dtype=np.int64))
         all_step_averages, my_step_averages = self._gather_all_step_averages()
         lt = max(self._reduce(float(self.learner_time_avg), mean=True), 0.01)
         target_length_time = -1.0
@@ -252,8 +245,7 @@ class PreemptionDeciderProcess(ProcessBase):
 
         if (
             self.learner_time_avg.count == self.learner_time_avg.window_size
-            and self.opt_rollout_time_avg.count
-            == self.opt_rollout_time_avg.window_size
+            and self.opt_rollout_time_avg.count == self.opt_rollout_time_avg.window_size
         ):
             self.rollout_ends.steps.value = float(self.my_opt_rollout_steps)
         else:
@@ -263,9 +255,7 @@ class PreemptionDeciderProcess(ProcessBase):
         step_time = data["t_stamp"]
         for _, env_idx in data["steps_finished"]:
             if self.last_step_times[env_idx] > 0:
-                self.step_averages[env_idx] += (
-                    step_time - self.last_step_times[env_idx]
-                )
+                self.step_averages[env_idx] += step_time - self.last_step_times[env_idx]
 
             self.last_step_times[env_idx] = step_time
 
@@ -283,13 +273,10 @@ class PreemptionDeciderProcess(ProcessBase):
         self.started = True
         if (
             self.learner_time_avg.count == self.learner_time_avg.window_size
-            and self.opt_rollout_time_avg.count
-            == self.opt_rollout_time_avg.window_size
+            and self.opt_rollout_time_avg.count == self.opt_rollout_time_avg.window_size
         ):
             self.rollout_ends.time.value = (
-                self.my_t_zero
-                + self.start_time
-                + float(self.opt_rollout_time_avg)
+                self.my_t_zero + self.start_time + float(self.opt_rollout_time_avg)
             )
         else:
             self.rollout_ends.time.value = -1
@@ -306,8 +293,7 @@ class PreemptionDeciderProcess(ProcessBase):
                     real_steps_collected=self.real_steps_collected,
                     expected_steps_collected=self.expected_steps_collected,
                     real_rollout_time=(end_steps_time - self.start_time) * 1e3,
-                    expected_rollout_time=float(self.opt_rollout_time_avg)
-                    * 1e3,
+                    expected_rollout_time=float(self.opt_rollout_time_avg) * 1e3,
                 ),
             )
         )
@@ -336,9 +322,7 @@ class PreemptionDeciderProcess(ProcessBase):
         self.response_queue.put(None)
 
         self.step_averages = [
-            WindowedRunningMean(
-                5 * self.config.habitat_baselines.rl.ppo.num_steps
-            )
+            WindowedRunningMean(5 * self.config.habitat_baselines.rl.ppo.num_steps)
             for _ in range(self.config.habitat_baselines.num_environments)
         ]
         self.last_step_times = np.zeros(
@@ -351,17 +335,15 @@ class PreemptionDeciderProcess(ProcessBase):
         self.n_rollouts_started = 0
         while not self.done_event.is_set():
             try:
-                new_tasks = self.queues.preemption_decider.get_many(
-                    timeout=1.0
-                )
+                new_tasks = self.queues.preemption_decider.get_many(timeout=1.0)
             except queue.Empty:
                 continue
 
             if not self.started:
                 new_tasks.sort(
-                    key=lambda t: 0
-                    if t[0] == PreemptionDeciderTasks.start_rollout
-                    else 1
+                    key=lambda t: (
+                        0 if t[0] == PreemptionDeciderTasks.start_rollout else 1
+                    )
                 )
 
                 if new_tasks[0][0] != PreemptionDeciderTasks.start_rollout:

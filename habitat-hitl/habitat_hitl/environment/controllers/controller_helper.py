@@ -43,9 +43,7 @@ class ControllerHelper:
         self._gym_habitat_env: GymHabitatEnv = gym_habitat_env
         self._env: habitat.Env = gym_habitat_env.unwrapped.habitat_env
         self.n_agents: int = len(self._env._sim.agents_mgr)  # type: ignore[attr-defined]
-        self.n_user_controlled_agents: int = len(
-            hitl_config.gui_controlled_agents
-        )
+        self.n_user_controlled_agents: int = len(hitl_config.gui_controlled_agents)
         assert self.n_user_controlled_agents <= self.n_agents
         self.n_policy_controlled_agents: int = (
             self.n_agents - self.n_user_controlled_agents
@@ -79,21 +77,17 @@ class ControllerHelper:
                 )
         else:
             # some agents are gui controlled and the rest (if any) are policy controlled
-            for agent_index in range(
-                len(self._env.sim.habitat_config.agents_order)
-            ):
-                gui_controlled_agent_config = (
-                    self._find_gui_controlled_agent_config(agent_index)
+            for agent_index in range(len(self._env.sim.habitat_config.agents_order)):
+                gui_controlled_agent_config = self._find_gui_controlled_agent_config(
+                    agent_index
                 )
                 if gui_controlled_agent_config:
-                    agent_name: str = (
-                        self._env.sim.habitat_config.agents_order[agent_index]
-                    )
-                    articulated_agent_type: str = (
-                        self._env.sim.habitat_config.agents[
-                            agent_name
-                        ].articulated_agent_type
-                    )
+                    agent_name: str = self._env.sim.habitat_config.agents_order[
+                        agent_index
+                    ]
+                    articulated_agent_type: str = self._env.sim.habitat_config.agents[
+                        agent_name
+                    ].articulated_agent_type
 
                     gui_agent_controller: Controller
                     if articulated_agent_type == "KinematicHumanoid":
@@ -105,9 +99,7 @@ class ControllerHelper:
                             walk_pose_path=hitl_config.walk_pose_path,
                             lin_speed=gui_controlled_agent_config.lin_speed,
                             ang_speed=gui_controlled_agent_config.ang_speed,
-                            recorder=recorder.get_nested_recorder(
-                                "gui_humanoid"
-                            ),
+                            recorder=recorder.get_nested_recorder("gui_humanoid"),
                         )
                     elif articulated_agent_type == "SpotRobot":
                         agent_k = f"agent_{agent_index}"
@@ -122,9 +114,7 @@ class ControllerHelper:
                         (
                             base_vel_action_idx,
                             base_vel_action_end_idx,
-                        ) = find_action_range(
-                            original_action_space, "_base_velocity"
-                        )
+                        ) = find_action_range(original_action_space, "_base_velocity")
 
                         assert len(action_space.shape) == 1
                         num_actions = action_space.shape[0]
@@ -168,9 +158,7 @@ class ControllerHelper:
                     )
 
     def _find_gui_controlled_agent_config(self, agent_index):
-        for (
-            gui_controlled_agent_config
-        ) in self._hitl_config.gui_controlled_agents:
+        for gui_controlled_agent_config in self._hitl_config.gui_controlled_agents:
             if gui_controlled_agent_config.agent_index == agent_index:
                 return gui_controlled_agent_config
         return None
@@ -180,9 +168,7 @@ class ControllerHelper:
         Return list of controllers indexed by user index. Beware the difference between user index and agent index. For example, user 0 may control agent 1.
         """
         gui_agent_controllers = []
-        for (
-            gui_controlled_agent_config
-        ) in self._hitl_config.gui_controlled_agents:
+        for gui_controlled_agent_config in self._hitl_config.gui_controlled_agents:
             gui_agent_controllers.append(
                 self.controllers[gui_controlled_agent_config.agent_index]
             )
@@ -208,14 +194,11 @@ class ControllerHelper:
             # so we need to sort the actions by agent index
             controlled_agent_idxs = [controller._agent_idx for controller in self.controllers]  # type: ignore[attr-defined]
             actions = [
-                action
-                for _, action in sorted(zip(controlled_agent_idxs, actions))
+                action for _, action in sorted(zip(controlled_agent_idxs, actions))
             ]
             action = np.concatenate(actions, dtype=np.float32)
         else:
-            raise ValueError(
-                "ControllerHelper only supports up to 2 controllers."
-            )
+            raise ValueError("ControllerHelper only supports up to 2 controllers.")
 
         return action
 

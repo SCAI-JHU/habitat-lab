@@ -21,9 +21,7 @@ class ResetArmSkill(SkillPolicy):
         batch_size,
     ):
         super().__init__(config, action_space, batch_size, True)
-        self._rest_state = np.array(
-            [float(x) for x in config.reset_joint_state]
-        )
+        self._rest_state = np.array([float(x) for x in config.reset_joint_state])
 
         self._arm_ac_range = find_action_range(action_space, "arm_action")
         self._arm_ac_range = (self._arm_ac_range[0], self._rest_state.shape[0])
@@ -46,9 +44,7 @@ class ResetArmSkill(SkillPolicy):
             skill_name,
         )
 
-        self._initial_delta = (
-            self._rest_state - observations["joint"].cpu().numpy()
-        )
+        self._initial_delta = self._rest_state - observations["joint"].cpu().numpy()
 
         return ret
 
@@ -93,12 +89,8 @@ class ResetArmSkill(SkillPolicy):
 
         action = torch.zeros_like(prev_actions)
         # There is an extra grab action that we don't want to set.
-        action[
-            ..., self._arm_ac_range[0] : self._arm_ac_range[1]
-        ] = torch.from_numpy(delta).to(
-            device=action.device, dtype=action.dtype
-        )
+        action[..., self._arm_ac_range[0] : self._arm_ac_range[1]] = torch.from_numpy(
+            delta
+        ).to(device=action.device, dtype=action.dtype)
 
-        return PolicyActionData(
-            actions=action, rnn_hidden_states=rnn_hidden_states
-        )
+        return PolicyActionData(actions=action, rnn_hidden_states=rnn_hidden_states)

@@ -97,17 +97,13 @@ class Benchmark:
 
                 res_env = unpack_for_grpc(
                     stub.act_on_environment(
-                        evaluation_pb2.Package(
-                            SerializedEntity=pack_for_grpc(action)
-                        )
+                        evaluation_pb2.Package(SerializedEntity=pack_for_grpc(action))
                     ).SerializedEntity
                 )
 
             metrics = unpack_for_grpc(
                 stub.get_metrics(
-                    evaluation_pb2.Package(
-                        SerializedEntity=pack_for_grpc(action)
-                    )
+                    evaluation_pb2.Package(SerializedEntity=pack_for_grpc(action))
                 ).SerializedEntity
             )
 
@@ -136,9 +132,7 @@ class Benchmark:
         else:
             assert num_episodes <= len(self._env.episodes), (
                 "num_episodes({}) is larger than number of episodes "
-                "in environment ({})".format(
-                    num_episodes, len(self._env.episodes)
-                )
+                "in environment ({})".format(num_episodes, len(self._env.episodes))
             )
 
         assert num_episodes > 0, "num_episodes should be greater than 0"

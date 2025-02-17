@@ -50,6 +50,7 @@ class ClientMessageManager:
     Extends gfx-replay keyframes to include server messages to be interpreted by the clients.
     Unlike keyframes, messages are client-specific.
     """
+
     _messages: List[Message]
     _users: Users
 
@@ -144,9 +145,7 @@ class ClientMessageManager:
                     # sloppy: using int 0-255 to reduce serialized data size
                     return int(channel * 255.0)
 
-                alpha = (
-                    1.0 if isinstance(from_color, mn.Color3) else from_color.a
-                )
+                alpha = 1.0 if isinstance(from_color, mn.Color3) else from_color.a
                 lines_dict["c"] = [
                     conv(from_color.r),
                     conv(from_color.g),
@@ -158,9 +157,7 @@ class ClientMessageManager:
 
             message["lines"].append(lines_dict)
 
-    def add_text(
-        self, text: str, pos: list[float], destination_mask: Mask = Mask.ALL
-    ):
+    def add_text(self, text: str, pos: list[float], destination_mask: Mask = Mask.ALL):
         r"""
         Draw text at the specified screen coordinates.
         """
@@ -171,9 +168,7 @@ class ClientMessageManager:
             assert len(pos) == 2
             if "texts" not in message:
                 message["texts"] = []
-            message["texts"].append(
-                {"text": text, "position": [pos[0], pos[1]]}
-            )
+            message["texts"].append({"text": text, "position": [pos[0], pos[1]]})
 
     def show_modal_dialogue_box(
         self,
@@ -313,9 +308,7 @@ class ClientMessageManager:
         layers = Users(8, activate_users=True)  # Maximum of 8 layers.
         for user_index in self._users.indices(destination_mask):
             message = self._messages[user_index]
-            viewport_properties = _obtain_viewport_properties(
-                message, viewport_id
-            )
+            viewport_properties = _obtain_viewport_properties(message, viewport_id)
             # TODO: Use mask int instead of array
             viewport_properties["layers"] = []
             for layer in layers.indices(visible_layer_ids):
@@ -339,9 +332,7 @@ class ClientMessageManager:
             message = self._messages[user_index]
             # flatten to a list of floats for more efficient serialization
             message["navmeshVertices"] = [
-                component
-                for sublist in triangle_vertices
-                for component in sublist
+                component for sublist in triangle_vertices for component in sublist
             ]
 
     def update_camera_transform(
@@ -403,9 +394,7 @@ def _create_transform_dict(transform: mn.Matrix4) -> Dict[str, List[float]]:
     }
 
 
-def _obtain_object_properties(
-    message: Message, object_id: int
-) -> Dict[str, Any]:
+def _obtain_object_properties(message: Message, object_id: int) -> Dict[str, Any]:
     """Get or create the properties dict of an object_id."""
     if "objects" not in message:
         message["objects"] = {}
@@ -414,9 +403,7 @@ def _obtain_object_properties(
     return message["objects"][object_id]
 
 
-def _obtain_viewport_properties(
-    message: Message, viewport_id: int
-) -> Dict[str, Any]:
+def _obtain_viewport_properties(message: Message, viewport_id: int) -> Dict[str, Any]:
     """Get or create the properties dict of a viewport."""
     if "viewports" not in message:
         message["viewports"] = {}

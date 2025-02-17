@@ -110,9 +110,7 @@ importlib.reload(
 repo = git.Repo(".", search_parent_directories=True)
 dir_path = repo.working_tree_dir
 data_path = os.path.join(dir_path, "data")
-output_path = os.path.join(
-    dir_path, "examples/tutorials/habitat_lab_visualization/"
-)
+output_path = os.path.join(dir_path, "examples/tutorials/habitat_lab_visualization/")
 os.makedirs(output_path, exist_ok=True)
 os.chdir(dir_path)
 
@@ -206,9 +204,7 @@ class NavPickTaskV1(RearrangeTask):
     """
 
     def reset(self, episode):
-        self.target_object_index = np.random.randint(
-            0, self._sim.get_n_targets()
-        )
+        self.target_object_index = np.random.randint(0, self._sim.get_n_targets())
         start_pos = self._sim.pathfinder.get_random_navigable_point()
         self._sim.articulated_agent.base_pos = start_pos
 
@@ -303,11 +299,7 @@ class NavPickSuccess(Measure):
 
     def reset_metric(self, *args, episode, task, observations, **kwargs):
         self.update_metric(
-            *args,
-            episode=episode,
-            task=task,
-            observations=observations,
-            **kwargs
+            *args, episode=episode, task=task, observations=observations, **kwargs
         )
 
     def update_metric(self, *args, episode, task, observations, **kwargs):

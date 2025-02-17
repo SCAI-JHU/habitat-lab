@@ -34,9 +34,7 @@ HabGymWrapperObsType = Union[np.ndarray, Dict[str, np.ndarray]]
 
 
 def filter_observation_space(obs_space, limit_keys):
-    return spaces.Dict(
-        {k: v for k, v in obs_space.spaces.items() if k in limit_keys}
-    )
+    return spaces.Dict({k: v for k, v in obs_space.spaces.items() if k in limit_keys})
 
 
 def smash_observation_space(obs_space, limit_keys):
@@ -53,9 +51,7 @@ def smash_observation_space(obs_space, limit_keys):
         # Smash together
         total_dim = sum(shape[0] for shape in obs_shapes)
 
-        return spaces.Box(
-            shape=(total_dim,), low=-1.0, high=1.0, dtype=np.float32
-        )
+        return spaces.Box(shape=(total_dim,), low=-1.0, high=1.0, dtype=np.float32)
     return filter_observation_space(obs_space, limit_keys)
 
 
@@ -111,9 +107,7 @@ def create_action_space(original_space: gym.Space) -> gym.Space:
         low: List[float] = []
         high: List[float] = []
         _recursive_continuous_size_getter(original_space, low, high)
-        return spaces.Box(
-            low=np.array(low), high=np.array(high), dtype=np.float32
-        )
+        return spaces.Box(low=np.array(low), high=np.array(high), dtype=np.float32)
     elif len(original_space) == 1 and isinstance(
         original_space[first_k], spaces.Discrete
     ):
@@ -214,10 +208,7 @@ class HabGymWrapper(gym.Wrapper):
             {
                 k: v
                 for k, v in env.action_space.spaces.items()
-                if (
-                    (self._gym_action_keys is None)
-                    or (k in self._gym_action_keys)
-                )
+                if ((self._gym_action_keys is None) or (k in self._gym_action_keys))
             }
         )
 
@@ -285,9 +276,7 @@ class HabGymWrapper(gym.Wrapper):
             self.orig_obs = obs
 
         observation = {
-            "observation": OrderedDict(
-                [(k, obs[k]) for k in self._gym_obs_keys]
-            )
+            "observation": OrderedDict([(k, obs[k]) for k in self._gym_obs_keys])
         }
 
         if len(self._gym_goal_keys) > 0:
@@ -301,9 +290,7 @@ class HabGymWrapper(gym.Wrapper):
             )
 
         if KEYFRAME_OBSERVATION_KEY in obs:
-            observation[KEYFRAME_OBSERVATION_KEY] = obs[
-                KEYFRAME_OBSERVATION_KEY
-            ]
+            observation[KEYFRAME_OBSERVATION_KEY] = obs[KEYFRAME_OBSERVATION_KEY]
 
         for k, v in observation.items():
             if isinstance(self.observation_space, spaces.Box):
@@ -331,18 +318,12 @@ class HabGymWrapper(gym.Wrapper):
             frame = observations_to_image(self._last_obs, last_infos)
         elif mode == "human":
             if pygame is None:
-                raise ValueError(
-                    "Render mode human not supported without pygame."
-                )
+                raise ValueError("Render mode human not supported without pygame.")
             frame = observations_to_image(self._last_obs, last_infos)
             if self._screen is None:
                 pygame.init()
-                self._screen = pygame.display.set_mode(
-                    [frame.shape[1], frame.shape[0]]
-                )
-            draw_frame = np.transpose(
-                frame, (1, 0, 2)
-            )  # (H, W, C) -> (W, H, C)
+                self._screen = pygame.display.set_mode([frame.shape[1], frame.shape[0]])
+            draw_frame = np.transpose(frame, (1, 0, 2))  # (H, W, C) -> (W, H, C)
             draw_frame = pygame.surfarray.make_surface(draw_frame)
             black_color = (0, 0, 0)
             top_corner = (0, 0)

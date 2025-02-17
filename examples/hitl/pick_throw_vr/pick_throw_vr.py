@@ -105,9 +105,7 @@ class AppStatePickThrowVr(AppState):
         largest_island_index = get_largest_island_index(
             self.get_sim().pathfinder, self.get_sim(), allow_outdoor=False
         )
-        pts = self.get_sim().pathfinder.build_navmesh_vertices(
-            largest_island_index
-        )
+        pts = self.get_sim().pathfinder.build_navmesh_vertices(largest_island_index)
         assert len(pts) > 0
         assert len(pts) % 3 == 0
         assert len(pts[0]) == 3
@@ -165,9 +163,7 @@ class AppStatePickThrowVr(AppState):
         hand_positions = []
         num_hands = 2
         for i in range(num_hands):
-            hand_pos, _ = remote_client_state.get_hand_pose(
-                user_index=0, hand_idx=i
-            )
+            hand_pos, _ = remote_client_state.get_hand_pose(user_index=0, hand_idx=i)
             if hand_pos:
                 hand_positions.append(hand_pos)
         if len(hand_positions) == 0:
@@ -311,9 +307,7 @@ class AppStatePickThrowVr(AppState):
             and distance_multiplier == 0.0
             and self._count_tsteps_stop > MIN_STEPS_STOP
         ):
-            reach_pos = self._get_target_object_position(
-                self._held_target_obj_idx
-            )
+            reach_pos = self._get_target_object_position(self._held_target_obj_idx)
             hand_idx = self._remote_held_hand_idx
         elif self._recent_reach_pos:
             # Track the state of the hand when trying to reach an object
@@ -376,16 +370,12 @@ class AppStatePickThrowVr(AppState):
                     self._recent_reach_pos = None
                 else:
                     # this spacebar release means we've finished the throwing motion
-                    throw_obj_id = (
-                        self._gui_agent_ctrl._get_grasp_mgr().snap_idx
-                    )
+                    throw_obj_id = self._gui_agent_ctrl._get_grasp_mgr().snap_idx
 
                     # The robot can only pick up the object if there is a throw_obj_id
                     # throw_obj_id will be None if the users fast press and press again the space
                     if throw_obj_id is not None:
-                        throw_vel = (
-                            self._throw_helper.viz_and_get_humanoid_throw()
-                        )
+                        throw_vel = self._throw_helper.viz_and_get_humanoid_throw()
                         if throw_vel:
                             self._held_target_obj_idx = None
         else:
@@ -416,9 +406,7 @@ class AppStatePickThrowVr(AppState):
                     self._has_grasp_preview = True
 
                     if self._app_service.gui_input.get_key_down(KeyCode.SPACE):
-                        self._recent_reach_pos = (
-                            self._get_target_object_position(min_i)
-                        )
+                        self._recent_reach_pos = self._get_target_object_position(min_i)
                         # we will reach towards this position until spacebar is released
                         reach_pos = self._recent_reach_pos
 
@@ -501,14 +489,9 @@ class AppStatePickThrowVr(AppState):
         if do_pulse:
             radius += self._app_service.get_anim_fraction() * RING_PULSE_SIZE
 
-        if (
-            self._app_service.client_message_manager
-            and self._is_remote_active()
-        ):
+        if self._app_service.client_message_manager and self._is_remote_active():
             client_radius = radius
-            self._app_service.client_message_manager.add_highlight(
-                pos, client_radius
-            )
+            self._app_service.client_message_manager.add_highlight(pos, client_radius)
 
         self._draw_circle(pos, color, radius)
 
@@ -537,9 +520,7 @@ class AppStatePickThrowVr(AppState):
 
     def _get_gui_agent_feet_height(self):
         assert isinstance(self._gui_agent_ctrl, GuiHumanoidController)
-        base_offset = (
-            self._gui_agent_ctrl.get_articulated_agent().params.base_offset
-        )
+        base_offset = self._gui_agent_ctrl.get_articulated_agent().params.base_offset
         agent_feet_translation = (
             self._gui_agent_ctrl.get_base_translation() + base_offset
         )
@@ -688,13 +669,9 @@ class AppStatePickThrowVr(AppState):
             if ray.origin.y < ceiling_y:
                 return None
 
-            dist_to_raycast_start_y = (
-                ray.origin.y - ceiling_y
-            ) / -ray.direction.y
+            dist_to_raycast_start_y = (ray.origin.y - ceiling_y) / -ray.direction.y
             assert dist_to_raycast_start_y >= 0
-            adjusted_origin = (
-                ray.origin + ray.direction * dist_to_raycast_start_y
-            )
+            adjusted_origin = ray.origin + ray.direction * dist_to_raycast_start_y
             ray.origin = adjusted_origin
 
         # reference code for casting a ray into the scene
@@ -707,9 +684,7 @@ class AppStatePickThrowVr(AppState):
         return hit_info
 
 
-@hydra.main(
-    version_base=None, config_path="config", config_name="pick_throw_vr"
-)
+@hydra.main(version_base=None, config_path="config", config_name="pick_throw_vr")
 def main(config):
     hitl_main(
         config,

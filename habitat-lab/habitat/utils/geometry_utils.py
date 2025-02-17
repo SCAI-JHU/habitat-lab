@@ -60,9 +60,7 @@ def quaternion_from_coeff(coeffs: List[float]) -> quaternion.quaternion:
     return quat
 
 
-def quaternion_rotate_vector(
-    quat: quaternion.quaternion, v: np.ndarray
-) -> np.ndarray:
+def quaternion_rotate_vector(quat: quaternion.quaternion, v: np.ndarray) -> np.ndarray:
     r"""Rotates a vector by a quaternion
     Args:
         quaternion: The quaternion to rotate by
@@ -90,12 +88,8 @@ def agent_state_target2ref(
         and need to be transformed to the local coordinate system defined by ref_agent_state.
     """
 
-    assert (
-        len(ref_agent_state[1]) == 3
-    ), "Only support Cartesian format currently."
-    assert (
-        len(target_agent_state[1]) == 3
-    ), "Only support Cartesian format currently."
+    assert len(ref_agent_state[1]) == 3, "Only support Cartesian format currently."
+    assert len(target_agent_state[1]) == 3, "Only support Cartesian format currently."
 
     ref_rotation, ref_position = ref_agent_state
     target_rotation, target_position = target_agent_state
@@ -118,9 +112,7 @@ def agent_state_target2ref(
     return (rotation_in_ref_coordinate, position_in_ref_coordinate)
 
 
-def random_triangle_point(
-    v0: np.ndarray, v1: np.ndarray, v2: np.ndarray
-) -> np.ndarray:
+def random_triangle_point(v0: np.ndarray, v1: np.ndarray, v2: np.ndarray) -> np.ndarray:
     """
     Sample a random point from a triangle given its vertices.
     """

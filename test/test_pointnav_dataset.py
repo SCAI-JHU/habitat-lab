@@ -35,9 +35,7 @@ NUM_EPISODES = 10
 def check_json_serialization(dataset: habitat.Dataset):
     start_time = time.time()
     json_str = str(dataset.to_json())
-    logger.info(
-        "JSON conversion finished. {} sec".format((time.time() - start_time))
-    )
+    logger.info("JSON conversion finished. {} sec".format((time.time() - start_time)))
     decoded_dataset = dataset.__class__()
     decoded_dataset.from_json(json_str)
     assert len(decoded_dataset.episodes) > 0
@@ -55,14 +53,10 @@ def test_single_pointnav_dataset():
     if not PointNavDatasetV1.check_config_paths_exist(dataset_config):
         pytest.skip("Test skipped as dataset files are missing.")
     scenes = PointNavDatasetV1.get_scenes_to_load(config=dataset_config)
-    assert (
-        len(scenes) > 0
-    ), "Expected dataset contains separate episode file per scene."
+    assert len(scenes) > 0, "Expected dataset contains separate episode file per scene."
     dataset = PointNavDatasetV1(config=dataset_config)
     assert len(dataset.episodes) > 0, "The dataset shouldn't be empty."
-    assert (
-        len(dataset.scene_ids) == 2
-    ), "The test dataset scenes number is wrong."
+    assert len(dataset.scene_ids) == 2, "The test dataset scenes number is wrong."
     check_json_serialization(dataset)
 
 
@@ -71,14 +65,10 @@ def test_multiple_files_scene_path():
     if not PointNavDatasetV1.check_config_paths_exist(dataset_config):
         pytest.skip("Test skipped as dataset files are missing.")
     scenes = PointNavDatasetV1.get_scenes_to_load(config=dataset_config)
-    assert (
-        len(scenes) > 0
-    ), "Expected dataset contains separate episode file per scene."
+    assert len(scenes) > 0, "Expected dataset contains separate episode file per scene."
     with habitat.config.read_write(dataset_config):
         dataset_config.content_scenes = scenes[:PARTIAL_LOAD_SCENES]
-        dataset_config.scenes_dir = os.path.join(
-            os.getcwd(), DEFAULT_SCENE_PATH_PREFIX
-        )
+        dataset_config.scenes_dir = os.path.join(os.getcwd(), DEFAULT_SCENE_PATH_PREFIX)
     partial_dataset = make_dataset(
         id_dataset=dataset_config.type, config=dataset_config
     )
@@ -98,9 +88,7 @@ def test_multiple_files_pointnav_dataset():
     if not PointNavDatasetV1.check_config_paths_exist(dataset_config):
         pytest.skip("Test skipped as dataset files are missing.")
     scenes = PointNavDatasetV1.get_scenes_to_load(config=dataset_config)
-    assert (
-        len(scenes) > 0
-    ), "Expected dataset contains separate episode file per scene."
+    assert len(scenes) > 0, "Expected dataset contains separate episode file per scene."
     with habitat.config.read_write(dataset_config):
         dataset_config.content_scenes = scenes[:PARTIAL_LOAD_SCENES]
     partial_dataset = make_dataset(
@@ -130,9 +118,7 @@ def test_dataset_splitting(split):
         full_dataset = make_dataset(
             id_dataset=dataset_config.type, config=dataset_config
         )
-        full_episodes = {
-            (ep.scene_id, ep.episode_id) for ep in full_dataset.episodes
-        }
+        full_episodes = {(ep.scene_id, ep.episode_id) for ep in full_dataset.episodes}
 
         dataset_config.content_scenes = scenes[: PARTIAL_LOAD_SCENES // 2]
         split1_dataset = make_dataset(
@@ -226,6 +212,4 @@ def test_pointnav_episode_generator():
 
         dataset: habitat.Dataset = habitat.Dataset()
         dataset.episodes = episodes
-        assert (
-            dataset.to_json()
-        ), "Generated episodes aren't json serializable."
+        assert dataset.to_json(), "Generated episodes aren't json serializable."

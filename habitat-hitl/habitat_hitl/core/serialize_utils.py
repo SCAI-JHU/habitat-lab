@@ -43,9 +43,7 @@ def convert_to_json_friendly(obj):
         return [convert_to_json_friendly(item) for item in obj]
     elif isinstance(obj, dict):
         # If obj is a dictionary, recursively convert its values
-        return {
-            key: convert_to_json_friendly(value) for key, value in obj.items()
-        }
+        return {key: convert_to_json_friendly(value) for key, value in obj.items()}
     elif isinstance(obj, np.generic):
         # If obj is a NumPy scalar type, convert it to a standard Python scalar type
         return convert_to_json_friendly(obj.item())
@@ -60,14 +58,10 @@ def convert_to_json_friendly(obj):
         attributes = {}
         for attr in dir(obj):
             try:
-                if not attr.startswith("__") and not callable(
-                    getattr(obj, attr)
-                ):
+                if not attr.startswith("__") and not callable(getattr(obj, attr)):
                     attributes[attr] = getattr(obj, attr)
             except Exception as e:
-                print(
-                    f"Unable to convert attribute to JSON: {attr}. Skipping. {e}"
-                )
+                print(f"Unable to convert attribute to JSON: {attr}. Skipping. {e}")
         return convert_to_json_friendly(attributes)
 
 
@@ -77,9 +71,7 @@ def save_as_pickle_gzip(obj, filepath):
 
 
 def save_as_json_gzip(obj, filepath):
-    json_data = json.dumps(
-        convert_to_json_friendly(obj), separators=(",", ":")
-    )
+    json_data = json.dumps(convert_to_json_friendly(obj), separators=(",", ":"))
     save_as_gzip(json_data.encode("utf-8"), filepath)
 
 

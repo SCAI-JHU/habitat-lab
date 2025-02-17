@@ -112,20 +112,15 @@ class CameraHelper:
         return eye_pos, lookat_pos
 
     def update(self, base_pos, dt):
-        if (
-            not self._first_person_mode
-            and self._gui_input.mouse_scroll_offset != 0
-        ):
+        if not self._first_person_mode and self._gui_input.mouse_scroll_offset != 0:
             zoom_sensitivity = 0.07
             if self._gui_input.mouse_scroll_offset < 0:
                 self.cam_zoom_dist *= (
-                    1.0
-                    + -self._gui_input.mouse_scroll_offset * zoom_sensitivity
+                    1.0 + -self._gui_input.mouse_scroll_offset * zoom_sensitivity
                 )
             else:
                 self.cam_zoom_dist /= (
-                    1.0
-                    + self._gui_input.mouse_scroll_offset * zoom_sensitivity
+                    1.0 + self._gui_input.mouse_scroll_offset * zoom_sensitivity
                 )
             self.cam_zoom_dist = mn.math.clamp(
                 self.cam_zoom_dist,
@@ -146,9 +141,7 @@ class CameraHelper:
 
     def get_xz_forward(self):
         assert self._cam_transform
-        forward_dir = self._cam_transform.transform_vector(
-            -mn.Vector3(0, 0, 1)
-        )
+        forward_dir = self._cam_transform.transform_vector(-mn.Vector3(0, 0, 1))
         forward_dir.y = 0
         # todo: handle case of degenerate zero vector here due to camera looking
         # straight up or down
@@ -157,9 +150,7 @@ class CameraHelper:
 
     def get_cam_forward_vector(self) -> Optional[mn.Vector3]:
         assert self._cam_transform
-        forward_dir = self._cam_transform.transform_vector(
-            -mn.Vector3(0, 0, 1)
-        )
+        forward_dir = self._cam_transform.transform_vector(-mn.Vector3(0, 0, 1))
         forward_dir = forward_dir.normalized()
         return forward_dir
 

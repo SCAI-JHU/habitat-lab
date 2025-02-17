@@ -109,10 +109,6 @@ class HumanoidBaseController:
         Obtains the controller joints, offset and base transform in a vectorized form so that it can be passed
         as an argument to HumanoidJointAction.
         """
-        obj_trans_offset = np.asarray(
-            self.obj_transform_offset.transposed()
-        ).flatten()
-        obj_trans_base = np.asarray(
-            self.obj_transform_base.transposed()
-        ).flatten()
+        obj_trans_offset = np.asarray(self.obj_transform_offset.transposed()).flatten()
+        obj_trans_base = np.asarray(self.obj_transform_base.transposed()).flatten()
         return self.joint_pose + list(obj_trans_offset) + list(obj_trans_base)

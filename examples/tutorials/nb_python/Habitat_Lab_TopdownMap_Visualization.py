@@ -71,9 +71,7 @@ if TYPE_CHECKING:
 repo = git.Repo(".", search_parent_directories=True)
 dir_path = repo.working_tree_dir
 data_path = os.path.join(dir_path, "data")
-output_path = os.path.join(
-    dir_path, "examples/tutorials/habitat_lab_visualization/"
-)
+output_path = os.path.join(dir_path, "examples/tutorials/habitat_lab_visualization/")
 os.makedirs(output_path, exist_ok=True)
 os.chdir(dir_path)
 # [/setup]
@@ -312,9 +310,7 @@ def example_top_down_map_measure():
             current_episode = env.current_episode
             video_name = f"{os.path.basename(current_episode.scene_id)}_{current_episode.episode_id}"
             # Create video from images and save to disk
-            images_to_video(
-                vis_frames, output_path, video_name, fps=6, quality=9
-            )
+            images_to_video(vis_frames, output_path, video_name, fps=6, quality=9)
             vis_frames.clear()
             # Display video
             vut.display_video(f"{output_path}/{video_name}.mp4")

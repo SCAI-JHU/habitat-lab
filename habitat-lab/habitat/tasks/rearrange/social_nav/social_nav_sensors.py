@@ -122,9 +122,7 @@ class SocialNavReward(RearrangeReward):
         else:
             # if the distance is too large
             social_nav_reward += self._prev_dist - dis
-        social_nav_reward = (
-            self._config.toward_human_reward * social_nav_reward
-        )
+        social_nav_reward = self._config.toward_human_reward * social_nav_reward
 
         # Componet 2: Social nav reward for facing human
         if dis < self._facing_human_dis and self._facing_human_reward != -1:
@@ -200,17 +198,13 @@ class SocialNavStats(UsesArticulatedAgentInterface, Measure):
         self._min_dis_human = self._config.min_dis_human
         self._max_dis_human = self._config.max_dis_human
         self._human_id = self._config.human_id
-        self._human_detect_threshold = (
-            self._config.human_detect_pixel_threshold
-        )
+        self._human_detect_threshold = self._config.human_detect_pixel_threshold
         self._total_step = self._config.total_steps
         self._dis_threshold_for_backup_yield = (
             self._config.dis_threshold_for_backup_yield
         )
         self._min_abs_vel_for_yield = self._config.min_abs_vel_for_yield
-        self._robot_face_human_threshold = (
-            self._config.robot_face_human_threshold
-        )
+        self._robot_face_human_threshold = self._config.robot_face_human_threshold
         self._enable_shortest_path_computation = (
             self._config.enable_shortest_path_computation
         )
@@ -268,15 +262,11 @@ class SocialNavStats(UsesArticulatedAgentInterface, Measure):
         # Robot's info
         self._robot_init_pos = robot_pos
         self._robot_init_trans = mn.Matrix4(
-            self._sim.get_agent_data(
-                0
-            ).articulated_agent.sim_obj.transformation
+            self._sim.get_agent_data(0).articulated_agent.sim_obj.transformation
         )
 
         self._prev_robot_base_T = mn.Matrix4(
-            self._sim.get_agent_data(
-                0
-            ).articulated_agent.sim_obj.transformation
+            self._sim.get_agent_data(0).articulated_agent.sim_obj.transformation
         )
 
         # Store pos of human and robot
@@ -296,9 +286,7 @@ class SocialNavStats(UsesArticulatedAgentInterface, Measure):
             return True
         use_k = f"agent_{self._robot_idx}_articulated_agent_arm_panoptic"
         panoptic = obs[use_k]
-        return (
-            np.sum(panoptic == self._human_id) > self._human_detect_threshold
-        )
+        return np.sum(panoptic == self._human_id) > self._human_detect_threshold
 
     def _check_robot_facing_human(self, human_pos, robot_pos):
         base_T = self._sim.get_agent_data(
@@ -313,14 +301,10 @@ class SocialNavStats(UsesArticulatedAgentInterface, Measure):
     def update_metric(self, *args, episode, task, observations, **kwargs):
         # Get the agent locations
         robot_pos = np.array(
-            self._sim.get_agent_data(
-                self._robot_idx
-            ).articulated_agent.base_pos
+            self._sim.get_agent_data(self._robot_idx).articulated_agent.base_pos
         )
         human_pos = np.array(
-            self._sim.get_agent_data(
-                self._human_idx
-            ).articulated_agent.base_pos
+            self._sim.get_agent_data(self._human_idx).articulated_agent.base_pos
         )
 
         # Store the human/robot position info
@@ -338,16 +322,11 @@ class SocialNavStats(UsesArticulatedAgentInterface, Measure):
             self._prev_robot_base_T.inverted().transform_point(robot_pos)
         )[[0, 2]]
         robot_move_vel = (
-            np.linalg.norm(robot_move_vec)
-            / (1.0 / 120.0)
-            * np.sign(robot_move_vec[0])
+            np.linalg.norm(robot_move_vec) / (1.0 / 120.0) * np.sign(robot_move_vec[0])
         )
 
         # Compute the metrics for backing up and yield
-        if (
-            dis <= self._dis_threshold_for_backup_yield
-            and robot_move_vel < 0.0
-        ):
+        if dis <= self._dis_threshold_for_backup_yield and robot_move_vel < 0.0:
             self._val_dict["backup_count"] += 1
         elif (
             dis <= self._dis_threshold_for_backup_yield
@@ -384,9 +363,7 @@ class SocialNavStats(UsesArticulatedAgentInterface, Measure):
             self._val_dict["min_start_end_episode_step"] == float("inf")
             and self._enable_shortest_path_computation
         ):
-            use_k_human = (
-                f"agent_{self._human_idx}_oracle_nav_randcoord_action"
-            )
+            use_k_human = f"agent_{self._human_idx}_oracle_nav_randcoord_action"
             robot_to_human_min_step = task.actions[
                 use_k_human
             ]._compute_robot_to_human_min_step(
@@ -419,9 +396,7 @@ class SocialNavStats(UsesArticulatedAgentInterface, Measure):
             first_encounter_spl = 0.0
 
         self._prev_robot_base_T = mn.Matrix4(
-            self._sim.get_agent_data(
-                0
-            ).articulated_agent.sim_obj.transformation
+            self._sim.get_agent_data(0).articulated_agent.sim_obj.transformation
         )
 
         # Compute the metrics
@@ -441,9 +416,7 @@ class SocialNavStats(UsesArticulatedAgentInterface, Measure):
             / self._val_dict["step_after_found"],
             "first_encounter_spl": first_encounter_spl,
             "frist_ecnounter_steps": self._val_dict["has_found_human_step"],
-            "frist_ecnounter_steps_ratio": self._val_dict[
-                "has_found_human_step"
-            ]
+            "frist_ecnounter_steps_ratio": self._val_dict["has_found_human_step"]
             / self._val_dict["min_start_end_episode_step"],
             "follow_human_steps_after_frist_encounter": self._val_dict[
                 "after_found_human_times"
@@ -451,13 +424,9 @@ class SocialNavStats(UsesArticulatedAgentInterface, Measure):
             "follow_human_steps_ratio_after_frist_encounter": self._val_dict[
                 "after_found_human_times"
             ]
-            / (
-                self._total_step - self._val_dict["min_start_end_episode_step"]
-            ),
-            "backup_ratio": self._val_dict["backup_count"]
-            / self._val_dict["step"],
-            "yield_ratio": self._val_dict["yield_count"]
-            / self._val_dict["step"],
+            / (self._total_step - self._val_dict["min_start_end_episode_step"]),
+            "backup_ratio": self._val_dict["backup_count"] / self._val_dict["step"],
+            "yield_ratio": self._val_dict["yield_count"] / self._val_dict["step"],
         }
 
         # Update the counter
@@ -491,9 +460,7 @@ class SocialNavSeekSuccess(Measure):
         super().__init__(*args, config=config, **kwargs)
         # Setup the parameters
         self._following_step = 0
-        self._following_step_succ_threshold = (
-            config.following_step_succ_threshold
-        )
+        self._following_step_succ_threshold = config.following_step_succ_threshold
         self._safe_dis_min = config.safe_dis_min
         self._safe_dis_max = config.safe_dis_max
         self._use_geo_distance = config.use_geo_distance
@@ -504,9 +471,7 @@ class SocialNavSeekSuccess(Measure):
 
     def update_metric(self, *args, episode, task, observations, **kwargs):
         # Get the angle distance
-        angle_dist = task.measurements.measures[
-            RotDistToGoal.cls_uuid
-        ].get_metric()
+        angle_dist = task.measurements.measures[RotDistToGoal.cls_uuid].get_metric()
 
         # Get the positions of the human and the robot
         use_k_human = f"agent_{self._human_idx}_localization_sensor"
@@ -521,9 +486,7 @@ class SocialNavSeekSuccess(Measure):
             dist = task.measurements.measures[DistToGoal.cls_uuid].get_metric()
 
         # Compute facing to human
-        base_T = self._sim.get_agent_data(
-            0
-        ).articulated_agent.base_transformation
+        base_T = self._sim.get_agent_data(0).articulated_agent.base_transformation
         if self._need_to_face_human:
             facing = (
                 robot_human_vec_dot_product(robot_pos, human_pos, base_T)
@@ -542,9 +505,7 @@ class SocialNavSeekSuccess(Measure):
 
         # If the robot needs to look at the target
         if self._config.must_look_at_targ:
-            self._metric = (
-                nav_pos_succ and angle_dist < self._config.success_angle_dist
-            )
+            self._metric = nav_pos_succ and angle_dist < self._config.success_angle_dist
         else:
             self._metric = nav_pos_succ
 
@@ -563,13 +524,13 @@ class HumanoidDetectorSensor(UsesArticulatedAgentInterface, Sensor):
         head_depth_shape = None
         for key in self._sim.sensor_suite.observation_spaces.spaces:
             if "articulated_agent_arm_panoptic" in key:
-                arm_panoptic_shape = (
-                    self._sim.sensor_suite.observation_spaces.spaces[key].shape
-                )
+                arm_panoptic_shape = self._sim.sensor_suite.observation_spaces.spaces[
+                    key
+                ].shape
             if "head_depth" in key:
-                head_depth_shape = (
-                    self._sim.sensor_suite.observation_spaces.spaces[key].shape
-                )
+                head_depth_shape = self._sim.sensor_suite.observation_spaces.spaces[
+                    key
+                ].shape
 
         # Set the correct size
         if arm_panoptic_shape is not None:
@@ -621,9 +582,7 @@ class HumanoidDetectorSensor(UsesArticulatedAgentInterface, Sensor):
             panoptic = observations[use_k]
         else:
             if self._return_image:
-                return np.zeros(
-                    (self._height, self._width, 1), dtype=np.float32
-                )
+                return np.zeros((self._height, self._width, 1), dtype=np.float32)
             else:
                 return np.zeros(1, dtype=np.float32)
 
@@ -639,10 +598,7 @@ class HumanoidDetectorSensor(UsesArticulatedAgentInterface, Sensor):
             else:
                 return tgt_mask
         else:
-            if (
-                np.sum(panoptic == self._human_id)
-                > self._human_pixel_threshold
-            ):
+            if np.sum(panoptic == self._human_id) > self._human_pixel_threshold:
                 found_human = True
 
             if found_human:

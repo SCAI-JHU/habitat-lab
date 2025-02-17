@@ -79,9 +79,7 @@ class RelationshipGraph:
             if len(self.obj_to_children[parent]) == 0:
                 del self.obj_to_children[parent]
 
-    def remove_obj_relations(
-        self, obj: int, parents_only: bool = False
-    ) -> None:
+    def remove_obj_relations(self, obj: int, parents_only: bool = False) -> None:
         """
         Remove all relationships for the object.
         Use this to remove an object from the kinematic manager.
@@ -122,9 +120,9 @@ class RelationshipGraph:
         :return: The relationship forest with strings instead of ints. The tuple contains: (object string, relationship type). Note, the strings include both object handles and link names, don't use them to backtrace the objects.
         """
 
-        obj_to_children_strings: Dict[
-            str, List[Tuple[str, str]]
-        ] = defaultdict(lambda: [])
+        obj_to_children_strings: Dict[str, List[Tuple[str, str]]] = defaultdict(
+            lambda: []
+        )
         # this maps object ids to explainable name strings
         ids_to_obj_names = sutils.get_all_object_ids(sim)
         for parent_id, children in self.obj_to_children.items():
@@ -204,9 +202,7 @@ class KinematicRelationshipManager:
                 )
                 continue
             rec = unique_name_to_rec[rec_unique_name]
-            parent_obj = sutils.get_obj_from_handle(
-                self.sim, rec.parent_object_handle
-            )
+            parent_obj = sutils.get_obj_from_handle(self.sim, rec.parent_object_handle)
             parent_id = parent_obj.object_id
             if rec.parent_link is not None and rec.parent_link >= 0:
                 # this is a link, get the object id
@@ -214,9 +210,7 @@ class KinematicRelationshipManager:
                     (v, k) for k, v in parent_obj.link_object_ids.items()
                 )
                 parent_id = link_ids_to_object_ids[rec.parent_link]
-            self.relationship_graph.add_relation(
-                parent_id, obj.object_id, "ontop"
-            )
+            self.relationship_graph.add_relation(parent_id, obj.object_id, "ontop")
 
         self.prev_snapshot = self.get_relations_snapshot()
         self.prev_root_obj_state = self.get_root_parents_snapshot()
@@ -231,29 +225,20 @@ class KinematicRelationshipManager:
         self.sim.perform_discrete_collision_detection()
 
         for obj_id in sutils.get_all_object_ids(self.sim).keys():
-            parent_obj = sutils.get_obj_from_id(
-                self.sim, obj_id, self.ao_link_map
-            )
+            parent_obj = sutils.get_obj_from_id(self.sim, obj_id, self.ao_link_map)
             assert parent_obj is not None, f"Object id {obj_id} is invalid."
 
-            obj_ontop = sutils.ontop(
-                self.sim, obj_id, do_collision_detection=False
-            )
+            obj_ontop = sutils.ontop(self.sim, obj_id, do_collision_detection=False)
             for child_id in obj_ontop:
                 if child_id == habitat_sim.stage_id:
                     continue
-                child_obj = sutils.get_obj_from_id(
-                    self.sim, child_id, self.ao_link_map
-                )
+                child_obj = sutils.get_obj_from_id(self.sim, child_id, self.ao_link_map)
                 if (
                     child_id == child_obj.object_id
-                    and child_obj.motion_type
-                    != habitat_sim.physics.MotionType.STATIC
+                    and child_obj.motion_type != habitat_sim.physics.MotionType.STATIC
                 ):
                     # this is a ManagedObject, not a link
-                    self.relationship_graph.add_relation(
-                        obj_id, child_id, "ontop"
-                    )
+                    self.relationship_graph.add_relation(obj_id, child_id, "ontop")
 
         self.prev_snapshot = self.get_relations_snapshot()
         self.prev_root_obj_state = self.get_root_parents_snapshot()
@@ -313,9 +298,7 @@ class KinematicRelationshipManager:
                 for root_parent in root_parent_subset
                 if root_parent in cur_root_parents
             ]
-        wip_snapshot: Dict[int, Dict[int, mn.Matrix4]] = defaultdict(
-            lambda: {}
-        )
+        wip_snapshot: Dict[int, Dict[int, mn.Matrix4]] = defaultdict(lambda: {})
         for parent_id in root_parents_to_update:
             self._get_relations_recursive(parent_id, wip_snapshot)
 
@@ -377,9 +360,7 @@ class KinematicRelationshipManager:
             if (
                 parent_id,
                 child_id,
-            ) in self.relationship_graph.relation_types and not applied_to[
-                child_id
-            ]:
+            ) in self.relationship_graph.relation_types and not applied_to[child_id]:
                 child_parent_obj = sutils.get_obj_from_id(
                     self.sim, child_id, self.ao_link_map
                 )
@@ -415,9 +396,7 @@ class KinematicRelationshipManager:
         applied_to: Dict[int, bool] = defaultdict(lambda: False)
 
         # pre-check for parents which should be updated if not apply_all
-        apply_transforms_to_subtree: Dict[int, bool] = defaultdict(
-            lambda: True
-        )
+        apply_transforms_to_subtree: Dict[int, bool] = defaultdict(lambda: True)
         if not apply_all:
             # check the root parents for state change
             cur_transforms = self.get_root_parents_snapshot()
@@ -433,9 +412,7 @@ class KinematicRelationshipManager:
             if apply_transforms_to_subtree[root_parent_id]:
                 # print(f"applying to dirty parent {root_parent_id}")
                 updated_root_parents.append(root_parent_id)
-                self._apply_relations_recursive(
-                    root_parent_id, snapshot, applied_to
-                )
+                self._apply_relations_recursive(root_parent_id, snapshot, applied_to)
 
         return updated_root_parents
 
@@ -447,22 +424,16 @@ class KinematicRelationshipManager:
         :return: The list of root parents for which the subtree transforms were updated.
         """
 
-        return self.apply_relationships_snapshot(
-            self.prev_snapshot, apply_all=False
-        )
+        return self.apply_relationships_snapshot(self.prev_snapshot, apply_all=False)
 
-    def update_snapshots(
-        self, root_parent_subset: Optional[List[int]] = None
-    ) -> None:
+    def update_snapshots(self, root_parent_subset: Optional[List[int]] = None) -> None:
         """
         Update the internal previous snapshots.
 
         :param root_parent_subset: If provided, limit the updates to particular root parents. This is an efficiency option to avoid wasting time in sparse delta situations. For example, when an update is needed after a single state change such as opening or closing a link.
         """
 
-        root_parents_snapshot = self.get_root_parents_snapshot(
-            root_parent_subset
-        )
+        root_parents_snapshot = self.get_root_parents_snapshot(root_parent_subset)
         relations_snapshot = self.get_relations_snapshot(root_parent_subset)
 
         if root_parent_subset is None:
@@ -475,9 +446,7 @@ class KinematicRelationshipManager:
             # first add the specified subset
             for root_parent, transform in root_parents_snapshot.items():
                 self.prev_root_obj_state[root_parent] = transform
-                self.prev_snapshot[root_parent] = relations_snapshot[
-                    root_parent
-                ]
+                self.prev_snapshot[root_parent] = relations_snapshot[root_parent]
 
             # then cull anything stale
             for root_parent_id in list(self.prev_root_obj_state.keys()):

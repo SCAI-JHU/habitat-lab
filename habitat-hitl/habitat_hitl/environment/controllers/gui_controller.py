@@ -72,12 +72,8 @@ class GuiRobotController(GuiController):
         self._cam_yaw = cam_yaw
         self._hint_target_dir = target_dir
 
-    def angle_from_sim_obj_forward_dir_to_target_yaw(
-        self, sim_obj, target_yaw
-    ):
-        dir_a = sim_obj.rotation.transform_vector_normalized(
-            mn.Vector3(1, 0, 0)
-        )
+    def angle_from_sim_obj_forward_dir_to_target_yaw(self, sim_obj, target_yaw):
+        dir_a = sim_obj.rotation.transform_vector_normalized(mn.Vector3(1, 0, 0))
         dir_b = mn.Vector3(
             mn.math.cos(mn.Rad(target_yaw)), 0, mn.math.sin(mn.Rad(target_yaw))
         )
@@ -292,9 +288,7 @@ class GuiHumanoidController(GuiController):
             assert not self.is_grasped
 
             sim = self._env.task._sim
-            rigid_obj = sim.get_rigid_object_manager().get_object_by_id(
-                grasp_object_id
-            )
+            rigid_obj = sim.get_rigid_object_manager().get_object_by_id(grasp_object_id)
             self._saved_object_rotation = rigid_obj.rotation
 
             self._get_grasp_mgr().snap_to_obj(grasp_object_id)
@@ -308,9 +302,7 @@ class GuiHumanoidController(GuiController):
 
             # teleport to requested drop_pos
             sim = self._env.task._sim
-            rigid_obj = sim.get_rigid_object_manager().get_object_by_id(
-                grasp_object_id
-            )
+            rigid_obj = sim.get_rigid_object_manager().get_object_by_id(grasp_object_id)
             rigid_obj.translation = drop_pos
             rigid_obj.rotation = self._saved_object_rotation
             self._saved_object_rotation = None
@@ -322,14 +314,10 @@ class GuiHumanoidController(GuiController):
             grasp_object_id = grasp_mgr.snap_idx
             grasp_mgr.desnap()
             sim = self._env.task._sim
-            rigid_obj = sim.get_rigid_object_manager().get_object_by_id(
-                grasp_object_id
-            )
+            rigid_obj = sim.get_rigid_object_manager().get_object_by_id(grasp_object_id)
             rigid_obj.motion_type = MotionType.DYNAMIC
             rigid_obj.collidable = True
-            rigid_obj.override_collision_group(
-                self._thrown_object_collision_group
-            )
+            rigid_obj.override_collision_group(self._thrown_object_collision_group)
             rigid_obj.linear_velocity = speed
 
             obj_bb = rigid_obj.aabb
@@ -400,14 +388,10 @@ class GuiHumanoidController(GuiController):
                 mn.Vector3(0, 1, 0),
             )
             humancontroller_base_user_input = np.array(
-                rotation.transform_vector(
-                    mn.Vector3(humancontroller_base_user_input)
-                )
+                rotation.transform_vector(mn.Vector3(humancontroller_base_user_input))
             )
 
-        self._recorder.record(
-            "base_user_input", humancontroller_base_user_input
-        )
+        self._recorder.record("base_user_input", humancontroller_base_user_input)
 
         relative_pos = mn.Vector3(humancontroller_base_user_input)
 
@@ -416,8 +400,7 @@ class GuiHumanoidController(GuiController):
         # located near its pelvis) to the humanoid's feet (where it should
         # snap to the navmesh), for example (0, -0.9, 0).
         prev_query_pos = (
-            self._humanoid_controller.obj_transform_base.translation
-            + base_offset
+            self._humanoid_controller.obj_transform_base.translation + base_offset
         )
 
         # 1.0 is the default value indicating moving in the relative_pos direction
@@ -437,8 +420,7 @@ class GuiHumanoidController(GuiController):
         # calculate_walk_pose has updated obj_transform_base.translation with
         # desired motion, but this should be filtered (restricted to navmesh).
         target_query_pos = (
-            self._humanoid_controller.obj_transform_base.translation
-            + base_offset
+            self._humanoid_controller.obj_transform_base.translation + base_offset
         )
         filtered_query_pos = self._env._sim.step_filter(
             prev_query_pos, target_query_pos

@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 
 import time
 
+
 def object_shortname_from_handle(object_handle: str) -> str:
     """
     Splits any path directory and instance increment from the handle.
@@ -183,16 +184,13 @@ def size_regularized_object_distance(
         return 0
 
     assert (
-        object_id_a != habitat_sim.stage_id
-        and object_id_b != habitat_sim.stage_id
+        object_id_a != habitat_sim.stage_id and object_id_b != habitat_sim.stage_id
     ), "Cannot compute distance between the scene and its contents."
 
     obja_bb, transform_a = get_bb_for_object_id(sim, object_id_a, ao_link_map)
     objb_bb, transform_b = get_bb_for_object_id(sim, object_id_b, ao_link_map)
 
-    return size_regularized_bb_distance(
-        obja_bb, objb_bb, transform_a, transform_b
-    )
+    return size_regularized_bb_distance(obja_bb, objb_bb, transform_a, transform_b)
 
 
 def bb_ray_prescreen(
@@ -242,10 +240,7 @@ def bb_ray_prescreen(
         world_point_height = world_point.projected_onto_normalized(
             -gravity_dir
         ).length()
-        if (
-            lowest_key_point is None
-            or lowest_key_point_height > world_point_height
-        ):
+        if lowest_key_point is None or lowest_key_point_height > world_point_height:
             lowest_key_point = world_point
             lowest_key_point_height = world_point_height
         # cast a ray in gravity direction
@@ -263,14 +258,11 @@ def bb_ray_prescreen(
                 elif hit.object_id in support_obj_ids:
                     hit_point = hit.point
                     support_impacts[ix] = hit_point
-                    support_impact_height = mn.math.dot(
-                        hit_point, -gravity_dir
-                    )
+                    support_impact_height = mn.math.dot(hit_point, -gravity_dir)
 
                     if (
                         highest_support_impact is None
-                        or highest_support_impact_height
-                        < support_impact_height
+                        or highest_support_impact_height < support_impact_height
                     ):
                         highest_support_impact = hit_point
                         highest_support_impact_height = support_impact_height
@@ -296,8 +288,7 @@ def bb_ray_prescreen(
     surface_snap_point = (
         None
         if 0 not in support_impacts
-        else highest_support_impact
-        + gravity_dir * (base_rel_height - margin_offset)
+        else highest_support_impact + gravity_dir * (base_rel_height - margin_offset)
     )
 
     # return list of relative base height, object position for surface snapped point, and ray results details
@@ -373,16 +364,12 @@ def snap_down(
                 if cp.link_id_a > 0:
                     # object_a is an AO and we need to get the link object id
                     ao_a = aom.get_object_by_id(cp.object_id_a)
-                    links_to_obj_ids = {
-                        v: k for k, v in ao_a.link_object_ids.items()
-                    }
+                    links_to_obj_ids = {v: k for k, v in ao_a.link_object_ids.items()}
                     cp_obj_id_a = links_to_obj_ids[cp.link_id_a]
                 if cp.link_id_b > 0:
                     # object_b is an AO and we need to get the link object id
                     ao_b = aom.get_object_by_id(cp.object_id_b)
-                    links_to_obj_ids = {
-                        v: k for k, v in ao_b.link_object_ids.items()
-                    }
+                    links_to_obj_ids = {v: k for k, v in ao_b.link_object_ids.items()}
                     cp_obj_id_b = links_to_obj_ids[cp.link_id_b]
 
                 if not (
@@ -427,17 +414,13 @@ def get_all_object_ids(sim: habitat_sim.Simulator) -> Dict[int, str]:
 
     object_id_map = {}
 
-    for _object_handle, rigid_object in rom.get_objects_by_handle_substring(
-        ""
-    ).items():
+    for _object_handle, rigid_object in rom.get_objects_by_handle_substring("").items():
         object_id_map[rigid_object.object_id] = rigid_object.handle
 
     for _object_handle, ao in aom.get_objects_by_handle_substring("").items():
         object_id_map[ao.object_id] = ao.handle
         for object_id, link_ix in ao.link_object_ids.items():
-            object_id_map[object_id] = (
-                ao.handle + " -- " + ao.get_link_name(link_ix)
-            )
+            object_id_map[object_id] = ao.handle + " -- " + ao.get_link_name(link_ix)
 
     return object_id_map
 
@@ -573,9 +556,7 @@ def get_obj_from_id(
     return None
 
 
-def get_obj_from_handle(
-    sim: habitat_sim.Simulator, obj_handle: str
-) -> Union[
+def get_obj_from_handle(sim: habitat_sim.Simulator, obj_handle: str) -> Union[
     habitat_sim.physics.ManagedRigidObject,
     habitat_sim.physics.ManagedArticulatedObject,
 ]:
@@ -640,8 +621,7 @@ def get_global_keypoints_from_bb(
     local_keypoints = [aabb.center()]
     local_keypoints.extend(get_bb_corners(aabb))
     global_keypoints = [
-        local_to_global.transform_point(key_point)
-        for key_point in local_keypoints
+        local_to_global.transform_point(key_point) for key_point in local_keypoints
     ]
     return global_keypoints
 
@@ -776,18 +756,14 @@ def within(
     :return: a list of object_id integers.
     """
 
-    global_keypoints = get_global_keypoints_from_object_id(
-        sim, object_a.object_id
-    )
+    global_keypoints = get_global_keypoints_from_object_id(sim, object_a.object_id)
 
     # build axes vectors
     pos_axes = [mn.Vector3.x_axis(), mn.Vector3.y_axis(), mn.Vector3.z_axis()]
     neg_axes = [-1 * axis for axis in pos_axes]
 
     # raycast for each axis for each keypoint
-    keypoint_intersect_set: List[List[int]] = [
-        [] for _ in range(len(global_keypoints))
-    ]
+    keypoint_intersect_set: List[List[int]] = [[] for _ in range(len(global_keypoints))]
     for k_ix, keypoint in enumerate(global_keypoints):
         for a_ix in range(3):
             pos_ids = [
@@ -826,9 +802,7 @@ def within(
 
     # count votes and de-duplicate
     containment_ids = containment_ids + [
-        obj_id
-        for obj_id in id_votes
-        if id_votes[obj_id] > keypoint_vote_threshold
+        obj_id for obj_id in id_votes if id_votes[obj_id] > keypoint_vote_threshold
     ]
     containment_ids = list(set(containment_ids))
 
@@ -865,9 +839,7 @@ def ontop(
     if isinstance(object_a, int):
         subject_object = get_obj_from_id(sim, object_a)
         if subject_object is None:
-            raise AssertionError(
-                f"The passed object_id {object_a} is invalid."
-            )
+            raise AssertionError(f"The passed object_id {object_a} is invalid.")
         if subject_object.object_id != object_a:
             # object_a is a link
             link_id = subject_object.link_object_ids[object_a]
@@ -897,10 +869,7 @@ def ontop(
                 if obj_is_b
                 else -cp.contact_normal_on_b_in_ws
             )
-            if (
-                mn.math.dot(contact_normal, yup)
-                > vertical_normal_error_threshold
-            ):
+            if mn.math.dot(contact_normal, yup) > vertical_normal_error_threshold:
                 ontop_object_ids.append(contacting_obj_id)
 
     ontop_object_ids = list(set(ontop_object_ids))
@@ -1068,9 +1037,7 @@ def get_floor_point_in_region(
                     region_center_snap, radius=1.0, island_index=island_index
                 )
                 if not np.isnan(sample[0]) and region.contains(sample):
-                    navmesh_dist = sim.pathfinder.distance_to_closest_obstacle(
-                        sample
-                    )
+                    navmesh_dist = sim.pathfinder.distance_to_closest_obstacle(sample)
                     if navmesh_dist > best_navmesh_dist:
                         # found a valid point in a more "open" part of the region
                         best_sample = sample
@@ -1091,9 +1058,7 @@ def get_floor_point_in_region(
                 island_index=island_index
             )
             if region.contains(sample):
-                navmesh_dist = sim.pathfinder.distance_to_closest_obstacle(
-                    sample
-                )
+                navmesh_dist = sim.pathfinder.distance_to_closest_obstacle(sample)
                 if navmesh_dist > best_navmesh_dist:
                     # found a valid point in a more "open" part of the region
                     best_sample = sample
@@ -1230,8 +1195,9 @@ def open_link(
     """
     set_link_normalized_joint_position(object_a, link_ix, 1.0)
 
+
 def open_link_steps(
-    object_a: habitat_sim.physics.ManagedArticulatedObject, link_ix: int, steps : int = 5
+    object_a: habitat_sim.physics.ManagedArticulatedObject, link_ix: int, steps: int = 5
 ) -> None:
     """
     Set a link to the "open" state. Sets the joint position to the maximum joint limit.
@@ -1332,8 +1298,7 @@ def obj_next_to(
     assert object_id_a != object_id_b, "Object cannot be 'next to' itself."
 
     assert (
-        object_id_a != habitat_sim.stage_id
-        and object_id_b != habitat_sim.stage_id
+        object_id_a != habitat_sim.stage_id and object_id_b != habitat_sim.stage_id
     ), "Cannot compute distance between the stage and its contents."
 
     obja_bb, transform_a = get_bb_for_object_id(sim, object_id_a, ao_link_map)
@@ -1444,9 +1409,7 @@ def point_to_tri_dist(
             spatial.distance.cdist(np.array([point]), closest_points_each_tri),
             axis=1,
         )
-        closest_point: np.ndarray = closest_points_each_tri[
-            closest_point_index
-        ]
+        closest_point: np.ndarray = closest_points_each_tri[closest_point_index]
         min_dist = float(np.linalg.norm(point - closest_point))
 
         # Return the minimum distance
@@ -1492,9 +1455,7 @@ def get_obj_receptacle_and_confidence(
 
     # find a support surface if one was not provided
     if support_surface_id is None:
-        raycast_results = sim.cast_ray(
-            habitat_sim.geo.Ray(center, grav_vector)
-        )
+        raycast_results = sim.cast_ray(habitat_sim.geo.Ray(center, grav_vector))
         if raycast_results.has_hits():
             for hit in raycast_results.hits:
                 if hit.object_id != obj.object_id:
@@ -1554,7 +1515,9 @@ def get_obj_receptacle_and_confidence(
                     "successful match",
                 )
             else:
-                info_text = "Point is too far from a valid Receptacle on the support surface."
+                info_text = (
+                    "Point is too far from a valid Receptacle on the support surface."
+                )
 
     # If we made it this far, matching to a Receptacle object failed.
     # Now for some cases, check if the point is navigable and if so, try matching it to a region
@@ -1569,17 +1532,13 @@ def get_obj_receptacle_and_confidence(
             )
             if len(point_regions) > 0:
                 # found matching regions, pick the primary (most precise) one
-                region_name = sim.semantic_scene.regions[
-                    point_regions[0][0]
-                ].id
+                region_name = sim.semantic_scene.regions[point_regions[0][0]].id
             else:
                 # point is not matched to a region
                 region_name = "unknown_region"
             return [f"floor,{region_name}"], 1.0, "successful match"
         else:
-            info_text = (
-                "Point does not match any Receptacle and is not navigable."
-            )
+            info_text = "Point does not match any Receptacle and is not navigable."
 
     # all receptacles are too far away or there are no matches
     return [], 1.0, info_text

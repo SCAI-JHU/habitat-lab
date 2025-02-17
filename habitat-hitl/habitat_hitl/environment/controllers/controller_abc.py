@@ -81,9 +81,9 @@ class BaselinesController(Controller):
         self._env_spec: EnvironmentSpec = self._create_env_spec()
 
         # create observations transforms
-        self._obs_transforms: List[
-            "ObservationTransformer"
-        ] = self._get_active_obs_transforms()
+        self._obs_transforms: List["ObservationTransformer"] = (
+            self._get_active_obs_transforms()
+        )
 
         # apply observations transforms
         self._env_spec.observation_space = apply_obs_transforms_obs_space(
@@ -107,9 +107,7 @@ class BaselinesController(Controller):
         )
 
         hidden_state_lens = self._agent.actor_critic.hidden_state_shape_lens
-        action_space_lens = (
-            self._agent.actor_critic.policy_action_space_shape_lens
-        )
+        action_space_lens = self._agent.actor_critic.policy_action_space_shape_lens
 
         self._space_lengths: Dict = {}
         n_agents = len(self._config.habitat.simulator.agents)
@@ -192,9 +190,7 @@ class BaselinesController(Controller):
                 **self._space_lengths,
             )
             if action_data.should_inserts is None:
-                self._test_recurrent_hidden_states = (
-                    action_data.rnn_hidden_states
-                )
+                self._test_recurrent_hidden_states = action_data.rnn_hidden_states
                 self._prev_actions.copy_(action_data.actions)  # type: ignore
             else:
                 self._agent.actor_critic.update_hidden_state(

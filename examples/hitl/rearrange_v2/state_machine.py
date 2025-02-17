@@ -26,9 +26,7 @@ class StateMachine(AppState):
         app_service: AppService,
     ):
         self._app_service = app_service
-        self._app_data = AppData(
-            app_service.hitl_config.networking.max_client_count
-        )
+        self._app_data = AppData(app_service.hitl_config.networking.max_client_count)
         self._app_state: AppStateBase = create_app_state_reset(
             app_service, self._app_data
         )
@@ -45,9 +43,7 @@ class StateMachine(AppState):
     def _on_client_connected(self, connection: ConnectionRecord):
         user_index = connection["userIndex"]
         if user_index in self._app_data.connected_users:
-            raise RuntimeError(
-                f"User index {user_index} already connected! Aborting."
-            )
+            raise RuntimeError(f"User index {user_index} already connected! Aborting.")
         self._app_data.connected_users[connection["userIndex"]] = connection
         self._app_state._time_since_last_connection = 0.0
         self._app_service.users.activate_user(user_index)

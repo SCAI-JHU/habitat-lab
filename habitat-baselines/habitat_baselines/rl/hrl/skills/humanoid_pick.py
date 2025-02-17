@@ -123,9 +123,7 @@ class HumanoidPickPolicy(NnSkillPolicy):
         batch_idx,
     ) -> torch.BoolTensor:
         ret = torch.zeros(masks.shape[0], dtype=torch.bool)
-        finish_pick_action = observations[
-            HasFinishedHumanoidPickSensor.cls_uuid
-        ].cpu()
+        finish_pick_action = observations[HasFinishedHumanoidPickSensor.cls_uuid].cpu()
         ret = finish_pick_action.to(torch.bool)[:, 0]
         return ret
 
@@ -140,15 +138,11 @@ class HumanoidPickPolicy(NnSkillPolicy):
         elif len(skill_arg) == 3:
             _, search_target, _ = skill_arg
         else:
-            raise ValueError(
-                f"Unexpected number of skill arguments in {skill_arg}"
-            )
+            raise ValueError(f"Unexpected number of skill arguments in {skill_arg}")
 
         target = self._pddl_problem.get_entity(search_target)
         if target is None:
-            raise ValueError(
-                f"Cannot find matching entity for {search_target}"
-            )
+            raise ValueError(f"Cannot find matching entity for {search_target}")
         match_i = self._all_entities.index(target)
 
         return HumanoidPickPolicy.HumanoidPickActionArgs(match_i, self.GRAB_ID)
@@ -190,17 +184,11 @@ class HumanoidPlacePolicy(HumanoidPickPolicy):
         elif len(skill_arg) == 3:
             _, search_target, _ = skill_arg
         else:
-            raise ValueError(
-                f"Unexpected number of skill arguments in {skill_arg}"
-            )
+            raise ValueError(f"Unexpected number of skill arguments in {skill_arg}")
 
         target = self._pddl_problem.get_entity(search_target)
         if target is None:
-            raise ValueError(
-                f"Cannot find matching entity for {search_target}"
-            )
+            raise ValueError(f"Cannot find matching entity for {search_target}")
         match_i = self._all_entities.index(target)
 
-        return HumanoidPickPolicy.HumanoidPickActionArgs(
-            match_i, self.RELEASE_ID
-        )
+        return HumanoidPickPolicy.HumanoidPickActionArgs(match_i, self.RELEASE_ID)

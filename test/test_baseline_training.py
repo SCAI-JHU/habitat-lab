@@ -40,9 +40,7 @@ except ImportError:
     int(os.environ.get("TEST_BASELINE_SMALL", 0)) == 0,
     reason="Full training tests did not run. Need `export TEST_BASELINE_SMALL=1",
 )
-@pytest.mark.skipif(
-    not baseline_installed, reason="baseline sub-module not installed"
-)
+@pytest.mark.skipif(not baseline_installed, reason="baseline sub-module not installed")
 @pytest.mark.parametrize(
     "config_path,num_updates,overrides",
     [
@@ -152,9 +150,7 @@ def test_trainers(
     if config_path in [
         "objectnav/ddppo_objectnav_hssd-hab.yaml",
         "objectnav/ddppo_objectnav_procthor-hab.yaml",
-    ] and not ObjectNavDatasetV1.check_config_paths_exist(
-        config.habitat.dataset
-    ):
+    ] and not ObjectNavDatasetV1.check_config_paths_exist(config.habitat.dataset):
         pytest.skip("Test skipped as dataset files are missing.")
 
     with read_write(config):
@@ -165,9 +161,7 @@ def test_trainers(
         # Set config for batch renderer
         if use_batch_renderer:
             config.habitat.simulator.renderer.enable_batch_renderer = True
-            config.habitat.simulator.habitat_sim_v0.enable_gfx_replay_save = (
-                True
-            )
+            config.habitat.simulator.habitat_sim_v0.enable_gfx_replay_save = True
             config.habitat.simulator.create_renderer = False
             config.habitat.simulator.concur_render = False
 
@@ -187,9 +181,7 @@ def test_trainers(
         "ver",
     ), "This test can only be used with ddppo/ver trainer"
 
-    trainer_init = baseline_registry.get_trainer(
-        config.habitat_baselines.trainer_name
-    )
+    trainer_init = baseline_registry.get_trainer(config.habitat_baselines.trainer_name)
     assert (
         trainer_init is not None
     ), f"{config.habitat_baselines.trainer_name} is not supported"
@@ -281,9 +273,7 @@ def test_hrl(config_path, policy_type, skill_type, mode):
     int(os.environ.get("TEST_BASELINE_SMALL", 0)) == 0,
     reason="Full training tests did not run. Need `export TEST_BASELINE_SMALL=1",
 )
-@pytest.mark.skipif(
-    not baseline_installed, reason="baseline sub-module not installed"
-)
+@pytest.mark.skipif(not baseline_installed, reason="baseline sub-module not installed")
 @pytest.mark.parametrize(
     "config_path",
     [
@@ -334,9 +324,7 @@ def test_multi_agent_trainer(
     ):
         torch.set_num_threads(1)
 
-    trainer_init = baseline_registry.get_trainer(
-        config.habitat_baselines.trainer_name
-    )
+    trainer_init = baseline_registry.get_trainer(config.habitat_baselines.trainer_name)
     assert (
         trainer_init is not None
     ), f"{config.habitat_baselines.trainer_name} is not supported"
@@ -351,12 +339,8 @@ def test_multi_agent_trainer(
     int(os.environ.get("TEST_BASELINE_SMALL", 0)) == 0,
     reason="Full training tests did not run. Need `export TEST_BASELINE_SMALL=1",
 )
-@pytest.mark.skipif(
-    not baseline_installed, reason="baseline sub-module not installed"
-)
-@pytest.mark.skipif(
-    not pygame_installed, reason="pygame sub-module not installed"
-)
+@pytest.mark.skipif(not baseline_installed, reason="baseline sub-module not installed")
+@pytest.mark.skipif(not pygame_installed, reason="pygame sub-module not installed")
 @pytest.mark.parametrize(
     "config_path,num_updates",
     [
@@ -405,9 +389,7 @@ def test_trainers_gym_registry(
         "ver",
     ), "This test can only be used with ddppo/ver trainer"
 
-    trainer_init = baseline_registry.get_trainer(
-        config.habitat_baselines.trainer_name
-    )
+    trainer_init = baseline_registry.get_trainer(config.habitat_baselines.trainer_name)
     assert (
         trainer_init is not None
     ), f"{config.habitat_baselines.trainer_name} is not supported"
@@ -422,9 +404,7 @@ def test_trainers_gym_registry(
     int(os.environ.get("TEST_BASELINE_LARGE", 0)) == 0,
     reason="Full training tests did not run. Need `export TEST_BASELINE_LARGE=1",
 )
-@pytest.mark.skipif(
-    not baseline_installed, reason="baseline sub-module not installed"
-)
+@pytest.mark.skipif(not baseline_installed, reason="baseline sub-module not installed")
 @pytest.mark.parametrize(
     "config_path,num_updates,target_reward",
     [
@@ -471,9 +451,7 @@ def test_trainers_large(config_path, num_updates, target_reward, trainer_name):
         "ver",
     ), "This test can only be used with ddppo/ver trainer"
 
-    trainer_init = baseline_registry.get_trainer(
-        config.habitat_baselines.trainer_name
-    )
+    trainer_init = baseline_registry.get_trainer(config.habitat_baselines.trainer_name)
     assert (
         trainer_init is not None
     ), f"{config.habitat_baselines.trainer_name} is not supported"
@@ -485,11 +463,7 @@ def test_trainers_large(config_path, num_updates, target_reward, trainer_name):
     # Gather the data
     if config.habitat_baselines.trainer_name == "ddppo":
         deltas = {
-            k: (
-                (v[-1] - v[0]).sum().item()
-                if len(v) > 1
-                else v[0].sum().item()
-            )
+            k: ((v[-1] - v[0]).sum().item() if len(v) > 1 else v[0].sum().item())
             for k, v in trainer.window_episode_stats.items()
         }
         deltas["count"] = max(deltas["count"], 1.0)

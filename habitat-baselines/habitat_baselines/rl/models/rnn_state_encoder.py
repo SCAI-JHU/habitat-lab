@@ -61,14 +61,10 @@ def build_pack_info_from_episode_ids(
     # block. This makes all the following logic MUCH easier
     sort_keys = episode_ids * (step_ids.max() + 1) + step_ids
     assert np.unique(sort_keys).size == sort_keys.size
-    episode_id_sorting = np.argsort(
-        episode_ids * (step_ids.max() + 1) + step_ids
-    )
+    episode_id_sorting = np.argsort(episode_ids * (step_ids.max() + 1) + step_ids)
     episode_ids = episode_ids[episode_id_sorting]
 
-    unique_episode_ids, sequence_lengths = np.unique(
-        episode_ids, return_counts=True
-    )
+    unique_episode_ids, sequence_lengths = np.unique(episode_ids, return_counts=True)
     # Exclusive cumsum
     sequence_starts = np.cumsum(sequence_lengths) - sequence_lengths
 
@@ -130,9 +126,7 @@ def build_pack_info_from_episode_ids(
         first_ep_mask = env_eps_ids == env_eps_ids.min()
         first_sequence_in_batch_mask[env_eps] = first_ep_mask
 
-        first_step_for_env.append(
-            sequence_starts[env_eps][first_ep_mask].item()
-        )
+        first_step_for_env.append(sequence_starts[env_eps][first_ep_mask].item())
 
     return {
         "select_inds": select_inds,
@@ -142,12 +136,8 @@ def build_pack_info_from_episode_ids(
         "rnn_state_batch_inds": rnn_state_batch_inds,
         "last_sequence_in_batch_mask": last_sequence_in_batch_mask,
         "first_sequence_in_batch_mask": first_sequence_in_batch_mask,
-        "last_sequence_in_batch_inds": np.nonzero(last_sequence_in_batch_mask)[
-            0
-        ],
-        "first_episode_in_batch_inds": np.nonzero(
-            first_sequence_in_batch_mask
-        )[0],
+        "last_sequence_in_batch_inds": np.nonzero(last_sequence_in_batch_mask)[0],
+        "first_episode_in_batch_inds": np.nonzero(first_sequence_in_batch_mask)[0],
         "first_step_for_env": np.asarray(first_step_for_env),
     }
 
@@ -189,7 +179,10 @@ def build_rnn_inputs(
     rnn_states: torch.Tensor,
     not_dones,
     rnn_build_seq_info,
-) -> Tuple[PackedSequence, torch.Tensor,]:
+) -> Tuple[
+    PackedSequence,
+    torch.Tensor,
+]:
     r"""Create a PackedSequence input for an RNN such that each
     set of steps that are part of the same episode are all part of
     a batch in the PackedSequence.
@@ -219,9 +212,7 @@ def build_rnn_inputs(
     select_inds = rnn_build_seq_info["select_inds"]
     num_seqs_at_step = rnn_build_seq_info["cpu_num_seqs_at_step"]
 
-    x_seq = PackedSequence(
-        x.index_select(0, select_inds), num_seqs_at_step, None, None
-    )
+    x_seq = PackedSequence(x.index_select(0, select_inds), num_seqs_at_step, None, None)
 
     rnn_state_batch_inds = rnn_build_seq_info["rnn_state_batch_inds"]
     sequence_starts = rnn_build_seq_info["sequence_starts"]
@@ -231,9 +222,7 @@ def build_rnn_inputs(
     rnn_states = rnn_states.index_select(1, rnn_state_batch_inds)
     # Now zero things out in the correct locations
     rnn_states.masked_fill_(
-        torch.logical_not(
-            not_dones.view(1, -1, 1).index_select(1, sequence_starts)
-        ),
+        torch.logical_not(not_dones.view(1, -1, 1).index_select(1, sequence_starts)),
         0,
     )
 
@@ -261,16 +250,12 @@ def build_rnn_out_from_seq(
     select_inds = rnn_build_seq_info["select_inds"]
     x = x_seq.data.index_select(0, _invert_permutation(select_inds))
 
-    last_sequence_in_batch_inds = rnn_build_seq_info[
-        "last_sequence_in_batch_inds"
-    ]
+    last_sequence_in_batch_inds = rnn_build_seq_info["last_sequence_in_batch_inds"]
     rnn_state_batch_inds = rnn_build_seq_info["rnn_state_batch_inds"]
     output_hidden_states = hidden_states.index_select(
         1,
         last_sequence_in_batch_inds[
-            _invert_permutation(
-                rnn_state_batch_inds[last_sequence_in_batch_inds]
-            )
+            _invert_permutation(rnn_state_batch_inds[last_sequence_in_batch_inds])
         ],
     )
 
@@ -307,9 +292,7 @@ class RNNStateEncoder(nn.Module):
             masks.view(1, -1, 1), hidden_states, hidden_states.new_zeros(())
         )
 
-        x, hidden_states = self.rnn(
-            x.unsqueeze(0), self.unpack_hidden(hidden_states)
-        )
+        x, hidden_states = self.rnn(x.unsqueeze(0), self.unpack_hidden(hidden_states))
         hidden_states = self.pack_hidden(hidden_states)
 
         x = x.squeeze(0)
@@ -395,9 +378,7 @@ class LSTMStateEncoder(RNNStateEncoder):
     ) -> torch.Tensor:
         return torch.cat(hidden_states, 0)
 
-    def unpack_hidden(
-        self, hidden_states
-    ) -> Tuple[torch.Tensor, torch.Tensor]:
+    def unpack_hidden(self, hidden_states) -> Tuple[torch.Tensor, torch.Tensor]:
         lstm_states = torch.chunk(hidden_states.contiguous(), 2, 0)
         return (lstm_states[0], lstm_states[1])
 

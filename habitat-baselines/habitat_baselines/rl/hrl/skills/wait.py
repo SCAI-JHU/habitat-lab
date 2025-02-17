@@ -43,6 +43,4 @@ class WaitSkillPolicy(SkillPolicy):
         action = torch.zeros(
             (masks.shape[0], self._full_ac_size), device=prev_actions.device
         )
-        return PolicyActionData(
-            actions=action, rnn_hidden_states=rnn_hidden_states
-        )
+        return PolicyActionData(actions=action, rnn_hidden_states=rnn_hidden_states)

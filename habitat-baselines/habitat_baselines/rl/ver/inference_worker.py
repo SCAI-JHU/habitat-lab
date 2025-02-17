@@ -73,9 +73,7 @@ class InferenceWorkerProcess(ProcessBase):
     timer: Timing = attr.Factory(Timing)
     _n_replay_steps: int = 0
     actor_critic: NetPolicy = attr.ib(init=False)
-    visual_encoder: Optional[torch.nn.Module] = attr.ib(
-        init=False, default=None
-    )
+    visual_encoder: Optional[torch.nn.Module] = attr.ib(init=False, default=None)
     _static_encoder: bool = attr.ib(init=False, default=False)
     transfer_buffers: NDArrayDict = attr.ib(default=None, init=False)
     incoming_transfer_buffers: NDArrayDict = attr.ib(default=None, init=False)
@@ -104,17 +102,13 @@ class InferenceWorkerProcess(ProcessBase):
         self.last_step_time = time.perf_counter()
         self.min_reqs = int(
             max(
-                len(self.queues.environments)
-                / self.num_inference_workers
-                / 1.5,
+                len(self.queues.environments) / self.num_inference_workers / 1.5,
                 1,
             )
         )
         self.max_reqs = int(
             max(
-                len(self.queues.environments)
-                / self.num_inference_workers
-                * 1.5,
+                len(self.queues.environments) / self.num_inference_workers * 1.5,
                 1,
             )
         )
@@ -145,9 +139,7 @@ class InferenceWorkerProcess(ProcessBase):
 
     def set_rollouts(self, rollouts: VERRolloutStorage):
         self.rollouts = rollouts
-        self._current_policy_version = int(
-            self.rollouts.cpu_current_policy_version
-        )
+        self._current_policy_version = int(self.rollouts.cpu_current_policy_version)
 
     def _update_actor_critic(self):
         for src, dst in zip(
@@ -194,9 +186,7 @@ class InferenceWorkerProcess(ProcessBase):
 
         assert torch.all(self.rollouts.buffers["is_stale"][my_slice])
 
-        self.rollouts.buffers.slice_keys(current_step.keys())[
-            my_slice
-        ] = current_step
+        self.rollouts.buffers.slice_keys(current_step.keys())[my_slice] = current_step
 
     def _sync_device(self):
         if self.num_inference_workers > 1 and self.device.type == "cuda":
@@ -221,13 +211,8 @@ class InferenceWorkerProcess(ProcessBase):
         if len(self.new_reqs) == 0:
             return False, steps_finished
 
-        if (
-            self._current_policy_version
-            != self.rollouts.cpu_current_policy_version
-        ):
-            self._current_policy_version = int(
-                self.rollouts.cpu_current_policy_version
-            )
+        if self._current_policy_version != self.rollouts.cpu_current_policy_version:
+            self._current_policy_version = int(self.rollouts.cpu_current_policy_version)
             if self._overlapped:
                 self._update_actor_critic()
 
@@ -298,8 +283,7 @@ class InferenceWorkerProcess(ProcessBase):
 
         with self.timer.avg_time("batch obs"):
             to_batch = [
-                self.incoming_transfer_buffers[env_idx]
-                for env_idx in self.new_reqs
+                self.incoming_transfer_buffers[env_idx] for env_idx in self.new_reqs
             ]
 
             to_batch = batch_obs(to_batch, device=self.device)
@@ -309,14 +293,12 @@ class InferenceWorkerProcess(ProcessBase):
 
         with self.timer.avg_time("step policy"):
             obs = apply_obs_transforms_batch(obs, self.obs_transforms)
-            recurrent_hidden_states = self.rollouts.next_hidden_states[
-                environment_ids
-            ]
+            recurrent_hidden_states = self.rollouts.next_hidden_states[environment_ids]
             prev_actions = self.rollouts.next_prev_actions[environment_ids]
             if self._static_encoder:
-                obs[
-                    PointNavResNetNet.PRETRAINED_VISUAL_FEATURES_KEY
-                ] = self.visual_encoder(obs)
+                obs[PointNavResNetNet.PRETRAINED_VISUAL_FEATURES_KEY] = (
+                    self.visual_encoder(obs)
+                )
 
             action_data = self.actor_critic.act(
                 obs,
@@ -345,9 +327,7 @@ class InferenceWorkerProcess(ProcessBase):
                 )
 
             cpu_actions = action_data.env_actions.to(device="cpu")
-            self.transfer_buffers["actions"][
-                self.new_reqs
-            ] = cpu_actions.numpy()
+            self.transfer_buffers["actions"][self.new_reqs] = cpu_actions.numpy()
 
             self._sync_device()
 
@@ -408,18 +388,14 @@ class InferenceWorkerProcess(ProcessBase):
             if self._variable_experience:
                 self._update_storage_ver(prev_step, current_step, my_slice)
             else:
-                self._update_storage_no_ver(
-                    prev_step, current_step, current_steps
-                )
+                self._update_storage_no_ver(prev_step, current_step, current_steps)
 
         self.new_reqs = []
 
         return True, steps_finished
 
     def finish_rollout(self):
-        with self.timer.add_time("rollout"), self.timer.avg_time(
-            "finish rollout"
-        ):
+        with self.timer.add_time("rollout"), self.timer.avg_time("finish rollout"):
             self._sync_device()
 
             # First barrier wait makes sure we don't put outstanding or replay reqs into the
@@ -472,8 +448,7 @@ class InferenceWorkerProcess(ProcessBase):
 
             should_try_step = len(self.new_reqs) > 0 and (
                 len(self.new_reqs) >= self.min_reqs
-                or (time.perf_counter() - self.last_step_time)
-                > self.min_wait_time
+                or (time.perf_counter() - self.last_step_time) > self.min_wait_time
             )
 
             if should_try_step:
@@ -546,11 +521,8 @@ class InferenceWorkerProcess(ProcessBase):
             if self.rollout_ends.steps.value < 0.0:
                 return
             with self.iw_sync.lock:
-                self.rollouts.rollout_done[:] = bool(
-                    self.rollouts.rollout_done
-                ) or (
-                    self.rollout_ends.steps.value
-                    <= self.rollouts.num_steps_collected
+                self.rollouts.rollout_done[:] = bool(self.rollouts.rollout_done) or (
+                    self.rollout_ends.steps.value <= self.rollouts.num_steps_collected
                 )
 
 

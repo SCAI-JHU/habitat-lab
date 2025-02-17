@@ -60,9 +60,7 @@ os.environ["HABITAT_SIM_LOG"] = "quiet"
 
 repo = git.Repo(".", search_parent_directories=True)
 dir_path = repo.working_tree_dir
-output_path = os.path.join(
-    dir_path, "examples/tutorials/habitat_lab_visualization/"
-)
+output_path = os.path.join(dir_path, "examples/tutorials/habitat_lab_visualization/")
 os.makedirs(output_path, exist_ok=True)
 os.chdir(dir_path)
 # If the import block below fails due to an error like "'PIL.TiffTags' has no attribute

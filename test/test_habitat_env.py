@@ -69,9 +69,7 @@ def _load_test_data():
     datasets = []
     for _ in range(NUM_ENVS):
         config = get_config(CFG_TEST)
-        if not PointNavDatasetV1.check_config_paths_exist(
-            config.habitat.dataset
-        ):
+        if not PointNavDatasetV1.check_config_paths_exist(config.habitat.dataset):
             pytest.skip("Please download Habitat test data to data folder.")
 
         datasets.append(
@@ -87,9 +85,7 @@ def _load_test_data():
             if "teleport" in config.habitat.task.actions:
                 del config.habitat.task.actions["teleport"]
             if not os.path.exists(config.habitat.simulator.scene):
-                pytest.skip(
-                    "Please download Habitat test data to data folder."
-                )
+                pytest.skip("Please download Habitat test data to data folder.")
         configs.append(config)
 
     return configs, datasets
@@ -142,9 +138,7 @@ def test_vectorized_envs(multiprocessing_start_method, gpu2gpu):
         p.join()
         assert p.exitcode == 0
     else:
-        _vec_env_test_fn(
-            configs, datasets, multiprocessing_start_method, gpu2gpu
-        )
+        _vec_env_test_fn(configs, datasets, multiprocessing_start_method, gpu2gpu)
 
 
 def test_with_scope():
@@ -236,9 +230,7 @@ def test_env(gpu2gpu):
 
         env.step(action=0)
         # check for stop action
-        assert (
-            env.episode_over is True
-        ), "episode should be over after stop action"
+        assert env.episode_over is True, "episode should be over after stop action"
 
 
 @pytest.mark.parametrize("gpu2gpu", [False, True])
@@ -269,9 +261,7 @@ def test_rl_vectorized_envs(gpu2gpu):
             outputs = envs.step(
                 sample_non_stop_action_gym(envs.action_spaces[0], num_envs)
             )
-            observations, rewards, dones, infos = [
-                list(x) for x in zip(*outputs)
-            ]
+            observations, rewards, dones, infos = [list(x) for x in zip(*outputs)]
             assert len(observations) == num_envs
             assert len(rewards) == num_envs
             assert len(dones) == num_envs
@@ -288,9 +278,7 @@ def test_rl_vectorized_envs(gpu2gpu):
             ), "vector env render is broken"
 
             if (i + 1) % configs[0].habitat.environment.max_episode_steps == 0:
-                assert all(
-                    dones
-                ), "dones should be true after max_episode steps"
+                assert all(dones), "dones should be true after max_episode steps"
 
 
 @pytest.mark.parametrize("classic_replay_renderer", [False, True])
@@ -318,9 +306,7 @@ def test_rl_vectorized_envs_batch_renderer(
             config.habitat.simulator.renderer.classic_replay_renderer = (
                 classic_replay_renderer
             )
-            config.habitat.simulator.habitat_sim_v0.enable_gfx_replay_save = (
-                True
-            )
+            config.habitat.simulator.habitat_sim_v0.enable_gfx_replay_save = True
             config.habitat.simulator.create_renderer = False
             config.habitat.simulator.habitat_sim_v0.gpu_gpu = gpu2gpu
             agent_config = get_agent_config(config.habitat.simulator)
@@ -364,9 +350,7 @@ def test_rl_vectorized_envs_batch_renderer(
             outputs = envs.step(
                 sample_non_stop_action_gym(envs.action_spaces[0], num_envs)
             )
-            observations, rewards, dones, infos = [
-                list(x) for x in zip(*outputs)
-            ]
+            observations, rewards, dones, infos = [list(x) for x in zip(*outputs)]
 
             for env_obs in observations:
                 assert KEYFRAME_OBSERVATION_KEY in env_obs

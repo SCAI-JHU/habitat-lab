@@ -69,13 +69,9 @@ class Matterport3dDatasetV1(Dataset):
             filter(self.build_content_scenes_filter(config), self.episodes)
         )
 
-    def from_json(
-        self, json_str: str, scenes_dir: Optional[str] = None
-    ) -> None:
+    def from_json(self, json_str: str, scenes_dir: Optional[str] = None) -> None:
         deserialized = json.loads(json_str)
-        self.__dict__.update(
-            deserialized
-        )  # This is a messy hack... Why do we do this.
+        self.__dict__.update(deserialized)  # This is a messy hack... Why do we do this.
         self.answer_vocab = VocabDict(
             word_list=self.answer_vocab["word_list"]  # type: ignore
         )
@@ -96,12 +92,8 @@ class Matterport3dDatasetV1(Dataset):
                 episode.goals[g_index] = ObjectGoal(**goal)
                 new_goal = episode.goals[g_index]
                 if new_goal.view_points is not None:
-                    for p_index, agent_state in enumerate(
-                        new_goal.view_points
-                    ):
-                        new_goal.view_points[p_index] = AgentState(
-                            **agent_state
-                        )
+                    for p_index, agent_state in enumerate(new_goal.view_points):
+                        new_goal.view_points[p_index] = AgentState(**agent_state)
             if episode.shortest_paths is not None:
                 for path in episode.shortest_paths:
                     for p_index, point in enumerate(path):

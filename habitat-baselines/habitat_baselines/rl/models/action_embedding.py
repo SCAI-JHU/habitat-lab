@@ -136,9 +136,7 @@ class ActionEmbedding(nn.Module):
 
     def forward(self, action, masks=None):
         output = []
-        for _slice, emb_mod in zip(
-            self.embedding_slices, self.embedding_modules
-        ):
+        for _slice, emb_mod in zip(self.embedding_slices, self.embedding_modules):
             output.append(emb_mod(action[..., _slice], masks))
 
         return torch.cat(output, -1)

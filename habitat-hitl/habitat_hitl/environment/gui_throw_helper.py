@@ -59,11 +59,7 @@ class GuiThrowHelper:
         dist_to_floor_y = (ray.origin.y - floor_y) / -ray.direction.y
         target_on_floor = ray.origin + ray.direction * dist_to_floor_y
 
-        art_obj = (
-            self._get_sim()
-            .agents_mgr[self._agent_idx]
-            .articulated_agent.sim_obj
-        )
+        art_obj = self._get_sim().agents_mgr[self._agent_idx].articulated_agent.sim_obj
         robot_root = art_obj.transformation.translation
         path_points = [robot_root, target_on_floor]
         vel_vector, path_points = self.compute_velocity_throw(

@@ -97,10 +97,7 @@ class ObjectStateSpec:
         """
 
         # TODO: This is a placeholder until semantic_class can be officially supported or replaced by something else
-        if (
-            get_state_of_obj(obj, "semantic_class")
-            in self.accepted_semantic_classes
-        ):
+        if get_state_of_obj(obj, "semantic_class") in self.accepted_semantic_classes:
             return True
 
         return False
@@ -204,9 +201,7 @@ class BooleanObjectState(ObjectStateSpec):
 
         draw_object_highlight(obj, debug_line_render, camera_transform, color)
 
-    def toggle(
-        self, obj: Union[ManagedArticulatedObject, ManagedRigidObject]
-    ) -> bool:
+    def toggle(self, obj: Union[ManagedArticulatedObject, ManagedRigidObject]) -> bool:
         """
         Toggles a boolean state, returning the newly set value.
 
@@ -266,9 +261,9 @@ class ObjectStateMachine:
         # a list of ObjectStateSpec singleton instances which are active in the current scene
         self.active_states = active_states if active_states is not None else []
         # map tracked objects to their set of state properties
-        self.objects_with_states: Dict[
-            str, List[ObjectStateSpec]
-        ] = defaultdict(lambda: [])
+        self.objects_with_states: Dict[str, List[ObjectStateSpec]] = defaultdict(
+            lambda: []
+        )
 
     def initialize_object_state_map(self, sim: habitat_sim.Simulator) -> None:
         """
@@ -295,9 +290,7 @@ class ObjectStateMachine:
         for state in self.active_states:
             if state.is_affordance_of_obj(obj):
                 self.objects_with_states[obj.handle].append(state)
-                logger.debug(
-                    f"registered state {state} for object {obj.handle}"
-                )
+                logger.debug(f"registered state {state} for object {obj.handle}")
 
     def update_states(self, sim: habitat_sim.Simulator, dt: float) -> None:
         """
@@ -346,8 +339,6 @@ class ObjectStateMachine:
             for state in states:
                 obj_state = get_state_of_obj(obj, state.name)
                 snapshot[state.name][object_handle] = (
-                    obj_state
-                    if obj_state is not None
-                    else state.default_value()
+                    obj_state if obj_state is not None else state.default_value()
                 )
         return dict(snapshot)

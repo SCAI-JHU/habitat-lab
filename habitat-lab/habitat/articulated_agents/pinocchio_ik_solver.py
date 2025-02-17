@@ -14,7 +14,7 @@ CEM_NUM_SAMPLES = 50
 CEM_NUM_TOP = 10
 
 stretch_urdf_path = "/home/ubuntu/partnr-planner/third_party/habitat-lab/habitat-lab/habitat/articulated_agents/stretch_base_translation_ik.urdf"
-#stretch_urdf_path = "/home/ubuntu/partnr-planner/data/robots/hab_stretch/urdf/hab_stretch.urdf"
+# stretch_urdf_path = "/home/ubuntu/partnr-planner/data/robots/hab_stretch/urdf/hab_stretch.urdf"
 # i = 0
 # for f in model.frames:
 #     print(i, f.name)
@@ -33,13 +33,19 @@ default_controlled_links = [
     # "joint_head_pan",
     # "joint_head_tilt",
 ]
+
+
 class PinocchioIKSolver(StretchRobot):  # link_gripper_finger_left
     EPS = 1e-5
     DT = 1e-1
     DAMP = 1e-13
 
     def __init__(
-            self, urdf_path:str = stretch_urdf_path, ee_link_name: str = "joint_lift", controlled_joints: List[str] = default_controlled_links, verbose: bool = False
+        self,
+        urdf_path: str = stretch_urdf_path,
+        ee_link_name: str = "joint_lift",
+        controlled_joints: List[str] = default_controlled_links,
+        verbose: bool = False,
     ):
         # super().__init__(None, None)
         self.model = pinocchio.buildModelFromUrdf(urdf_path)
@@ -57,7 +63,9 @@ class PinocchioIKSolver(StretchRobot):  # link_gripper_finger_left
                 jid = self.model.getJointId(joint)
                 if jid >= len(self.model.idx_qs):
                     logger.error(f"{joint=} {jid=} not in model.idx_qs")
-                    raise RuntimeError(f"Invalid urdf at {urdf_path=}: missing {joint=}")
+                    raise RuntimeError(
+                        f"Invalid urdf at {urdf_path=}: missing {joint=}"
+                    )
                 else:
                     idx = self.model.idx_qs[jid]
             self.controlled_joints.append(idx)
@@ -71,10 +79,10 @@ class PinocchioIKSolver(StretchRobot):  # link_gripper_finger_left
 
     def get_dof(self) -> int:
         return len(self.controlled_joints)
-    
+
     def get_num_controllable_joint(self) -> int:
         return len(self.controlled_joints)
-    
+
     def _qmap_control2model(
         self, q_input: Union[np.ndarray, dict], ignore_missing_joints: bool = False
     ) -> np.ndarray:
@@ -88,12 +96,16 @@ class PinocchioIKSolver(StretchRobot):  # link_gripper_finger_left
                     jid = self.model.getJointId(joint_name)
                     if jid >= len(self.model.idx_qs):
                         if not ignore_missing_joints:
-                            logger.error(f"ERROR: {joint_name=} {jid=} not in model.idx_qs")
+                            logger.error(
+                                f"ERROR: {joint_name=} {jid=} not in model.idx_qs"
+                            )
                             raise RuntimeError(
                                 f"Tried to set joint not in model.idx_qs: {joint_name=}"
                             )
                     else:
-                        q_out[self.model.idx_qs[self.model.getJointId(joint_name)]] = value
+                        q_out[self.model.idx_qs[self.model.getJointId(joint_name)]] = (
+                            value
+                        )
         else:
             assert len(self.controlled_joints) == len(
                 q_input
@@ -130,7 +142,9 @@ class PinocchioIKSolver(StretchRobot):  # link_gripper_finger_left
         Returns:
             transformation matrix from node_a to node_b
         """
-        q_model = self._qmap_control2model(config, ignore_missing_joints=ignore_missing_joints)
+        q_model = self._qmap_control2model(
+            config, ignore_missing_joints=ignore_missing_joints
+        )
         # print('q_model', q_model)
         pinocchio.forwardKinematics(self.model, self.data, q_model)
         frame_idx1 = [f.name for f in self.model.frames].index(node_a)
@@ -150,13 +164,15 @@ class PinocchioIKSolver(StretchRobot):  # link_gripper_finger_left
         return placement_frame2.inverse() * placement_frame1
 
     def compute_fk(
-        self, config: np.ndarray, link_name: str = None, ignore_missing_joints: bool = False
+        self,
+        config: np.ndarray,
+        link_name: str = None,
+        ignore_missing_joints: bool = False,
     ) -> Tuple[np.ndarray, np.ndarray]:
-        base_frame_name = "link_arm_l0"  
+        base_frame_name = "link_arm_l0"
         base_frame_idx = self.model.getFrameId(base_frame_name)
 
-        base = self.data.oMf[base_frame_idx] 
-        print("basexytestbefore",base)
+        base = self.data.oMf[base_frame_idx]
         """Given joint values, return end-effector position and quaternion associated with it.
 
         Args:
@@ -173,25 +189,23 @@ class PinocchioIKSolver(StretchRobot):  # link_gripper_finger_left
             try:
                 frame_idx = [f.name for f in self.model.frames].index(link_name)
             except ValueError:
-                logger.error(f"Unknown link_name {link_name}. Defaulting to end-effector")
+                logger.error(
+                    f"Unknown link_name {link_name}. Defaulting to end-effector"
+                )
                 frame_idx = self.ee_frame_idx
-        q_model = self._qmap_control2model(config, ignore_missing_joints=ignore_missing_joints)
+        q_model = self._qmap_control2model(
+            config, ignore_missing_joints=ignore_missing_joints
+        )
         pinocchio.forwardKinematics(self.model, self.data, q_model)
         pinocchio.updateFramePlacement(self.model, self.data, frame_idx)
         pos = self.data.oMf[frame_idx].translation
         quat = R.from_matrix(self.data.oMf[frame_idx].rotation).as_quat()
-
-        # base_frame_name = "link_gripper_finger_left"  
-        # base_frame_idx = self.model.getFrameId(base_frame_name)
-
-        # base = self.data.oMf[base_frame_idx] 
-        # print("basexytest",base)
         return pos.copy(), quat.copy()
 
     def compute_ik(
         self,
         pos_desired: np.ndarray,
-        quat_desired: np.ndarray = np.array([1,0,0,0]),
+        quat_desired: np.ndarray = np.array([1, 0, 0, 0]),
         q_init=None,
         max_iterations=300,
         num_attempts: int = 1,
@@ -220,26 +234,29 @@ class PinocchioIKSolver(StretchRobot):  # link_gripper_finger_left
                     "Sampling multiple initial configs not yet supported by Pinocchio solver."
                 )
         else:
-            q = self._qmap_control2model(q_init, ignore_missing_joints=ignore_missing_joints)
+            q = self._qmap_control2model(
+                q_init, ignore_missing_joints=ignore_missing_joints
+            )
             # Override the number of attempts
             num_attempts = 1
 
-        desired_ee_pose = pinocchio.SE3(R.from_quat(quat_desired).as_matrix(), pos_desired)
-        print("desired_ee_pose",desired_ee_pose)
-#        lower_limits, upper_limits = self.get_joint_limits()
+        desired_ee_pose = pinocchio.SE3(
+            R.from_quat(quat_desired).as_matrix(), pos_desired
+        )
+        #        lower_limits, upper_limits = self.get_joint_limits()
         while True:
             pinocchio.forwardKinematics(self.model, self.data, q)
             pinocchio.updateFramePlacement(self.model, self.data, _ee_frame_idx)
             dMi = desired_ee_pose.actInv(self.data.oMf[_ee_frame_idx])
             # print("self.data.oMf[_ee_frame_idx]",self.data.oMf[_ee_frame_idx])
             err = pinocchio.log(dMi).vector
-            # pos_err = err[3:6] 
+            # pos_err = err[3:6]
 
             if verbose:
                 print(f"[pinocchio_ik_solver] iter={i}; error={err}")
-            pos_desired = desired_ee_pose.translation 
-            pos_current = self.data.oMf[_ee_frame_idx].translation  
-            pos_err = pos_desired - pos_current  
+            pos_desired = desired_ee_pose.translation
+            pos_current = self.data.oMf[_ee_frame_idx].translation
+            pos_err = pos_desired - pos_current
             if np.linalg.norm(pos_err) < self.EPS:
                 success = True
                 break
@@ -255,18 +272,18 @@ class PinocchioIKSolver(StretchRobot):  # link_gripper_finger_left
             )
             v = -J.T.dot(np.linalg.solve(J.dot(J.T) + self.DAMP * np.eye(6), err))
             q = pinocchio.integrate(self.model, q, v * self.DT)
-         #   q = np.clip(q, lower_limits, upper_limits)
+            #   q = np.clip(q, lower_limits, upper_limits)
             i += 1
 
         q_control = self._qmap_model2control(q.flatten())
         debug_info = {"iter": i, "pos_err": err}
         print(debug_info)
 
-        base_frame_name = "link_gripper_finger_left"  
+        base_frame_name = "link_gripper_finger_left"
         base_frame_idx = self.model.getFrameId(base_frame_name)
 
-        base = self.data.oMf[base_frame_idx] 
-        print("basexytest",base)
+        base = self.data.oMf[base_frame_idx]
+        # print("basexytest",base)
 
         return q_control, success, debug_info
 
@@ -276,7 +293,7 @@ class PinocchioIKSolver(StretchRobot):  # link_gripper_finger_left
         for i, name in enumerate(self.controlled_joint_names):
             state[name] = arr[i]
         return state
-    
+
     def set_initail_joint_state(self, joint_state: List):
         initial_joint_state = {}
         for i in range(len(default_controlled_links)):
@@ -284,11 +301,10 @@ class PinocchioIKSolver(StretchRobot):  # link_gripper_finger_left
         return initial_joint_state
 
 
-
 manip_ik_solver = PinocchioIKSolver()
 
 initial_joint_state = {
-    "joint_mobile_base_translation":0.0,
+    "joint_mobile_base_translation": 0.0,
     "joint_arm_l0": 0.0,
     "joint_arm_l1": 0.0,
     "joint_arm_l2": 0.0,
@@ -300,13 +316,12 @@ initial_joint_state = {
     # "joint_head_pan": 0.0,
     # "joint_head_tilt": 0.0,
 }
-joint_state = [0,0,0,0,0,0,0,0,0]
+joint_state = [0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 
 ee_pose = manip_ik_solver.compute_fk(initial_joint_state)
-print(f"{ee_pose=}")
+# print(f"{ee_pose=}")
 assert ee_pose is not None, "FK failed"
-
 
 
 # rotation_matrix = np.array([

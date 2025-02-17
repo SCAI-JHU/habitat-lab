@@ -90,9 +90,7 @@ if __name__ == "__main__":
     failed_runs = []
 
     failed_runs.extend(
-        check_benchmark_sps(
-            NAME_MAP, MINIMUM_PERFORMANCE_1_PROCESS, "1_200_-1_"
-        )
+        check_benchmark_sps(NAME_MAP, MINIMUM_PERFORMANCE_1_PROCESS, "1_200_-1_")
     )
     # TODO: understand CI multi-process issues before asserting on these bench results
     # failed_runs.extend(

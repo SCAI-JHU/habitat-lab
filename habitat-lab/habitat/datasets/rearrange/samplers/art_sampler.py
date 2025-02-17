@@ -27,9 +27,7 @@ class ArticulatedObjectStateSampler:
 
     def sample(
         self, sim: habitat_sim.Simulator, receptacles=None
-    ) -> Optional[
-        Dict[habitat_sim.physics.ManagedArticulatedObject, Dict[int, float]]
-    ]:
+    ) -> Optional[Dict[habitat_sim.physics.ManagedArticulatedObject, Dict[int, float]]]:
         """
         For all matching AOs in the scene, sample and apply the joint state for this sampler.
         Return a list of tuples (instance_handle, link_name, state)
@@ -51,9 +49,7 @@ class ArticulatedObjectStateSampler:
                     joint_state = self._sample_joint_state()
                     # set the joint state
                     pose = ao_instance.joint_positions
-                    pose[
-                        ao_instance.get_link_joint_pos_offset(link_ix)
-                    ] = joint_state
+                    pose[ao_instance.get_link_joint_pos_offset(link_ix)] = joint_state
                     ao_instance.joint_positions = pose
                     if ao_instance not in ao_states:
                         ao_states[ao_instance] = {}
@@ -98,9 +94,7 @@ class CompositeArticulatedObjectStateSampler(ArticulatedObjectStateSampler):
 
     def sample(
         self, sim: habitat_sim.Simulator, receptacles: List[Receptacle]
-    ) -> Optional[
-        Dict[habitat_sim.physics.ManagedArticulatedObject, Dict[int, float]]
-    ]:
+    ) -> Optional[Dict[habitat_sim.physics.ManagedArticulatedObject, Dict[int, float]]]:
         """
         Iterative rejection sampling of all joint states specified in parameters.
         Return a list of tuples (instance_handle, link_name, state)
@@ -115,9 +109,9 @@ class CompositeArticulatedObjectStateSampler(ArticulatedObjectStateSampler):
             str, List[habitat_sim.physics.ManagedArticulatedObject]
         ] = {}
         for ao_handle in self.ao_sampler_params:
-            matching_ao_instances[
+            matching_ao_instances[ao_handle] = aom.get_objects_by_handle_substring(
                 ao_handle
-            ] = aom.get_objects_by_handle_substring(ao_handle).values()
+            ).values()
 
         # construct an efficiently iterable structure for reject sampling of link states
         link_sample_params: Dict[
@@ -134,9 +128,9 @@ class CompositeArticulatedObjectStateSampler(ArticulatedObjectStateSampler):
                         assert (
                             link_ix not in link_sample_params[ao_instance]
                         ), f"Joint sampler configuration creating duplicate sampler requests for object '{ao_handle}', instance '{ao_instance.handle}', link {link_name}."
-                        link_sample_params[ao_instance][
-                            link_ix
-                        ] = self.ao_sampler_params[ao_handle][link_name]
+                        link_sample_params[ao_instance][link_ix] = (
+                            self.ao_sampler_params[ao_handle][link_name]
+                        )
 
         for _iteration in range(self.max_iterations):
             ao_states: Dict[
@@ -170,16 +164,12 @@ class CompositeArticulatedObjectStateSampler(ArticulatedObjectStateSampler):
                         # the object is spawned inside the fridge OR inside the kitchen counter BUT not on top of the counter
                         # because in this case all drawers must be closed.
                         # TODO: move this receptacle access logic to the ao_config files in a future refactor
-                        joint_state = random.uniform(
-                            joint_range[0], joint_range[1]
-                        )
+                        joint_state = random.uniform(joint_range[0], joint_range[1])
                     else:
                         joint_state = pose[
                             ao_instance.get_link_joint_pos_offset(link_ix)
                         ]
-                    pose[
-                        ao_instance.get_link_joint_pos_offset(link_ix)
-                    ] = joint_state
+                    pose[ao_instance.get_link_joint_pos_offset(link_ix)] = joint_state
                     ao_states[ao_instance][link_ix] = joint_state
                 ao_instance.joint_positions = pose
 
@@ -188,18 +178,14 @@ class CompositeArticulatedObjectStateSampler(ArticulatedObjectStateSampler):
             for ao_handle in matching_ao_instances:
                 for ao_instance in matching_ao_instances[ao_handle]:
                     if ao_instance.contact_test():
-                        logger.info(
-                            f"ao_handle = {ao_handle} failed contact test."
-                        )
+                        logger.info(f"ao_handle = {ao_handle} failed contact test.")
                         sim.perform_discrete_collision_detection()
                         cps = sim.get_physics_contact_points()
                         logger.info(ao_instance.handle)
                         for cp in cps:
                             if (
-                                ao_instance.handle
-                                in ids_to_names[cp.object_id_a]
-                                or ao_instance.handle
-                                in ids_to_names[cp.object_id_b]
+                                ao_instance.handle in ids_to_names[cp.object_id_a]
+                                or ao_instance.handle in ids_to_names[cp.object_id_b]
                             ):
                                 logger.info(
                                     f" contact between ({cp.object_id_a})'{ids_to_names[cp.object_id_a]}' and ({cp.object_id_b})'{ids_to_names[cp.object_id_b]}'"

@@ -110,9 +110,7 @@ class SessionRecorder:
         self.user_records: List[UserRecord] = []
         for user_index, connection_record in connection_records.items():
             self.user_records.append(
-                UserRecord(
-                    user_index=user_index, connection_record=connection_record
-                )
+                UserRecord(user_index=user_index, connection_record=connection_record)
             )
 
     def end_session(self, error: str):

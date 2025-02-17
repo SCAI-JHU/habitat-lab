@@ -169,9 +169,7 @@ class MultiAgentAccessMgr(AgentAccessMgr):
         agent_count_idxs = [0]
         agents = []
         for agent_i in range(self._pop_config.num_agent_types):
-            num_agents_type = self._pop_config.num_pool_agents_per_type[
-                agent_i
-            ]
+            num_agents_type = self._pop_config.num_pool_agents_per_type[agent_i]
             agent_count_idxs.append(num_agents_type)
 
             for agent_type_i in range(num_agents_type):
@@ -182,18 +180,14 @@ class MultiAgentAccessMgr(AgentAccessMgr):
                     use_resume_state = resume_state[str(agent_ct)]
 
                 agent_obs_space = spaces.Dict(
-                    update_dict_with_agent_prefix(
-                        env_spec.observation_space, agent_i
-                    )
+                    update_dict_with_agent_prefix(env_spec.observation_space, agent_i)
                 )
                 agent_orig_action_space = spaces.Dict(
                     update_dict_with_agent_prefix(
                         env_spec.orig_action_space.spaces, agent_i
                     )
                 )
-                agent_action_space = create_action_space(
-                    agent_orig_action_space
-                )
+                agent_action_space = create_action_space(agent_orig_action_space)
                 agent_env_spec = EnvironmentSpec(
                     observation_space=agent_obs_space,
                     action_space=agent_action_space,
@@ -258,10 +252,7 @@ class MultiAgentAccessMgr(AgentAccessMgr):
                 raise ValueError(
                     "The current code only supports sampling one agent of a given type at a time"
                 )
-            if (
-                self._pop_config.force_partner_sample_idx >= 0
-                and agent_type_ind > 0
-            ):
+            if self._pop_config.force_partner_sample_idx >= 0 and agent_type_ind > 0:
                 # We want to force the selection of an agent from the
                 # population for the non-coordination agent (the coordination
                 # agent is at index 0.
@@ -271,9 +262,7 @@ class MultiAgentAccessMgr(AgentAccessMgr):
             else:
                 active_agents_type = self._rnd.choice(
                     self._agent_count_idxs[agent_type_ind],
-                    size=self._pop_config.num_active_agents_per_type[
-                        agent_type_ind
-                    ],
+                    size=self._pop_config.num_active_agents_per_type[agent_type_ind],
                 )
             agent_cts = active_agents_type + prev_num_agents
             prev_num_agents += self._agent_count_idxs[agent_type_ind]
@@ -281,9 +270,7 @@ class MultiAgentAccessMgr(AgentAccessMgr):
             active_agent_types.append(
                 np.ones(agent_cts.shape, dtype=np.int32) * agent_type_ind
             )
-        return np.concatenate(active_agents), np.concatenate(
-            active_agent_types
-        )
+        return np.concatenate(active_agents), np.concatenate(active_agent_types)
 
     def _sample_active(self):
         """
@@ -339,9 +326,7 @@ class MultiAgentAccessMgr(AgentAccessMgr):
 
     @property
     def masks_shape(self) -> Tuple:
-        return (
-            sum(self._agents[i].masks_shape[0] for i in self._active_agents),
-        )
+        return (sum(self._agents[i].masks_shape[0] for i in self._active_agents),)
 
     def after_update(self):
         """
@@ -355,13 +340,9 @@ class MultiAgentAccessMgr(AgentAccessMgr):
             self._num_updates % self._pop_config.agent_sample_interval == 0
             and self._pop_config.agent_sample_interval != -1
         ):
-            prev_rollouts = [
-                self._agents[i].rollouts for i in self._active_agents
-            ]
+            prev_rollouts = [self._agents[i].rollouts for i in self._active_agents]
             self._sample_active()
-            cur_rollouts = [
-                self._agents[i].rollouts for i in self._active_agents
-            ]
+            cur_rollouts = [self._agents[i].rollouts for i in self._active_agents]
 
             # We just sampled new agents. We also need to reset the storage buffer current and starting state.
             for prev_rollout, cur_rollout in zip(prev_rollouts, cur_rollouts):

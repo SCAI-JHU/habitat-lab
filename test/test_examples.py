@@ -42,12 +42,8 @@ def run_main_subproc(args):
 
 
 @pytest.mark.skipif(
-    not osp.exists(
-        "data/scene_datasets/habitat-test-scenes/skokloster-castle.glb"
-    )
-    or not osp.exists(
-        "data/scene_datasets/habitat-test-scenes/van-gogh-room.glb"
-    ),
+    not osp.exists("data/scene_datasets/habitat-test-scenes/skokloster-castle.glb")
+    or not osp.exists("data/scene_datasets/habitat-test-scenes/van-gogh-room.glb"),
     reason="Requires the habitat-test-scenes",
 )
 @pytest.mark.parametrize(

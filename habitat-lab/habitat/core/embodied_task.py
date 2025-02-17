@@ -135,9 +135,7 @@ class Metrics(dict):
         :param measures: list of :ref:`Measure` whose metrics are fetched and
             packaged.
         """
-        data = [
-            (uuid, measure.get_metric()) for uuid, measure in measures.items()
-        ]
+        data = [(uuid, measure.get_metric()) for uuid, measure in measures.items()]
         super().__init__(data)
 
 
@@ -181,9 +179,7 @@ class Measurements:
     def _get_measure_index(self, measure_name):
         return list(self.measures.keys()).index(measure_name)
 
-    def check_measure_dependencies(
-        self, measure_name: str, dependencies: List[str]
-    ):
+    def check_measure_dependencies(self, measure_name: str, dependencies: List[str]):
         r"""Checks if dependencies measures are enabled and calculatethat the measure
         :param measure_name: a name of the measure for which has dependencies.
         :param dependencies: a list of a measure names that are required by
@@ -242,9 +238,7 @@ class EmbodiedTask:
         self._sim = sim
         self._dataset = dataset
         self._physics_target_sps = config.physics_target_sps
-        assert (
-            self._physics_target_sps > 0
-        ), "physics_target_sps must be positive"
+        assert self._physics_target_sps > 0, "physics_target_sps must be positive"
 
         self.measurements = Measurements(
             self._init_entities(
@@ -317,13 +311,13 @@ class EmbodiedTask:
     ):
         if isinstance(action_name, (int, np.integer)):
             action_name = self.get_action_name(action_name)
-            print("xytestaction_name",action_name)
+            print("xytestaction_name", action_name)
         assert (
             action_name in self.actions
         ), f"Can't find '{action_name}' action in {self.actions.keys()}."
         task_action = self.actions[action_name]
         # print("xytesttttttask_action",action_name,task_action)
-        observation =  task_action.step(
+        observation = task_action.step(
             **action["action_args"],
             task=self,
         )
@@ -341,29 +335,26 @@ class EmbodiedTask:
                     action,
                     episode,
                 )
-                
+
         else:
-            observations = self._step_single_action(
-                action_name, action, episode
-            )
+            observations = self._step_single_action(action_name, action, episode)
 
         self._sim.step_physics(1.0 / self._physics_target_sps)  # type:ignore
 
-        if observations and isinstance(observations,list):
+        if observations and isinstance(observations, list):
 
-            print("len(observations)",len(observations))
+            print("len(observations)", len(observations))
             for i in range(len(observations)):
                 observation = observations[i]
                 observations.update(
-            self.sensor_suite.get_observations(
-                observations=observation,
-                episode=episode,
-                action=action,
-                task=self,
-                should_time=True,
-            )
-
-        )
+                    self.sensor_suite.get_observations(
+                        observations=observation,
+                        episode=episode,
+                        action=action,
+                        task=self,
+                        should_time=True,
+                    )
+                )
 
         if observations is None:
             observations = self._sim.step(None)
@@ -381,7 +372,7 @@ class EmbodiedTask:
             observations=observations, action=action, episode=episode
         )
         return observations
-    
+
     def get_action_name(self, action_index: Union[int, np.integer]):
         if action_index >= len(self.actions):
             raise ValueError(f"Action index '{action_index}' is out of range.")

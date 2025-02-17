@@ -48,9 +48,7 @@ class EvalConfig(HabitatBaselinesBaseConfig):
         # available options are "disk" and "tensorboard"
         default_factory=list
     )
-    extra_sim_sensors: Dict[str, SimulatorSensorConfig] = field(
-        default_factory=dict
-    )
+    extra_sim_sensors: Dict[str, SimulatorSensorConfig] = field(default_factory=dict)
 
 
 @dataclass
@@ -265,9 +263,7 @@ class HierarchicalPolicyConfig(HabitatBaselinesBaseConfig):
     high_level_policy: Dict[str, Any] = MISSING
     # Names of the skills to not load.
     ignore_skills: List[str] = field(default_factory=list)
-    defined_skills: Dict[str, HrlDefinedSkillConfig] = field(
-        default_factory=dict
-    )
+    defined_skills: Dict[str, HrlDefinedSkillConfig] = field(default_factory=dict)
     use_skills: Dict[str, str] = field(default_factory=dict)
 
 
@@ -423,9 +419,7 @@ class EvaluatorConfig(HabitatBaselinesBaseConfig):
     policy during evaluation mode.
     """
 
-    _target_: str = (
-        "habitat_baselines.rl.ppo.habitat_evaluator.HabitatEvaluator"
-    )
+    _target_: str = "habitat_baselines.rl.ppo.habitat_evaluator.HabitatEvaluator"
 
 
 @dataclass
@@ -528,9 +522,7 @@ cs.store(
     name="habitat_baselines_spa_config_base",
     node=HabitatBaselinesSPAConfig,
 )
-cs.store(
-    group="habitat_baselines/rl/policy", name="policy_base", node=PolicyConfig
-)
+cs.store(group="habitat_baselines/rl/policy", name="policy_base", node=PolicyConfig)
 
 cs.store(
     package="habitat_baselines.rl.auxiliary_losses.cpca",

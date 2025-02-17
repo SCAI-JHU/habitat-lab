@@ -32,9 +32,7 @@ class AppStateStartScreen(AppStateBase):
     Cancellable.
     """
 
-    def __init__(
-        self, app_service: AppService, app_data: AppData, session: Session
-    ):
+    def __init__(self, app_service: AppService, app_data: AppData, session: Session):
         super().__init__(app_service, app_data)
         self._session = session
         self._has_user_pressed_start_button: List[bool] = [
@@ -83,10 +81,8 @@ class AppStateStartScreen(AppStateBase):
 
         # Show dialogue box with "Start" button.
         for user_index in range(self._app_data.max_user_count):
-            button_pressed = (
-                self._app_service.remote_client_state.ui_button_pressed(
-                    user_index, START_BUTTON_ID
-                )
+            button_pressed = self._app_service.remote_client_state.ui_button_pressed(
+                user_index, START_BUTTON_ID
             )
             self._has_user_pressed_start_button[user_index] |= button_pressed
 

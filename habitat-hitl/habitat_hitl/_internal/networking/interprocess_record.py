@@ -40,9 +40,7 @@ class InterprocessRecord:
         """Get whether new connections are allowed."""
         return self._allow_new_connections.value  # type: ignore
 
-    def send_keyframe_to_networking_thread(
-        self, keyframe: KeyframeAndMessages
-    ) -> None:
+    def send_keyframe_to_networking_thread(self, keyframe: KeyframeAndMessages) -> None:
         """Send a keyframe (outgoing data) to the networking thread."""
         # Acquire the semaphore to ensure the simulation doesn't advance too far ahead
         self._keyframe_queue.put(keyframe)
@@ -50,9 +48,7 @@ class InterprocessRecord:
     def send_kick_signal_to_networking_thread(self, user_index: int) -> None:
         self._kick_signal_queue.put(user_index)
 
-    def send_client_state_to_main_thread(
-        self, client_state: ClientState
-    ) -> None:
+    def send_client_state_to_main_thread(self, client_state: ClientState) -> None:
         """Send a client state (incoming data) to the main thread."""
         self._client_state_queue.put(client_state)
 

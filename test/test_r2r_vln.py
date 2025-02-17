@@ -23,9 +23,7 @@ EPISODES_LIMIT = 1
 def check_json_serialization(dataset: habitat.Dataset):
     start_time = time.time()
     json_str = str(dataset.to_json())
-    logger.info(
-        "JSON conversion finished. {} sec".format((time.time() - start_time))
-    )
+    logger.info("JSON conversion finished. {} sec".format((time.time() - start_time)))
     decoded_dataset = dataset.__class__()
     decoded_dataset.from_json(json_str)
     assert len(decoded_dataset.episodes) > 0
@@ -61,16 +59,10 @@ def test_dataset_splitting(split):
     with habitat.config.read_write(dataset_config):
         dataset_config.split = split
 
-        if not r2r_vln_dataset.VLNDatasetV1.check_config_paths_exist(
-            dataset_config
-        ):
-            pytest.skip(
-                "Please download Matterport3D R2R dataset to data folder."
-            )
+        if not r2r_vln_dataset.VLNDatasetV1.check_config_paths_exist(dataset_config):
+            pytest.skip("Please download Matterport3D R2R dataset to data folder.")
 
-        scenes = r2r_vln_dataset.VLNDatasetV1.get_scenes_to_load(
-            config=dataset_config
-        )
+        scenes = r2r_vln_dataset.VLNDatasetV1.get_scenes_to_load(config=dataset_config)
         assert (
             len(scenes) > 0
         ), "Expected dataset contains separate episode file per scene."
@@ -79,9 +71,7 @@ def test_dataset_splitting(split):
         full_dataset = make_dataset(
             id_dataset=dataset_config.type, config=dataset_config
         )
-        full_episodes = {
-            (ep.scene_id, ep.episode_id) for ep in full_dataset.episodes
-        }
+        full_episodes = {(ep.scene_id, ep.episode_id) for ep in full_dataset.episodes}
 
         dataset_config.content_scenes = scenes[0 : len(scenes) // 2]
         split1_dataset = make_dataset(
@@ -113,9 +103,7 @@ def test_r2r_vln_sim():
     if not r2r_vln_dataset.VLNDatasetV1.check_config_paths_exist(
         vln_config.habitat.dataset
     ):
-        pytest.skip(
-            "Please download Matterport3D R2R VLN dataset to data folder."
-        )
+        pytest.skip("Please download Matterport3D R2R VLN dataset to data folder.")
 
     dataset = make_dataset(
         id_dataset=vln_config.habitat.dataset.type,
@@ -125,9 +113,7 @@ def test_r2r_vln_sim():
     with habitat.Env(config=vln_config, dataset=dataset) as env:
         env.episodes = dataset.episodes[:EPISODES_LIMIT]
 
-        follower = ShortestPathFollower(
-            env.sim, goal_radius=0.5, return_one_hot=False
-        )
+        follower = ShortestPathFollower(env.sim, goal_radius=0.5, return_one_hot=False)
 
         for _ in range(len(env.episodes)):
             env.reset()
@@ -147,9 +133,7 @@ def test_r2r_vln_sim():
                         obs["instruction"]["text"]
                         == env.current_episode.instruction.instruction_text
                     ), "Instruction from sensor does not match the intruction from the episode"
-                    agent_config = get_agent_config(
-                        vln_config.habitat.simulator
-                    )
+                    agent_config = get_agent_config(vln_config.habitat.simulator)
                     assert obs["rgb"].shape[:2] == (
                         agent_config.sim_sensors.rgb_sensor.height,
                         agent_config.sim_sensors.rgb_sensor.width,

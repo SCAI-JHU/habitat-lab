@@ -94,9 +94,7 @@ class SimpleCNN(nn.Module):
 
         self.layer_init()
 
-    def _conv_output_dim(
-        self, dimension, padding, dilation, kernel_size, stride
-    ):
+    def _conv_output_dim(self, dimension, padding, dilation, kernel_size, stride):
         r"""Calculates the output height and width based on the input
         height and width to the convolution layer.
 
@@ -126,9 +124,7 @@ class SimpleCNN(nn.Module):
     def layer_init(self):
         for layer in self.cnn:  # type: ignore
             if isinstance(layer, (nn.Conv2d, nn.Linear)):
-                nn.init.kaiming_normal_(
-                    layer.weight, nn.init.calculate_gain("relu")
-                )
+                nn.init.kaiming_normal_(layer.weight, nn.init.calculate_gain("relu"))
                 if layer.bias is not None:
                     nn.init.constant_(layer.bias, val=0)
 
@@ -142,9 +138,7 @@ class SimpleCNN(nn.Module):
             rgb_observations = observations["rgb"]
             # permute tensor to dimension [BATCH x CHANNEL x HEIGHT x WIDTH]
             rgb_observations = rgb_observations.permute(0, 3, 1, 2)
-            rgb_observations = (
-                rgb_observations.float() / 255.0
-            )  # normalize RGB
+            rgb_observations = rgb_observations.float() / 255.0  # normalize RGB
             cnn_input.append(rgb_observations)
 
         if self._n_input_depth > 0:

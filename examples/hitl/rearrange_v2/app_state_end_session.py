@@ -33,9 +33,7 @@ class AppStateEndSession(AppStateBase):
     * Upload collected data.
     """
 
-    def __init__(
-        self, app_service: AppService, app_data: AppData, session: Session
-    ):
+    def __init__(self, app_service: AppService, app_data: AppData, session: Session):
         super().__init__(app_service, app_data)
         self._session = session
         self._elapsed_time = 0.0
@@ -132,7 +130,5 @@ class AppStateEndSession(AppStateBase):
         for orig_file_name in orig_file_names:
             local_file_path = os.path.join(output_folder, orig_file_name)
             s3_file_name = orig_file_name
-            print(
-                f"Uploading '{local_file_path}' to '{s3_path}' as '{s3_file_name}'."
-            )
+            print(f"Uploading '{local_file_path}' to '{s3_path}' as '{s3_file_name}'.")
             upload_file_to_s3(local_file_path, s3_file_name, s3_path)

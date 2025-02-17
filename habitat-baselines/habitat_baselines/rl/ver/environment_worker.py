@@ -175,9 +175,7 @@ class EnvironmentWorkerProcess(ProcessBase):
         self._last_obs, reward, done, info = self._step_env(action)
 
         with self.timer.avg_time("enqueue env"):
-            self.send_transfer_buffers[
-                self.env_idx
-            ] = dict(  # type:ignore[assignment]
+            self.send_transfer_buffers[self.env_idx] = dict(  # type:ignore[assignment]
                 observations=self._last_obs,
                 rewards=reward,
                 masks=not done,
@@ -347,9 +345,7 @@ def _create_worker_configs(config: "DictConfig"):
         if len(scene_splits[-1]) == scenes_per_env:
             break
 
-    assert len(set().union(*(set(scenes) for scenes in scene_splits))) == len(
-        scenes
-    )
+    assert len(set().union(*(set(scenes) for scenes in scene_splits))) == len(scenes)
 
     args = [
         _make_proc_config(config, rank, scenes, scene_splits)

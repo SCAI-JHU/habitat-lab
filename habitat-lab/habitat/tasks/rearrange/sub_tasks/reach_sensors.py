@@ -31,11 +31,7 @@ class RearrangeReachReward(Measure):
             ],
         )
         self.update_metric(
-            *args,
-            episode=episode,
-            task=task,
-            observations=observations,
-            **kwargs
+            *args, episode=episode, task=task, observations=observations, **kwargs
         )
 
     def update_metric(self, *args, episode, task, observations, **kwargs):
@@ -79,18 +75,12 @@ class RearrangeReachSuccess(Measure):
             ],
         )
         self.update_metric(
-            *args,
-            episode=episode,
-            task=task,
-            observations=observations,
-            **kwargs
+            *args, episode=episode, task=task, observations=observations, **kwargs
         )
 
     def update_metric(self, *args, episode, task, observations, **kwargs):
         self._metric = (
-            task.measurements.measures[
-                EndEffectorToRestDistance.cls_uuid
-            ].get_metric()
+            task.measurements.measures[EndEffectorToRestDistance.cls_uuid].get_metric()
             < self._config.succ_thresh
         )
 
@@ -112,19 +102,13 @@ class AnyReachSuccess(Measure):
         )
         self._did_succ = False
         self.update_metric(
-            *args,
-            episode=episode,
-            task=task,
-            observations=observations,
-            **kwargs
+            *args, episode=episode, task=task, observations=observations, **kwargs
         )
 
     def update_metric(self, *args, episode, task, observations, **kwargs):
         self._did_succ = (
             self._did_succ
-            or task.measurements.measures[
-                RearrangeReachSuccess.cls_uuid
-            ].get_metric()
+            or task.measurements.measures[RearrangeReachSuccess.cls_uuid].get_metric()
         )
 
         self._metric = self._did_succ

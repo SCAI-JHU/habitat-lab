@@ -88,16 +88,13 @@ class ArticulatedAgentManager:
             agent = agent_cls(agent_cfg, sim)
             grasp_managers = []
             for grasp_manager_id in range(agent_cfg.grasp_managers):
-                grasp_mgr = RearrangeGraspManager(
-                    sim, cfg, agent, grasp_manager_id
-                )
+                grasp_mgr = RearrangeGraspManager(sim, cfg, agent, grasp_manager_id)
                 grasp_managers.append(grasp_mgr)
 
             if len(cfg.agents) > 1:
                 # Prefix sensors if there is more than 1 agent in the scene.
                 agent.params.cameras = {
-                    f"{agent_name}_{k}": v
-                    for k, v in agent.params.cameras.items()
+                    f"{agent_name}_{k}": v for k, v in agent.params.cameras.items()
                 }
                 for camera_prefix in agent.params.cameras:
                     for sensor_name in self._sim._sensors:
@@ -187,9 +184,7 @@ class ArticulatedAgentManager:
                         # The initial parameter for this joint should be the original angle
                         target_arm_init_params[i] = agent_data.start_js[i]
 
-            agent_data.articulated_agent.params.arm_init_params = (
-                target_arm_init_params
-            )
+            agent_data.articulated_agent.params.arm_init_params = target_arm_init_params
             # note this does not reset the base position and rotation
             agent_data.articulated_agent.reset()
 

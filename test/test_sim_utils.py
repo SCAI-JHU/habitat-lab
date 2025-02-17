@@ -52,12 +52,8 @@ def test_snap_down(support_margin, obj_margin, stage_support):
         otm.register_template(cube_template, cube_stage_template_handle)
     else:
         # setup a stage using the plane.glb test asset
-        new_stage_template = stm.create_new_template(
-            handle=plane_stage_template_handle
-        )
-        new_stage_template.render_asset_handle = (
-            "data/test_assets/scenes/plane.glb"
-        )
+        new_stage_template = stm.create_new_template(handle=plane_stage_template_handle)
+        new_stage_template.render_asset_handle = "data/test_assets/scenes/plane.glb"
         new_stage_template.margin = support_margin
         new_stage_template.orient_up = mn.Vector3(0, 0, 1)
         new_stage_template.orient_front = mn.Vector3(0, 1, 0)
@@ -144,12 +140,8 @@ def test_snap_down(support_margin, obj_margin, stage_support):
                 assert (
                     cube_obj.translation
                     - bb_ray_prescreen_results["surface_snap_point"]
-                ).length() < 1e-5, (
-                    "Translation should be the pre-screened location."
-                )
-                assert (
-                    bb_ray_prescreen_results["surface_snap_point"] is not None
-                )
+                ).length() < 1e-5, "Translation should be the pre-screened location."
+                assert bb_ray_prescreen_results["surface_snap_point"] is not None
 
                 # reset the object and try again, ignoring the supports instead
                 cube_obj.translation = mn.Vector3(0, 0.2, 0)
@@ -173,9 +165,9 @@ def test_snap_down(support_margin, obj_margin, stage_support):
 )
 def test_object_getters():
     sim_settings = default_sim_settings.copy()
-    sim_settings[
-        "scene_dataset_config_file"
-    ] = "data/replica_cad/replicaCAD.scene_dataset_config.json"
+    sim_settings["scene_dataset_config_file"] = (
+        "data/replica_cad/replicaCAD.scene_dataset_config.json"
+    )
     sim_settings["scene"] = "apt_0"
     hab_cfg = make_cfg(sim_settings)
     with Simulator(hab_cfg) as sim:
@@ -200,12 +192,8 @@ def test_object_getters():
                 obj.object_id in all_object_ids
             ), f"Object's object_id {object_id} is not found in the global object id map."
             # check the wrapper getter functions
-            obj_from_id_getter = sutils.get_obj_from_id(
-                sim, obj.object_id, ao_link_map
-            )
-            obj_from_handle_getter = sutils.get_obj_from_handle(
-                sim, obj.handle
-            )
+            obj_from_id_getter = sutils.get_obj_from_id(sim, obj.object_id, ao_link_map)
+            obj_from_handle_getter = sutils.get_obj_from_handle(sim, obj.handle)
             assert obj_from_id_getter.object_id == obj.object_id
             assert obj_from_handle_getter.object_id == obj.object_id
 
@@ -237,9 +225,9 @@ def test_object_getters():
 )
 def test_keypoint_cast_prepositions():
     sim_settings = default_sim_settings.copy()
-    sim_settings[
-        "scene_dataset_config_file"
-    ] = "data/replica_cad/replicaCAD.scene_dataset_config.json"
+    sim_settings["scene_dataset_config_file"] = (
+        "data/replica_cad/replicaCAD.scene_dataset_config.json"
+    )
     sim_settings["scene"] = "apt_0"
     hab_cfg = make_cfg(sim_settings)
     with Simulator(hab_cfg) as sim:
@@ -262,9 +250,7 @@ def test_keypoint_cast_prepositions():
             assert expected in mixer_above_strings
         assert len(mixer_above_strings) == len(expected_mixer_above_strings)
 
-        tv_object = sutils.get_obj_from_handle(
-            sim, "frl_apartment_tv_screen_:0000"
-        )
+        tv_object = sutils.get_obj_from_handle(sim, "frl_apartment_tv_screen_:0000")
         tv_above = sutils.above(sim, tv_object)
         tv_above_strings = [
             all_objects[obj_id] for obj_id in tv_above if obj_id > stage_id
@@ -279,9 +265,7 @@ def test_keypoint_cast_prepositions():
         assert len(tv_above_strings) == len(expected_tv_above_strings)
 
         # now define a custom keypoint cast from the mixer constructed to include tv in the set
-        mixer_to_tv = (
-            tv_object.translation - mixer_object.translation
-        ).normalized()
+        mixer_to_tv = (tv_object.translation - mixer_object.translation).normalized()
         mixer_to_tv_object_ids = [
             hit.object_id
             for keypoint_raycast_result in sutils.object_keypoint_cast(
@@ -295,9 +279,7 @@ def test_keypoint_cast_prepositions():
         # now test "within" preposition
 
         # the clock is sitting within the shelf object
-        clock_obj = sutils.get_obj_from_handle(
-            sim, "frl_apartment_clock_:0000"
-        )
+        clock_obj = sutils.get_obj_from_handle(sim, "frl_apartment_clock_:0000")
         shelf_object = sutils.get_obj_from_handle(
             sim, "frl_apartment_wall_cabinet_01_:0000"
         )
@@ -309,9 +291,7 @@ def test_keypoint_cast_prepositions():
         canister_object = sutils.get_obj_from_handle(
             sim, "frl_apartment_kitchen_utensil_08_:0000"
         )
-        basket_object = sutils.get_obj_from_handle(
-            sim, "frl_apartment_basket_:0000"
-        )
+        basket_object = sutils.get_obj_from_handle(sim, "frl_apartment_basket_:0000")
 
         # place the canister just above, but outside the basket
         canister_object.translation = mn.Vector3(-2.01639, 1.35, 0.0410867)
@@ -324,17 +304,13 @@ def test_keypoint_cast_prepositions():
         assert len(canister_within) == 1
         assert basket_object.object_id in canister_within
         # now make the check more strict, requiring 6 keypoints
-        canister_within = sutils.within(
-            sim, canister_object, keypoint_vote_threshold=6
-        )
+        canister_within = sutils.within(sim, canister_object, keypoint_vote_threshold=6)
         assert len(canister_within) == 0
 
         # further lower the canister such that the center is contained
         canister_object.translation = mn.Vector3(-2.01639, 1.2, 0.0410867)
         # when center ensures containment this state is "within"
-        canister_within = sutils.within(
-            sim, canister_object, keypoint_vote_threshold=6
-        )
+        canister_within = sutils.within(sim, canister_object, keypoint_vote_threshold=6)
         assert len(canister_within) == 1
         assert basket_object.object_id in canister_within
         # when center is part of the vote with threshold 6, this state is not "within"
@@ -364,9 +340,9 @@ def test_keypoint_cast_prepositions():
 )
 def test_region_containment_utils():
     sim_settings = default_sim_settings.copy()
-    sim_settings[
-        "scene_dataset_config_file"
-    ] = "data/hab3_bench_assets/hab3-hssd/hab3-hssd.scene_dataset_config.json"
+    sim_settings["scene_dataset_config_file"] = (
+        "data/hab3_bench_assets/hab3-hssd/hab3-hssd.scene_dataset_config.json"
+    )
     sim_settings["scene"] = "103997919_171031233"
     hab_cfg = make_cfg(sim_settings)
 
@@ -381,9 +357,7 @@ def test_region_containment_utils():
         living_room_region_index = 0
         bedroom_region_index = 3
 
-        living_room_region = sim.semantic_scene.regions[
-            living_room_region_index
-        ]
+        living_room_region = sim.semantic_scene.regions[living_room_region_index]
         bedroom_region = sim.semantic_scene.regions[bedroom_region_index]
 
         # the desk starts in completely in the living room
@@ -409,9 +383,7 @@ def test_region_containment_utils():
 
         assert in_livingroom
         assert in_bedroom
-        assert (
-            abs(livingroom_ratio + bedroom_ratio - 1.0) < 1e-5
-        )  # eps for float error
+        assert abs(livingroom_ratio + bedroom_ratio - 1.0) < 1e-5  # eps for float error
         assert livingroom_ratio > 0
         assert bedroom_ratio > 0
         assert bedroom_ratio > livingroom_ratio
@@ -469,9 +441,9 @@ def test_region_containment_utils():
 )
 def test_ao_open_close_queries():
     sim_settings = default_sim_settings.copy()
-    sim_settings[
-        "scene_dataset_config_file"
-    ] = "data/replica_cad/replicaCAD.scene_dataset_config.json"
+    sim_settings["scene_dataset_config_file"] = (
+        "data/replica_cad/replicaCAD.scene_dataset_config.json"
+    )
     sim_settings["scene"] = "apt_0"
     hab_cfg = make_cfg(sim_settings)
     with Simulator(hab_cfg) as sim:
@@ -479,9 +451,7 @@ def test_ao_open_close_queries():
         fridge = sutils.get_obj_from_handle(sim, "fridge_:0000")
 
         # for prismatic drawers
-        kitchen_counter = sutils.get_obj_from_handle(
-            sim, "kitchen_counter_:0000"
-        )
+        kitchen_counter = sutils.get_obj_from_handle(sim, "kitchen_counter_:0000")
 
         # for prismatic (sliding) doors
         cabinet = sutils.get_obj_from_handle(sim, "cabinet_:0000")
@@ -493,9 +463,8 @@ def test_ao_open_close_queries():
                     JointType.Revolute,
                     JointType.Prismatic,
                 ]:
-                    if (
-                        "cabinet" in obj.handle
-                        and "right_door" in obj.get_link_name(link_id)
+                    if "cabinet" in obj.handle and "right_door" in obj.get_link_name(
+                        link_id
                     ):
                         print(
                             "TODO: Skipping 'cabinet's right_door' link because it does not follow conventions. Axis should be inverted."
@@ -512,18 +481,14 @@ def test_ao_open_close_queries():
                     assert not sutils.link_is_open(obj, link_id)
                     assert sutils.link_is_closed(obj, link_id)
                     # test an intermediate position and the normalized setter utils
-                    sutils.set_link_normalized_joint_position(
-                        obj, link_id, 0.35
-                    )
+                    sutils.set_link_normalized_joint_position(obj, link_id, 0.35)
                     assert not sutils.link_is_open(obj, link_id)
                     assert not sutils.link_is_closed(obj, link_id)
                     assert sutils.link_is_open(obj, link_id, threshold=0.34)
                     assert sutils.link_is_closed(obj, link_id, threshold=0.36)
                     assert (
                         abs(
-                            sutils.get_link_normalized_joint_position(
-                                obj, link_id
-                            )
+                            sutils.get_link_normalized_joint_position(obj, link_id)
                             - 0.35
                         )
                         < 1e-5
@@ -536,9 +501,7 @@ def test_ao_open_close_queries():
         # test computing the default link
         default_link = sutils.get_ao_default_link(fridge)
         assert default_link is None
-        default_link = sutils.get_ao_default_link(
-            fridge, compute_if_not_found=True
-        )
+        default_link = sutils.get_ao_default_link(fridge, compute_if_not_found=True)
         assert default_link == 1
         assert fridge.user_attributes.get("default_link") == 1
         default_link = sutils.get_ao_default_link(
@@ -560,17 +523,12 @@ def test_ao_open_close_queries():
                 "new_fridge_template"
             )
         )
-        assert (
-            new_fridge_template_check.get_user_config().get("default_link")
-            == 0
-        )
+        assert new_fridge_template_check.get_user_config().get("default_link") == 0
         new_fridge = sim.get_articulated_object_manager().add_articulated_object_by_template_handle(
             "new_fridge_template"
         )
         assert new_fridge is not None
-        default_link = sutils.get_ao_default_link(
-            fridge, compute_if_not_found=True
-        )
+        default_link = sutils.get_ao_default_link(fridge, compute_if_not_found=True)
         assert default_link == 1
         new_default_link = sutils.get_ao_default_link(
             new_fridge, compute_if_not_found=True
@@ -582,9 +540,7 @@ def test_ao_open_close_queries():
         # test setting the default link in instance metadata
         fridge.user_attributes.set("default_link", 0)
         assert fridge.user_attributes.get("default_link") == 0
-        default_link = sutils.get_ao_default_link(
-            fridge, compute_if_not_found=True
-        )
+        default_link = sutils.get_ao_default_link(fridge, compute_if_not_found=True)
         assert fridge.user_attributes.get("default_link") == 0
 
 
@@ -598,21 +554,17 @@ def test_ao_open_close_queries():
 )
 def test_ontop_util():
     sim_settings = default_sim_settings.copy()
-    sim_settings[
-        "scene_dataset_config_file"
-    ] = "data/replica_cad/replicaCAD.scene_dataset_config.json"
+    sim_settings["scene_dataset_config_file"] = (
+        "data/replica_cad/replicaCAD.scene_dataset_config.json"
+    )
     sim_settings["scene"] = "apt_0"
     hab_cfg = make_cfg(sim_settings)
     with Simulator(hab_cfg) as sim:
         # a rigid object to test
-        table_object = sutils.get_obj_from_handle(
-            sim, "frl_apartment_table_02_:0000"
-        )
+        table_object = sutils.get_obj_from_handle(sim, "frl_apartment_table_02_:0000")
 
         # an articulated object to test
-        counter_object = sutils.get_obj_from_handle(
-            sim, "kitchen_counter_:0000"
-        )
+        counter_object = sutils.get_obj_from_handle(sim, "kitchen_counter_:0000")
 
         # the link to test
         drawer_link_id = 7
@@ -626,9 +578,7 @@ def test_ontop_util():
         drawer_link_object_id = drawer_link_object_ids[0]
 
         # open the drawer
-        drawer_link_dof = counter_object.get_link_joint_pos_offset(
-            drawer_link_id
-        )
+        drawer_link_dof = counter_object.get_link_joint_pos_offset(drawer_link_id)
         joint_positions = counter_object.joint_positions
         joint_positions[drawer_link_dof] = 0.5
         counter_object.joint_positions = joint_positions
@@ -709,9 +659,9 @@ def test_ontop_util():
 )
 def test_on_floor_and_next_to():
     sim_settings = default_sim_settings.copy()
-    sim_settings[
-        "scene_dataset_config_file"
-    ] = "data/replica_cad/replicaCAD.scene_dataset_config.json"
+    sim_settings["scene_dataset_config_file"] = (
+        "data/replica_cad/replicaCAD.scene_dataset_config.json"
+    )
     sim_settings["scene"] = "apt_0"
     hab_cfg = make_cfg(sim_settings)
     with Simulator(hab_cfg) as sim:
@@ -721,21 +671,15 @@ def test_on_floor_and_next_to():
         for obj_id, handle in all_objects.items():
             obj = sutils.get_obj_from_id(sim, obj_id, ao_link_map)
             if not obj.is_articulated:
-                obj_on_floor = sutils.on_floor(
-                    sim, obj, ao_link_map=ao_link_map
-                )
+                obj_on_floor = sutils.on_floor(sim, obj, ao_link_map=ao_link_map)
                 print(f"{handle}: {obj_on_floor}")
                 # check a known set of relationships in this scene
                 if "plant" in handle:
                     assert obj_on_floor, "All potted plants are on the floor."
                 if "lamp" in handle:
-                    assert (
-                        not obj_on_floor
-                    ), "All lamps are on furniture off the floor."
+                    assert not obj_on_floor, "All lamps are on furniture off the floor."
                 if "chair" in handle:
-                    assert (
-                        obj_on_floor
-                    ), "All chairs are furniture on the floor."
+                    assert obj_on_floor, "All chairs are furniture on the floor."
                 if "rug" in handle:
                     assert obj_on_floor, "All rugs are on the floor."
                 if "remote-control" in handle:
@@ -747,14 +691,10 @@ def test_on_floor_and_next_to():
                         not obj_on_floor
                     ), "All pictures are on furniture, off the floor."
                 if "beanbag" in handle:
-                    assert (
-                        obj_on_floor
-                    ), "All beanbags are furniture on the floor."
+                    assert obj_on_floor, "All beanbags are furniture on the floor."
 
         # also test the regularized distance functions directly
-        table_object = sutils.get_obj_from_handle(
-            sim, "frl_apartment_table_02_:0000"
-        )
+        table_object = sutils.get_obj_from_handle(sim, "frl_apartment_table_02_:0000")
         objects_in_table = [
             "frl_apartment_choppingboard_02_:0000",
             "frl_apartment_kitchen_utensil_01_:0000",
@@ -798,15 +738,11 @@ def test_on_floor_and_next_to():
 
         # test distance between two large neighboring objects
         sofa = sutils.get_obj_from_handle(sim, "frl_apartment_sofa_:0000")
-        shelf = sutils.get_obj_from_handle(
-            sim, "frl_apartment_wall_cabinet_01_:0000"
-        )
+        shelf = sutils.get_obj_from_handle(sim, "frl_apartment_wall_cabinet_01_:0000")
         reg_dist = sutils.size_regularized_object_distance(
             sim, sofa.object_id, shelf.object_id, ao_link_map
         )
-        assert (
-            reg_dist < 0.1
-        ), "sofa and shelf should be very close heuristically"
+        assert reg_dist < 0.1, "sofa and shelf should be very close heuristically"
         l2_dist = (sofa.translation - shelf.translation).length()
         assert l2_dist > reg_dist
         assert (

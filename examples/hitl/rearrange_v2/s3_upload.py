@@ -47,9 +47,7 @@ if boto3_imported:
                 print(f"Uploading {local_file} to {bucket_name}/{s3_path}")
                 s3_client.upload_file(local_file, bucket_name, s3_path)
             else:
-                print(
-                    "'S3_BUCKET' environment variable is not set. Cannot upload."
-                )
+                print("'S3_BUCKET' environment variable is not set. Cannot upload.")
         except Exception as e:
             print(e)
 
@@ -123,6 +121,5 @@ def validate_experiment_name(experiment_name: Optional[str]) -> bool:
 
     authorized_chars = ["_", "-", "."]
     return all(
-        not (not c.isalnum() and c not in authorized_chars)
-        for c in experiment_name
+        not (not c.isalnum() and c not in authorized_chars) for c in experiment_name
     )

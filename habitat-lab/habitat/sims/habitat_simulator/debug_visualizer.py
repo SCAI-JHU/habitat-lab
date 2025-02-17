@@ -94,9 +94,7 @@ class DebugObservation:
         """
 
         self.obs_data: np.ndarray = obs_data
-        self.image: Image.Image = (
-            None  # creation deferred to show or save time
-        )
+        self.image: Image.Image = None  # creation deferred to show or save time
 
     def create_image(self) -> None:
         """
@@ -275,9 +273,7 @@ class DebugVisualizer:
         self.agent_id = 0
         # default black background
         self.clear_color = (
-            mn.Color4.from_linear_rgb_int(0)
-            if clear_color is None
-            else clear_color
+            mn.Color4.from_linear_rgb_int(0) if clear_color is None else clear_color
         )
         self._equirect = equirect
 
@@ -306,9 +302,7 @@ class DebugVisualizer:
                 self.remove_dbv_agent()
                 self.create_dbv_agent(self.sensor_resolution)
 
-    def create_dbv_agent(
-        self, resolution: Tuple[int, int] = (500, 500)
-    ) -> None:
+    def create_dbv_agent(self, resolution: Tuple[int, int] = (500, 500)) -> None:
         """
         Create an initialize a new DebugVisualizer agent with a color sensor.
 
@@ -333,9 +327,7 @@ class DebugVisualizer:
         debug_agent_config.sensor_specifications = [debug_sensor_spec]
         self.sim.agents.append(
             habitat_sim.Agent(
-                self.sim.get_active_scene_graph()
-                .get_root_node()
-                .create_child(),
+                self.sim.get_active_scene_graph().get_root_node().create_child(),
                 debug_agent_config,
             )
         )
@@ -343,9 +335,7 @@ class DebugVisualizer:
         self.agent_id = len(self.sim.agents) - 1
         self.sim._Simulator__sensors.append({})
         self.sim._update_simulator_sensors(self.sensor_uuid, self.agent_id)
-        self.sensor = self.sim._Simulator__sensors[self.agent_id][
-            self.sensor_uuid
-        ]
+        self.sensor = self.sim._Simulator__sensors[self.agent_id][self.sensor_uuid]
 
     def remove_dbv_agent(self) -> None:
         """
@@ -386,9 +376,7 @@ class DebugVisualizer:
             self.create_dbv_agent(self.sensor_resolution)
 
         camera_pos = (
-            look_from
-            if look_from is not None
-            else self.agent.scene_node.translation
+            look_from if look_from is not None else self.agent.scene_node.translation
         )
         if look_up is None:
             # pick a valid "up" vector.
@@ -600,9 +588,7 @@ class DebugVisualizer:
         elif isinstance(subject, str):
             if subject == "stage" or subject == "scene":
                 subject_bb = (
-                    self.sim.get_active_scene_graph()
-                    .get_root_node()
-                    .cumulative_bb
+                    self.sim.get_active_scene_graph().get_root_node().cumulative_bb
                 )
                 if cam_local_pos is None:
                     cam_local_pos = mn.Vector3(0, 1, 0)
@@ -664,8 +650,7 @@ class DebugVisualizer:
         bb_size = bb.size()
         fov = 90 if self._equirect else self.sensor._spec.hfov
         aspect = (
-            float(self.sensor._spec.resolution[1])
-            / self.sensor._spec.resolution[0]
+            float(self.sensor._spec.resolution[1]) / self.sensor._spec.resolution[0]
         )
         import math
 
@@ -678,8 +663,7 @@ class DebugVisualizer:
             cam_local_pos = mn.Vector3(0, 0, -1)
         if not peek_all_axis:
             look_from = (
-                world_transform.transform_vector(cam_local_pos).normalized()
-                * distance
+                world_transform.transform_vector(cam_local_pos).normalized() * distance
                 + look_at
             )
             self.render_debug_lines(debug_lines)
@@ -693,8 +677,7 @@ class DebugVisualizer:
             axis_vec = mn.Vector3()
             axis_vec[axis % 3] = 1 if axis // 3 == 0 else -1
             look_from = (
-                world_transform.transform_vector(axis_vec).normalized()
-                * distance
+                world_transform.transform_vector(axis_vec).normalized() * distance
                 + look_at
             )
             self.render_debug_lines(debug_lines)
@@ -748,9 +731,7 @@ class DebugVisualizer:
         if obs_cache is None:
             obs_cache = self.debug_obs
 
-        all_formatted_obs_data = [
-            {self.sensor_uuid: obs.obs_data} for obs in obs_cache
-        ]
+        all_formatted_obs_data = [{self.sensor_uuid: obs.obs_data} for obs in obs_cache]
 
         from habitat_sim.utils import viz_utils as vut
 

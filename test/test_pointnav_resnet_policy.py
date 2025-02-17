@@ -64,7 +64,9 @@ OBSERVATION_SPACES = {
 }
 
 MODELS_DEST_DIR = "data/ddppo-models"
-MODELS_BASE_URL = "https://dl.fbaipublicfiles.com/habitat/data/baselines/v1/ddppo/ddppo-models"
+MODELS_BASE_URL = (
+    "https://dl.fbaipublicfiles.com/habitat/data/baselines/v1/ddppo/ddppo-models"
+)
 MODELS_TO_TEST = {
     "gibson-2plus-resnet50.pth": {
         "backbone": "resnet50",
@@ -99,13 +101,9 @@ def download_data():
         model_path = _get_model_path(model_name)
         if not os.path.exists(model_path):
             print(f"Downloading {model_name}.")
-            download_command = (
-                "wget --continue " + model_url + " -P " + MODELS_DEST_DIR
-            )
+            download_command = "wget --continue " + model_url + " -P " + MODELS_DEST_DIR
             subprocess.check_call(shlex.split(download_command))
-            assert os.path.exists(
-                model_path
-            ), "Download failed, no package found."
+            assert os.path.exists(model_path), "Download failed, no package found."
 
 
 @pytest.mark.parametrize(
@@ -123,9 +121,7 @@ def download_data():
 def test_pretrained_models(
     pretrained_weights_path, backbone, observation_space, action_space
 ):
-    config = get_config(
-        "test/config/habitat_baselines/ddppo_pointnav_test.yaml"
-    )
+    config = get_config("test/config/habitat_baselines/ddppo_pointnav_test.yaml")
     with read_write(config):
         ddppo_config = config.habitat_baselines.rl.ddppo
         ddppo_config.pretrained = True
@@ -144,7 +140,6 @@ def test_pretrained_models(
     prefix = "actor_critic."
     policy.load_state_dict(
         {  # type: ignore
-            k[len(prefix) :]: v
-            for k, v in pretrained_state["state_dict"].items()
+            k[len(prefix) :]: v for k, v in pretrained_state["state_dict"].items()
         }
     )

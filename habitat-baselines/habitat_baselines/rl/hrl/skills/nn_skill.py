@@ -47,9 +47,7 @@ class NnSkillPolicy(SkillPolicy):
         """
         :param action_space: The overall action space of the entire task, not task specific.
         """
-        super().__init__(
-            config, action_space, batch_size, should_keep_hold_state
-        )
+        super().__init__(config, action_space, batch_size, should_keep_hold_state)
         self._wrap_policy = wrap_policy
         self._filtered_obs_space = filtered_obs_space
         self._filtered_action_space = filtered_action_space
@@ -69,9 +67,7 @@ class NnSkillPolicy(SkillPolicy):
 
     @property
     def required_obs_keys(self):
-        return super().required_obs_keys + list(
-            self._filtered_obs_space.spaces.keys()
-        )
+        return super().required_obs_keys + list(self._filtered_obs_space.spaces.keys())
 
     def parameters(self):
         if self._wrap_policy is not None:
@@ -114,10 +110,7 @@ class NnSkillPolicy(SkillPolicy):
 
     def _get_filtered_obs(self, observations, cur_batch_idx) -> TensorDict:
         return TensorDict(
-            {
-                k: observations[k]
-                for k in self._filtered_obs_space.spaces.keys()
-            }
+            {k: observations[k] for k in self._filtered_obs_space.spaces.keys()}
         )
 
     def _internal_act(
@@ -146,14 +139,12 @@ class NnSkillPolicy(SkillPolicy):
         full_action = torch.zeros(
             (masks.shape[0], self._full_ac_size), device=masks.device
         )
-        full_action[
-            :, self._ac_start : self._ac_start + self._ac_len
-        ] = action_data.actions
+        full_action[:, self._ac_start : self._ac_start + self._ac_len] = (
+            action_data.actions
+        )
         action_data.actions = full_action
 
-        self._did_want_done[cur_batch_idx] = full_action[
-            :, self._stop_action_idx
-        ]
+        self._did_want_done[cur_batch_idx] = full_action[:, self._stop_action_idx]
         return action_data
 
     @classmethod
@@ -169,9 +160,7 @@ class NnSkillPolicy(SkillPolicy):
             )
         else:
             try:
-                ckpt_dict = torch.load(
-                    config.load_ckpt_file, map_location="cpu"
-                )
+                ckpt_dict = torch.load(config.load_ckpt_file, map_location="cpu")
             except FileNotFoundError as e:
                 raise FileNotFoundError(
                     f"Could not load neural network weights for skill from ckpt {config.load_ckpt_file}"
@@ -198,8 +187,7 @@ class NnSkillPolicy(SkillPolicy):
 
         filtered_action_space = ActionSpace(
             OrderedDict(
-                (k, action_space[k])
-                for k in policy_cfg.habitat.task.actions.keys()
+                (k, action_space[k]) for k in policy_cfg.habitat.task.actions.keys()
             )
         )
 

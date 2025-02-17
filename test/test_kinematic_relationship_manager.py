@@ -28,9 +28,9 @@ def test_kinematic_relationship_manager():
     """
 
     sim_settings = default_sim_settings.copy()
-    sim_settings[
-        "scene_dataset_config_file"
-    ] = "data/replica_cad/replicaCAD.scene_dataset_config.json"
+    sim_settings["scene_dataset_config_file"] = (
+        "data/replica_cad/replicaCAD.scene_dataset_config.json"
+    )
     sim_settings["scene"] = "apt_0"
     hab_cfg = make_cfg(sim_settings)
 
@@ -67,9 +67,9 @@ def test_kinematic_relationship_manager():
         }
         # objects on the center table
         for table_obj in table_objects:
-            obj_to_rec_relations[
-                table_obj.handle
-            ] = "frl_apartment_table_02_:0000|receptacle_aabb_Tbl2_Top1_frl_apartment_table_02"
+            obj_to_rec_relations[table_obj.handle] = (
+                "frl_apartment_table_02_:0000|receptacle_aabb_Tbl2_Top1_frl_apartment_table_02"
+            )
 
         # initialize a KRM from the object to receptacle map
         krm.initialize_from_obj_to_rec_pairs(obj_to_rec_relations, recs)
@@ -86,9 +86,7 @@ def test_kinematic_relationship_manager():
             assert table_obj.object_id in krm.relationship_graph.obj_to_parents
             assert (
                 table_obj.object_id
-                in krm.relationship_graph.obj_to_children[
-                    table_object.object_id
-                ]
+                in krm.relationship_graph.obj_to_children[table_object.object_id]
             )
         # check that the root parent snapshot is correct
         assert len(krm.prev_root_obj_state) == 1
@@ -111,41 +109,24 @@ def test_kinematic_relationship_manager():
         # test removing a parent relationship
         krm.relationship_graph.remove_obj_relations(table_objects[0].object_id)
         assert len(krm.relationship_graph.obj_to_children) == 1
-        assert (
-            len(krm.relationship_graph.obj_to_parents)
-            == len(table_objects) - 1
-        )
-        assert (
-            len(krm.relationship_graph.relation_types)
-            == len(table_objects) - 1
-        )
+        assert len(krm.relationship_graph.obj_to_parents) == len(table_objects) - 1
+        assert len(krm.relationship_graph.relation_types) == len(table_objects) - 1
         for table_obj in table_objects[1:]:
             assert table_obj.object_id in krm.relationship_graph.obj_to_parents
             assert (
                 table_obj.object_id
-                in krm.relationship_graph.obj_to_children[
-                    table_object.object_id
-                ]
+                in krm.relationship_graph.obj_to_children[table_object.object_id]
             )
+        assert table_objects[0].object_id not in krm.relationship_graph.obj_to_parents
         assert (
             table_objects[0].object_id
-            not in krm.relationship_graph.obj_to_parents
-        )
-        assert (
-            table_objects[0].object_id
-            not in krm.relationship_graph.obj_to_children[
-                table_object.object_id
-            ]
+            not in krm.relationship_graph.obj_to_children[table_object.object_id]
         )
         # removed object is still in the snapshots until recomputed
-        assert (
-            table_objects[0].object_id
-            in krm.prev_snapshot[table_object.object_id]
-        )
+        assert table_objects[0].object_id in krm.prev_snapshot[table_object.object_id]
         krm.update_snapshots()
         assert (
-            table_objects[0].object_id
-            not in krm.prev_snapshot[table_object.object_id]
+            table_objects[0].object_id not in krm.prev_snapshot[table_object.object_id]
         )
 
         # smoke test for utility function
@@ -157,22 +138,11 @@ def test_kinematic_relationship_manager():
         test_child = list(krm.relationship_graph.obj_to_parents.keys())[0]
         test_parent = krm.relationship_graph.obj_to_parents[test_child]
         assert test_parent in krm.relationship_graph.obj_to_children
-        assert (
-            test_child in krm.relationship_graph.obj_to_children[test_parent]
-        )
+        assert test_child in krm.relationship_graph.obj_to_children[test_parent]
         # now add the previously removed parent as parent of this child
         new_test_parent = table_objects[0].object_id
         krm.relationship_graph.add_relation(new_test_parent, test_child, "on")
-        assert (
-            test_child
-            not in krm.relationship_graph.obj_to_children[test_parent]
-        )
+        assert test_child not in krm.relationship_graph.obj_to_children[test_parent]
         assert new_test_parent in krm.relationship_graph.obj_to_children
-        assert (
-            test_child
-            in krm.relationship_graph.obj_to_children[new_test_parent]
-        )
-        assert (
-            krm.relationship_graph.obj_to_parents[test_child]
-            == new_test_parent
-        )
+        assert test_child in krm.relationship_graph.obj_to_children[new_test_parent]
+        assert krm.relationship_graph.obj_to_parents[test_child] == new_test_parent

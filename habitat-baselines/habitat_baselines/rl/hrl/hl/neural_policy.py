@@ -56,23 +56,16 @@ class NeuralHighLevelPolicy(HighLevelPolicy):
         self._termination_obs_name = self._config.termination_obs_name
 
         use_obs_space = spaces.Dict(
-            {
-                k: self._obs_space.spaces[k]
-                for k in self._config.policy_input_keys
-            }
+            {k: self._obs_space.spaces[k] for k in self._config.policy_input_keys}
         )
         self._im_obs_space = spaces.Dict(
             {k: v for k, v in use_obs_space.items() if len(v.shape) == 3}
         )
 
-        state_obs_space = {
-            k: v for k, v in use_obs_space.items() if len(v.shape) == 1
-        }
+        state_obs_space = {k: v for k, v in use_obs_space.items() if len(v.shape) == 1}
         self._state_obs_space = spaces.Dict(state_obs_space)
 
-        rnn_input_size = sum(
-            v.shape[0] for v in self._state_obs_space.values()
-        )
+        rnn_input_size = sum(v.shape[0] for v in self._state_obs_space.values())
         self._hidden_size = self._config.hidden_dim
         if len(self._im_obs_space) > 0 and self._config.backbone != "NONE":
             resnet_baseplanes = 32
@@ -167,9 +160,7 @@ class NeuralHighLevelPolicy(HighLevelPolicy):
             hidden.extend([obs[k] for k in self._state_obs_space.keys()])
         hidden = torch.cat(hidden, -1)
 
-        return self._state_encoder(
-            hidden, rnn_hidden_states, masks, rnn_build_seq_info
-        )
+        return self._state_encoder(hidden, rnn_hidden_states, masks, rnn_build_seq_info)
 
     def to(self, device):
         self._device = device
@@ -222,9 +213,7 @@ class NeuralHighLevelPolicy(HighLevelPolicy):
         skill_args_data: List[Any] = [None for _ in range(batch_size)]
         immediate_end = torch.zeros(batch_size, dtype=torch.bool)
 
-        state, rnn_hidden_states = self.forward(
-            observations, rnn_hidden_states, masks
-        )
+        state, rnn_hidden_states = self.forward(observations, rnn_hidden_states, masks)
         distrib = self._policy(state)
         values = self._critic(state)
         if deterministic:
@@ -240,9 +229,7 @@ class NeuralHighLevelPolicy(HighLevelPolicy):
             if baselines_logger.level >= logging.DEBUG:
                 baselines_logger.debug(f"HL Policy selected skill {use_ac}")
             next_skill[batch_idx] = self._skill_name_to_idx[use_ac.name]
-            skill_args_data[batch_idx] = [
-                entity.name for entity in use_ac.param_values
-            ]
+            skill_args_data[batch_idx] = [entity.name for entity in use_ac.param_values]
             log_info[batch_idx]["nn_action"] = use_ac.compact_str
 
         return (

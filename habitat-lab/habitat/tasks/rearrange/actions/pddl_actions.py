@@ -24,9 +24,7 @@ class PddlApplyAction(ArticulatedAgentAction):
 
     @property
     def action_space(self):
-        action_n_args = sum(
-            [action.n_args for action in self._action_ordering]
-        )
+        action_n_args = sum([action.n_args for action in self._action_ordering])
 
         return spaces.Dict(
             {
@@ -71,15 +69,11 @@ class PddlApplyAction(ArticulatedAgentAction):
                 param_values = [self.entities[i] for i in real_action_idxs]
 
                 # Look up the most recent version of this action.
-                apply_action = self._task.pddl_problem.actions[
-                    action.name
-                ].clone()
+                apply_action = self._task.pddl_problem.actions[action.name].clone()
                 apply_action.set_param_values(param_values)
                 self._prev_action = apply_action
 
-                if not apply_action.apply_if_true(
-                    self._task.pddl_problem.sim_info
-                ):
+                if not apply_action.apply_if_true(self._task.pddl_problem.sim_info):
                     self._was_prev_action_invalid = True
 
             cur_i += action.n_args
@@ -88,8 +82,6 @@ class PddlApplyAction(ArticulatedAgentAction):
         self._prev_action = None
         apply_pddl_action = kwargs[self._action_arg_prefix + "pddl_action"]
         self._was_prev_action_invalid = False
-        inputs_outside = any(
-            a < 0 or a > len(self.entities) for a in apply_pddl_action
-        )
+        inputs_outside = any(a < 0 or a > len(self.entities) for a in apply_pddl_action)
         if not inputs_outside:
             self._apply_action(apply_pddl_action)

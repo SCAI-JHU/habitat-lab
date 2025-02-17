@@ -45,6 +45,7 @@ class RearrangeEpisode(Episode):
 @registry.register_dataset(name="RearrangeDataset-v0")
 class RearrangeDatasetV0(PointNavDatasetV1):
     r"""Class inherited from PointNavDataset that loads Rearrangement dataset."""
+
     episodes: List[RearrangeEpisode] = []  # type: ignore
     content_scenes_path: str = "{data_path}/content/{scene}.json.gz"
 
@@ -64,9 +65,7 @@ class RearrangeDatasetV0(PointNavDatasetV1):
 
         super().__init__(config)
 
-    def from_json(
-        self, json_str: str, scenes_dir: Optional[str] = None
-    ) -> None:
+    def from_json(self, json_str: str, scenes_dir: Optional[str] = None) -> None:
         deserialized = json.loads(json_str)
 
         for i, episode in enumerate(deserialized["episodes"]):
@@ -101,9 +100,7 @@ class RearrangeDatasetV0(PointNavDatasetV1):
             new_ep_data = attr.asdict(ep)
             rigid_objs = []
             for name, T in ep.rigid_objs:
-                rigid_objs.append(
-                    [access_idx(name, name_to_idx), len(all_transforms)]
-                )
+                rigid_objs.append([access_idx(name, name_to_idx), len(all_transforms)])
                 all_transforms.append(T)
 
             name_to_recep = []
@@ -115,9 +112,7 @@ class RearrangeDatasetV0(PointNavDatasetV1):
                     ]
                 )
             new_ep_data["rigid_objs"] = np.array(rigid_objs)
-            new_ep_data["ao_states"] = encode_name_dict(
-                ep.ao_states, name_to_idx
-            )
+            new_ep_data["ao_states"] = encode_name_dict(ep.ao_states, name_to_idx)
             new_ep_data["name_to_receptacle"] = np.array(name_to_recep)
             new_ep_data["additional_obj_config_paths"] = list(
                 new_ep_data["additional_obj_config_paths"]
@@ -132,9 +127,7 @@ class RearrangeDatasetV0(PointNavDatasetV1):
                         access_idx(marker_data["type"], name_to_idx),
                         np.array(marker_data["params"]["offset"]),
                         access_idx(marker_data["params"]["link"], name_to_idx),
-                        access_idx(
-                            marker_data["params"]["object"], name_to_idx
-                        ),
+                        access_idx(marker_data["params"]["object"], name_to_idx),
                     ]
                 )
 
@@ -167,12 +160,9 @@ class RearrangeDatasetV0(PointNavDatasetV1):
             ep["rigid_objs"] = [
                 [idx_to_name[ni], all_T[ti]] for ni, ti in ep["rigid_objs"]
             ]
-            ep["ao_states"] = {
-                idx_to_name[ni]: v for ni, v in ep["ao_states"].items()
-            }
+            ep["ao_states"] = {idx_to_name[ni]: v for ni, v in ep["ao_states"].items()}
             ep["name_to_receptacle"] = {
-                idx_to_name[k]: idx_to_name[v]
-                for k, v in ep["name_to_receptacle"]
+                idx_to_name[k]: idx_to_name[v] for k, v in ep["name_to_receptacle"]
             }
 
             new_markers = []

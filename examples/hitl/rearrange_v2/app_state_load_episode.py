@@ -30,9 +30,7 @@ class AppStateLoadEpisode(AppStateBase):
     * If any user disconnects, cancel the session.
     """
 
-    def __init__(
-        self, app_service: AppService, app_data: AppData, session: Session
-    ):
+    def __init__(self, app_service: AppService, app_data: AppData, session: Session):
         super().__init__(app_service, app_data)
         self._session = session
         self._loading = True
@@ -106,9 +104,7 @@ class AppStateLoadEpisode(AppStateBase):
         session.current_episode_index = next_episode_index
         print(f"Next episode index: {next_episode_index}.")
         try:
-            app_service.episode_helper.set_next_episode_by_index(
-                next_episode_index
-            )
+            app_service.episode_helper.set_next_episode_by_index(next_episode_index)
         except Exception as e:
             print(f"ERROR: Invalid episode index {next_episode_index}. {e}")
             print("Loading episode index 0.")

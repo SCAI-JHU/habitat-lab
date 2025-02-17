@@ -66,9 +66,7 @@ class ObjectAnimation:
             view_lookat[0],
             mn.Vector3(-1, 0, 0),  # Object forward axis
         )
-        self._object_target_rot = mn.Quaternion.from_matrix(
-            object_lookat.rotation()
-        )
+        self._object_target_rot = mn.Quaternion.from_matrix(object_lookat.rotation())
 
     def update(self, dt: float):
         # Slowly rotate the object to give more perspective
@@ -229,15 +227,11 @@ class Tutorial:
 
     def get_look_at_matrix(self) -> mn.Matrix4:
         assert not self.is_completed()
-        return self._tutorial_stages[
-            self._tutorial_stage_index
-        ].get_look_at_matrix()
+        return self._tutorial_stages[self._tutorial_stage_index].get_look_at_matrix()
 
     def get_display_text(self) -> str:
         assert not self.is_completed()
-        return self._tutorial_stages[
-            self._tutorial_stage_index
-        ].get_display_text()
+        return self._tutorial_stages[self._tutorial_stage_index].get_display_text()
 
     def get_help_text(self) -> str:
         return TEXT_HELP
@@ -265,9 +259,7 @@ class Tutorial:
         tutorial_stage = self._tutorial_stages[self._tutorial_stage_index]
 
         if tutorial_stage._object_animation is not None:
-            self._pending_object_animations.append(
-                tutorial_stage._object_animation
-            )
+            self._pending_object_animations.append(tutorial_stage._object_animation)
 
         self._tutorial_stage_index += 1
 
@@ -300,9 +292,7 @@ def generate_tutorial(
 
     # Show all the targets
     idxs, goal_pos = sim.get_targets()
-    target_objs = [
-        rom.get_object_by_id(sim._scene_obj_ids[idx]) for idx in idxs
-    ]
+    target_objs = [rom.get_object_by_id(sim._scene_obj_ids[idx]) for idx in idxs]
     for target_obj in target_objs:
         prev_lookat = tutorial_stages[len(tutorial_stages) - 1]._next_lookat
 
@@ -367,9 +357,7 @@ def generate_tutorial(
             TutorialStage(
                 stage_duration=2.0,
                 transition_duration=2.0,
-                prev_lookat=tutorial_stages[
-                    len(tutorial_stages) - 1
-                ]._next_lookat,
+                prev_lookat=tutorial_stages[len(tutorial_stages) - 1]._next_lookat,
                 next_lookat=robot_lookat_far,
                 display_text=TEXT_ROBOT_FOCUS,
             )
@@ -386,9 +374,7 @@ def generate_tutorial(
 
     # Controlled agent focus
     art_obj = sim.agents_mgr[agent_idx].articulated_agent.sim_obj
-    agent_root_node = art_obj.get_link_scene_node(
-        -1
-    )  # Root link always has index -1
+    agent_root_node = art_obj.get_link_scene_node(-1)  # Root link always has index -1
     target_bb = mn.Range3D.from_center(
         mn.Vector3(agent_root_node.absolute_translation),
         mn.Vector3(1.0, 1.0, 1.0),
@@ -441,8 +427,7 @@ def _lookat_bounding_box_top_down(
     target_dimension = max(target_bb.size_x(), target_bb.size_z())
     camera_position = mn.Vector3(
         target_bb.center_x(),
-        target_bb.center_y()
-        + abs(target_dimension / math.sin(camera_fov_rad / 2)),
+        target_bb.center_y() + abs(target_dimension / math.sin(camera_fov_rad / 2)),
         target_bb.center_z(),
     )
     # Because of gimbal lock, we apply an epsilon bias to force a camera orientation

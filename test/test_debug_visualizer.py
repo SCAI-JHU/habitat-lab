@@ -28,9 +28,9 @@ def test_debug_visualizer():
     ######################
 
     sim_settings = default_sim_settings.copy()
-    sim_settings[
-        "scene_dataset_config_file"
-    ] = "data/replica_cad/replicaCAD.scene_dataset_config.json"
+    sim_settings["scene_dataset_config_file"] = (
+        "data/replica_cad/replicaCAD.scene_dataset_config.json"
+    )
     sim_settings["scene"] = "apt_0"
     hab_cfg = make_cfg(sim_settings)
     with habitat_sim.Simulator(hab_cfg) as sim:
@@ -116,9 +116,7 @@ def test_debug_visualizer():
         # test assertion that images sizes must match by adding a larger image
         dbv.remove_dbv_agent()
         dbv.create_dbv_agent(resolution=(im_height * 2, im_width * 2))
-        larger_image = dbv.get_observation(
-            np.random.uniform(size=3), np.zeros(3)
-        )
+        larger_image = dbv.get_observation(np.random.uniform(size=3), np.zeros(3))
         try:
             stitch_image_matrix(im_cache + [larger_image.get_image()])
         except ValueError as e:

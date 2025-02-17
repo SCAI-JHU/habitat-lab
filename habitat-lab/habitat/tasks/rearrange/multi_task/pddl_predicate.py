@@ -71,9 +71,7 @@ class Predicate:
         return self._name
 
     def sub_in(self, sub_dict: Dict[PddlEntity, PddlEntity]) -> "Predicate":
-        self._arg_values = [
-            sub_dict.get(entity, entity) for entity in self._arg_values
-        ]
+        self._arg_values = [sub_dict.get(entity, entity) for entity in self._arg_values]
         ensure_entity_lists_match(self._args, self._arg_values)
         return self
 
@@ -108,9 +106,7 @@ class Predicate:
         if self._is_valid_fn is None:
             result = True
         else:
-            result = self._is_valid_fn(
-                sim_info=sim_info, **self._create_kwargs()
-            )
+            result = self._is_valid_fn(sim_info=sim_info, **self._create_kwargs())
         if sim_info.pred_truth_cache is not None:
             sim_info.pred_truth_cache[self_repr] = result
         return result
@@ -123,14 +119,10 @@ class Predicate:
             self._set_state_fn(sim_info=sim_info, **self._create_kwargs())
 
     def _create_kwargs(self):
-        return {
-            arg.name: val for arg, val in zip(self._args, self._arg_values)
-        }
+        return {arg.name: val for arg, val in zip(self._args, self._arg_values)}
 
     def clone(self):
-        p = Predicate(
-            self._name, self._is_valid_fn, self._set_state_fn, self._args
-        )
+        p = Predicate(self._name, self._is_valid_fn, self._set_state_fn, self._args)
         if self._arg_values is not None:
             p.set_param_values(self._arg_values)
         return p

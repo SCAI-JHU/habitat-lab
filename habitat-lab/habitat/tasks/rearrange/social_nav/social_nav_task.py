@@ -47,10 +47,7 @@ class PddlSocialNavTask(PddlTask):
         start_hold_obj_idx: Optional[int] = None
 
         # Only change the scene if this skill is not running as a sub-task
-        if (
-            force_idx is None
-            and random.random() < self._object_in_hand_sample_prob
-        ):
+        if force_idx is None and random.random() < self._object_in_hand_sample_prob:
             start_hold_obj_idx = self._generate_snap_to_obj()
 
         if start_hold_obj_idx is None:
@@ -66,10 +63,7 @@ class PddlSocialNavTask(PddlTask):
             nav_to_pos = all_pos[np.random.randint(0, len(all_pos))]
 
         def filter_func(start_pos, _):
-            return (
-                np.linalg.norm(start_pos - nav_to_pos)
-                > self._min_start_distance
-            )
+            return np.linalg.norm(start_pos - nav_to_pos) > self._min_start_distance
 
         (
             articulated_agent_pos,
@@ -107,14 +101,10 @@ class PddlSocialNavTask(PddlTask):
                 episode, force_idx=self.force_obj_to_idx
             )
 
-            self._sim.get_agent_data(
-                agent_id
-            ).articulated_agent.base_pos = (
+            self._sim.get_agent_data(agent_id).articulated_agent.base_pos = (
                 self._nav_to_info.articulated_agent_start_pos
             )
-            self._sim.get_agent_data(
-                agent_id
-            ).articulated_agent.base_rot = (
+            self._sim.get_agent_data(agent_id).articulated_agent.base_rot = (
                 self._nav_to_info.articulated_agent_start_angle
             )
 

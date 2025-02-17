@@ -33,9 +33,7 @@ from habitat_baselines.config.default_structured_configs import (
     ],
 )
 def test_transforms(obs_transform_config: ObsTransformConfig):
-    transformer_cls = baseline_registry.get_obs_transformer(
-        obs_transform_config.type
-    )
+    transformer_cls = baseline_registry.get_obs_transformer(obs_transform_config.type)
     transformer = transformer_cls.from_config(obs_transform_config)
     obs_space = spaces.Dict(
         {
@@ -56,9 +54,7 @@ def test_transforms(obs_transform_config: ObsTransformConfig):
     batched_obs_space = batch_space(obs_space, 7)
     observation = batched_obs_space.sample()
     tensor_observation = TensorDict.from_tree(observation)
-    transformed_obs = apply_obs_transforms_batch(
-        tensor_observation, [transformer]
-    )
+    transformed_obs = apply_obs_transforms_batch(tensor_observation, [transformer])
     assert modified_obs_space.contains(
         {k: v[0] for k, v in transformed_obs.items()}
     ), f"Observation transform generated the observation ({str({k: v.shape for k,v in transformed_obs.items()}) }) which is incompatible with the defined observation space {modified_obs_space}"

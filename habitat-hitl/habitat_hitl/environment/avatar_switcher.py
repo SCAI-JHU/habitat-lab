@@ -74,9 +74,9 @@ class AvatarSwitcher:
         self._gui_agent_ctrl: GuiHumanoidController = gui_agent_ctrl
         self._agent_idx: int = self._gui_agent_ctrl._agent_idx
 
-        self._humanoid_models: List[
-            Tuple[str, str]
-        ] = self._get_humanoid_models("data/humanoids/humanoid_data/")
+        self._humanoid_models: List[Tuple[str, str]] = self._get_humanoid_models(
+            "data/humanoids/humanoid_data/"
+        )
 
         self._avatar_model_idx = 0
 
@@ -109,9 +109,7 @@ class AvatarSwitcher:
         model = self._get_next_model()
 
         # record current humanoid state
-        humanoid_agent_data: ArticulatedAgentData = sim.agents_mgr[
-            self._agent_idx
-        ]
+        humanoid_agent_data: ArticulatedAgentData = sim.agents_mgr[self._agent_idx]
         humanoid = humanoid_agent_data.articulated_agent
         humanoid_controller = self._gui_agent_ctrl._humanoid_controller
 
@@ -140,9 +138,7 @@ class AvatarSwitcher:
         humanoid.base_rot = prev_humanoid_base_state[1]
 
         # create new grasp manager
-        grasp_mgr = RearrangeGraspManager(
-            sim, config.habitat.simulator, humanoid, 0
-        )
+        grasp_mgr = RearrangeGraspManager(sim, config.habitat.simulator, humanoid, 0)
 
         # maybe re-snap object
         assert len(humanoid_agent_data.grasp_mgrs) == 1
@@ -154,9 +150,7 @@ class AvatarSwitcher:
         humanoid_agent_data.grasp_mgrs = [grasp_mgr]
 
         # create new humanoid controller
-        humanoid_controller = HumanoidRearrangeController(
-            walk_pose_path=model[1]
-        )
+        humanoid_controller = HumanoidRearrangeController(walk_pose_path=model[1])
         # todo: support for multiple gui-controlled agents here
         assert len(self._app_service.hitl_config.gui_controlled_agents) == 1
         gui_controlled_agent_config = (

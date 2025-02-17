@@ -178,9 +178,7 @@ class GuiDrawer:
                 destination_mask
             ):
                 parent_transform = self._compute_parent_transform(user_index)
-                global_translation = parent_transform.transform_point(
-                    translation
-                )
+                global_translation = parent_transform.transform_point(translation)
 
                 self._client_message_manager.add_highlight(
                     pos=_vec_to_list(global_translation),

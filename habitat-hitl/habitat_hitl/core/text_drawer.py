@@ -105,9 +105,7 @@ if not use_headless_text_drawer:
             self._framebuffer_size = framebuffer_size
 
             # Load a TrueTypeFont plugin and open the font file
-            self._display_font = text.FontManager().load_and_instantiate(
-                "TrueTypeFont"
-            )
+            self._display_font = text.FontManager().load_and_instantiate("TrueTypeFont")
             self._display_font.open_file(
                 os.path.join(os.path.dirname(__file__), relative_path_to_font),
                 13,
@@ -163,13 +161,10 @@ if not use_headless_text_drawer:
             window_text_transform = mn.Matrix3.projection(
                 self._framebuffer_size
             ) @ mn.Matrix3.translation(
-                mn.Vector2(self._framebuffer_size)
-                * mn.Vector2(align_x, align_y)
+                mn.Vector2(self._framebuffer_size) * mn.Vector2(align_x, align_y)
                 + mn.Vector2(text_delta_x, text_delta_y)
             )
-            self._text_transform_pairs.append(
-                (text_to_add, window_text_transform)
-            )
+            self._text_transform_pairs.append((text_to_add, window_text_transform))
 
             if self._client_message_manager:
                 self._client_message_manager.add_text(

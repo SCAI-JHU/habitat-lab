@@ -46,6 +46,7 @@ class ReportWorkerProcess(ProcessBase):
     r"""Responsible for generating reports. Reports on system performance (timings),
     learning progress, and agent training progress.
     """
+
     port: int
     config: "DictConfig"
     report_queue: BatchedQueue
@@ -65,9 +66,7 @@ class ReportWorkerProcess(ProcessBase):
     steps_delta: int = 0
     writer: Optional[Any] = None
     run_id: Optional[str] = None
-    preemption_decider_report: Dict[str, float] = attr.ib(
-        factory=dict, init=False
-    )
+    preemption_decider_report: Dict[str, float] = attr.ib(factory=dict, init=False)
     window_episode_stats: Optional[Dict[str, WindowedRunningMean]] = attr.ib(
         default=None, init=False
     )
@@ -85,9 +84,7 @@ class ReportWorkerProcess(ProcessBase):
                 running_frames_window=self.running_frames_window,
                 running_time_window=self.running_time_window,
                 n_update_reports=self.n_update_reports,
-                run_id=self.writer.get_run_id()
-                if self.writer is not None
-                else None,
+                run_id=self.writer.get_run_id() if self.writer is not None else None,
             )
         )
 
@@ -122,15 +119,12 @@ class ReportWorkerProcess(ProcessBase):
     def get_time(self):
         return time.perf_counter() - self.my_t_zero
 
-    def log_metrics(
-        self, writer: TensorboardWriter, learner_metrics: Dict[str, float]
-    ):
+    def log_metrics(self, writer: TensorboardWriter, learner_metrics: Dict[str, float]):
         self.steps_delta = int(self._all_reduce(self.steps_delta))
         self.num_steps_done += self.steps_delta
         last_time_taken = float(self.time_taken)
         self.time_taken.fill_(
-            self._all_reduce(self.get_time() - self.start_time)
-            / self.world_size
+            self._all_reduce(self.get_time() - self.start_time) / self.world_size
             + self._prev_time_taken
         )
 
@@ -151,18 +145,14 @@ class ReportWorkerProcess(ProcessBase):
                     self.window_episode_stats[k].add_many(vs)
 
         all_learner_metrics = gather_objects(learner_metrics)
-        all_preemption_decider_reports = gather_objects(
-            self.preemption_decider_report
-        )
+        all_preemption_decider_reports = gather_objects(self.preemption_decider_report)
 
         if rank0_only():
             assert all_learner_metrics is not None
             learner_metrics = cast(
                 Dict[str, float],
                 (
-                    NDArrayDict.from_tree(
-                        transpose_list_of_dicts(*all_learner_metrics)
-                    )
+                    NDArrayDict.from_tree(transpose_list_of_dicts(*all_learner_metrics))
                     .map(np.mean)
                     .to_tree()
                 ),
@@ -193,8 +183,7 @@ class ReportWorkerProcess(ProcessBase):
             )
             writer.add_scalar(
                 "perf/fps_window",
-                float(self.running_frames_window)
-                / float(self.running_time_window),
+                float(self.running_frames_window) / float(self.running_time_window),
                 n_steps,
             )
 
@@ -215,10 +204,7 @@ class ReportWorkerProcess(ProcessBase):
             for k, v in preemption_decider_report.items():
                 writer.add_scalar(f"preemption_decider/{k}", v, n_steps)
 
-        if (
-            self.n_update_reports % self.config.habitat_baselines.log_interval
-            == 0
-        ):
+        if self.n_update_reports % self.config.habitat_baselines.log_interval == 0:
             if rank0_only():
                 logger.info(
                     "update: {}\tfps: {:.1f}\twindow fps: {:.1f}\tframes: {:d}".format(
@@ -232,9 +218,7 @@ class ReportWorkerProcess(ProcessBase):
                 if len(self.window_episode_stats) > 0:
                     logger.info(
                         "Average window size: {}  {}".format(
-                            next(
-                                iter(self.window_episode_stats.values())
-                            ).count,
+                            next(iter(self.window_episode_stats.values())).count,
                             "  ".join(
                                 "{}: {:.3f}".format(k, v.mean)
                                 for k, v in self.window_episode_stats.items()
@@ -251,9 +235,7 @@ class ReportWorkerProcess(ProcessBase):
                 assert all_timing_stats is not None
                 timing_stats = cast(
                     Dict[str, Dict[str, float]],
-                    NDArrayDict.from_tree(
-                        transpose_list_of_dicts(*all_timing_stats)
-                    )
+                    NDArrayDict.from_tree(transpose_list_of_dicts(*all_timing_stats))
                     .map(np.mean)
                     .to_tree(),
                 )
@@ -342,21 +324,15 @@ class ReportWorkerProcess(ProcessBase):
         }
         self.timing_stats = {
             n: defaultdict(
-                functools.partial(
-                    WindowedRunningMean, ppo_cfg.reward_window_size
-                )
+                functools.partial(WindowedRunningMean, ppo_cfg.reward_window_size)
             )
             for n in timing_types.values()
         }
         self.preemption_decider_report = {}
 
         self.start_time = self.get_time()
-        self.running_time_window = WindowedRunningMean(
-            ppo_cfg.reward_window_size
-        )
-        self.running_frames_window = WindowedRunningMean(
-            ppo_cfg.reward_window_size
-        )
+        self.running_time_window = WindowedRunningMean(ppo_cfg.reward_window_size)
+        self.running_frames_window = WindowedRunningMean(ppo_cfg.reward_window_size)
 
         with (
             get_writer(
@@ -385,9 +361,7 @@ class ReportWorker(WorkerBase):
         init_num_steps=0,
         run_id=None,
     ):
-        self.num_steps_done = torch.full(
-            (), int(init_num_steps), dtype=torch.int64
-        )
+        self.num_steps_done = torch.full((), int(init_num_steps), dtype=torch.int64)
         self.time_taken = torch.full((), 0.0, dtype=torch.float64)
         self.num_steps_done.share_memory_()
         self.time_taken.share_memory_()
@@ -407,9 +381,7 @@ class ReportWorker(WorkerBase):
         self.response_queue.get()
 
     def start_collection(self):
-        self.report_queue.put(
-            (ReportWorkerTasks.start_collection, time.perf_counter())
-        )
+        self.report_queue.put((ReportWorkerTasks.start_collection, time.perf_counter()))
 
     def state_dict(self):
         self.report_queue.put((ReportWorkerTasks.state_dict, None))
@@ -417,12 +389,8 @@ class ReportWorker(WorkerBase):
 
     def load_state_dict(self, state_dict):
         if state_dict is not None:
-            self.report_queue.put(
-                (ReportWorkerTasks.load_state_dict, state_dict)
-            )
+            self.report_queue.put((ReportWorkerTasks.load_state_dict, state_dict))
 
     def get_window_episode_stats(self):
-        self.report_queue.put(
-            (ReportWorkerTasks.get_window_episode_stats, None)
-        )
+        self.report_queue.put((ReportWorkerTasks.get_window_episode_stats, None))
         return self.response_queue.get()

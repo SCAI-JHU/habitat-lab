@@ -39,9 +39,7 @@ class PlaceSkillPolicy(PickSkillPolicy):
             observations[RelativeRestingPositionSensor.cls_uuid], dim=-1
         )
         is_within_thresh = rel_resting_pos < self._config.at_resting_threshold
-        is_holding = (
-            observations[IsHoldingSensor.cls_uuid].view(-1).type(torch.bool)
-        )
+        is_holding = observations[IsHoldingSensor.cls_uuid].view(-1).type(torch.bool)
         is_done = is_within_thresh & (~is_holding)
         if is_done.sum() > 0:
             self._internal_log(

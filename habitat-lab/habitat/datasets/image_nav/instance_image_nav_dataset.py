@@ -49,9 +49,7 @@ class InstanceImageNavDatasetV1(PointNavDatasetV1):
         return result
 
     @staticmethod
-    def _deserialize_goal(
-        serialized_goal: Dict[str, Any]
-    ) -> InstanceImageGoal:
+    def _deserialize_goal(serialized_goal: Dict[str, Any]) -> InstanceImageGoal:
         g = InstanceImageGoal(**serialized_goal)
 
         for vidx, view in enumerate(g.view_points):
@@ -64,9 +62,7 @@ class InstanceImageNavDatasetV1(PointNavDatasetV1):
 
         return g
 
-    def from_json(
-        self, json_str: str, scenes_dir: Optional[str] = None
-    ) -> None:
+    def from_json(self, json_str: str, scenes_dir: Optional[str] = None) -> None:
         deserialized = json.loads(json_str)
 
         if len(deserialized["episodes"]) == 0:

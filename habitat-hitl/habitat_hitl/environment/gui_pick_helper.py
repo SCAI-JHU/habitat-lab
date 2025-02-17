@@ -34,17 +34,11 @@ class GuiPickHelper:
         self._dist_to_highlight_obj = DIST_HIGHLIGHT
         self._pick_candidate_indices: List[int] = []
 
-    def _closest_point_and_dist_to_ray(
-        self, ray_origin, ray_direction_vector, points
-    ):
-        norm_direction = ray_direction_vector / np.linalg.norm(
-            ray_direction_vector
-        )
+    def _closest_point_and_dist_to_ray(self, ray_origin, ray_direction_vector, points):
+        norm_direction = ray_direction_vector / np.linalg.norm(ray_direction_vector)
         vectors_to_points = points - ray_origin
         dot_products = np.dot(vectors_to_points, norm_direction)
-        closest_points = (
-            ray_origin + dot_products[:, np.newaxis] * norm_direction
-        )
+        closest_points = ray_origin + dot_products[:, np.newaxis] * norm_direction
         distances = np.linalg.norm(closest_points - points, axis=1)
         return np.argmin(distances), np.min(distances)
 
@@ -103,9 +97,7 @@ class GuiPickHelper:
         if len(self._pick_candidate_indices) > 0:
             for candidate_index in self._pick_candidate_indices:
                 obj_id = self._obj_ids[candidate_index]
-                pos = self._rom.get_object_by_id(
-                    obj_id
-                ).transformation.translation
+                pos = self._rom.get_object_by_id(obj_id).transformation.translation
                 self._add_highlight_ring(
                     pos,
                     RADIUS_GRASP_PREVIEW,
@@ -116,9 +108,7 @@ class GuiPickHelper:
         else:
             for i in range(len(obj_positions)):
                 obj_id = self._obj_ids[i]
-                pos = self._rom.get_object_by_id(
-                    obj_id
-                ).transformation.translation
+                pos = self._rom.get_object_by_id(obj_id).transformation.translation
                 self._add_highlight_ring(
                     pos, RADIUS_GRASPABLE, COLOR_GRASPABLE, do_pulse=True
                 )

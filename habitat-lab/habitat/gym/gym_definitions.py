@@ -60,21 +60,15 @@ def make_gym_from_config(config: "DictConfig", dataset=None) -> gym.Env:
     return make_env_fn(env_class=env_class, config=config, dataset=dataset)
 
 
-def _add_sim_sensor_to_config(
-    config: "DictConfig", sensor: SimulatorSensorConfig
-):
+def _add_sim_sensor_to_config(config: "DictConfig", sensor: SimulatorSensorConfig):
     with read_write(config):
         sim_config = config.habitat.simulator
-        default_agent_name = sim_config.agents_order[
-            sim_config.default_agent_id
-        ]
+        default_agent_name = sim_config.agents_order[sim_config.default_agent_id]
         default_agent = sim_config.agents[default_agent_name]
         if len(sim_config.agents) == 1:
             default_agent.sim_sensors.update({"third_rgb_sensor": sensor})
         else:
-            default_agent.sim_sensors.update(
-                {"default_agent_third_rgb_sensor": sensor}
-            )
+            default_agent.sim_sensors.update({"default_agent_third_rgb_sensor": sensor})
 
 
 def _make_habitat_gym_env(

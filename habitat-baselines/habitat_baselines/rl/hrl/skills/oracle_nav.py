@@ -111,9 +111,7 @@ class OracleNavPolicy(NnSkillPolicy):
     ) -> torch.BoolTensor:
         ret = torch.zeros(masks.shape[0], dtype=torch.bool)
 
-        finish_oracle_nav = observations[
-            HasFinishedOracleNavSensor.cls_uuid
-        ].cpu()
+        finish_oracle_nav = observations[HasFinishedOracleNavSensor.cls_uuid].cpu()
         ret = finish_oracle_nav.to(torch.bool)[:, 0]
 
         return ret
@@ -124,15 +122,11 @@ class OracleNavPolicy(NnSkillPolicy):
         elif len(skill_arg) == 3:
             _, search_target, _ = skill_arg
         else:
-            raise ValueError(
-                f"Unexpected number of skill arguments in {skill_arg}"
-            )
+            raise ValueError(f"Unexpected number of skill arguments in {skill_arg}")
 
         target = self._pddl_problem.get_entity(search_target)
         if target is None:
-            raise ValueError(
-                f"Cannot find matching entity for {search_target}"
-            )
+            raise ValueError(f"Cannot find matching entity for {search_target}")
         match_i = self._all_entities.index(target)
 
         return OracleNavPolicy.OracleNavActionArgs(match_i)
@@ -201,9 +195,7 @@ class OracleNavCoordPolicy(OracleNavPolicy):
         )
         # Random coordinate means that the navigation target is chosen randomly
         action_name = "oracle_nav_randcoord_action"
-        self._oracle_nav_ac_idx, _ = find_action_range(
-            action_space, action_name
-        )
+        self._oracle_nav_ac_idx, _ = find_action_range(action_space, action_name)
 
     def _parse_skill_arg(self, skill_arg):
         return OracleNavCoordPolicy.OracleNavActionArgs(skill_arg)
@@ -266,9 +258,7 @@ class OracleNavHumanPolicy(OracleNavCoordPolicy):
             batch_size,
         )
         action_name = "oracle_nav_human_action"
-        self._oracle_nav_ac_idx, _ = find_action_range(
-            action_space, action_name
-        )
+        self._oracle_nav_ac_idx, _ = find_action_range(action_space, action_name)
 
     def _parse_skill_arg(self, skill_arg):
         return OracleNavHumanPolicy.OracleNavActionArgs(skill_arg)

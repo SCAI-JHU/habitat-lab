@@ -23,9 +23,7 @@ from habitat_hitl.core.hitl_main import hitl_main
 from habitat_hitl.core.hydra_utils import register_hydra_plugins
 
 
-@hydra.main(
-    version_base=None, config_path="config", config_name="rearrange_v2"
-)
+@hydra.main(version_base=None, config_path="config", config_name="rearrange_v2")
 def main(config):
     # We don't sync the server camera. Instead, we maintain one camera per user.
     assert config.habitat_hitl.networking.client_sync.server_camera == False

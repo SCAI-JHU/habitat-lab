@@ -37,6 +37,7 @@ class PACMANTrainer(BaseILTrainer):
     used in EmbodiedQA (Das et. al.;CVPR 2018)
     Paper: https://embodiedqa.org/paper.pdf.
     """
+
     supported_tasks = ["EQA-v0"]
 
     def __init__(self, config=None):
@@ -191,8 +192,7 @@ class PACMANTrainer(BaseILTrainer):
                     start_time = time.time()
                     for t, batch in enumerate(train_loader):
                         batch = (
-                            item.to(self.device, non_blocking=True)
-                            for item in batch
+                            item.to(self.device, non_blocking=True) for item in batch
                         )
                         (
                             idx,
@@ -226,9 +226,7 @@ class PACMANTrainer(BaseILTrainer):
                         controller_actions_in = controller_actions_in[perm_idx]
                         controller_outs = controller_outs[perm_idx]
                         planner_hidden_idx = planner_hidden_idx[perm_idx]
-                        controller_action_lengths = controller_action_lengths[
-                            perm_idx
-                        ]
+                        controller_action_lengths = controller_action_lengths[perm_idx]
                         controller_masks = controller_masks[perm_idx]
 
                         (
@@ -247,18 +245,16 @@ class PACMANTrainer(BaseILTrainer):
                         )
 
                         planner_logprob = F.log_softmax(planner_scores, dim=1)
-                        controller_logprob = F.log_softmax(
-                            controller_scores, dim=1
-                        )
+                        controller_logprob = F.log_softmax(controller_scores, dim=1)
 
                         planner_loss = planner_loss_fn(
                             planner_logprob,
                             planner_actions_out[
                                 :, : planner_action_lengths.max()
                             ].reshape(-1, 1),
-                            planner_masks[
-                                :, : planner_action_lengths.max()
-                            ].reshape(-1, 1),
+                            planner_masks[:, : planner_action_lengths.max()].reshape(
+                                -1, 1
+                            ),
                         )
 
                         controller_loss = controller_loss_fn(
@@ -275,9 +271,7 @@ class PACMANTrainer(BaseILTrainer):
                         optim.zero_grad()
 
                         # update metrics
-                        metrics.update(
-                            [planner_loss.item(), controller_loss.item()]
-                        )
+                        metrics.update([planner_loss.item(), controller_loss.item()])
 
                         (planner_loss + controller_loss).backward()
 
@@ -293,17 +287,14 @@ class PACMANTrainer(BaseILTrainer):
                             logger.info(metrics.get_stat_string())
 
                             writer.add_scalar("planner loss", planner_loss, t)
-                            writer.add_scalar(
-                                "controller loss", controller_loss, t
-                            )
+                            writer.add_scalar("controller loss", controller_loss, t)
 
                             metrics.dump_log()
 
                     # Dataloader length for IterableDataset doesn't take into
                     # account batch size for Pytorch v < 1.6.0
                     num_batches = math.ceil(
-                        len(nav_dataset)
-                        / config.habitat_baselines.il.nav.batch_size
+                        len(nav_dataset) / config.habitat_baselines.il.nav.batch_size
                     )
 
                     avg_p_loss /= num_batches
@@ -318,19 +309,12 @@ class PACMANTrainer(BaseILTrainer):
                         )
                     )
 
-                    logger.info(
-                        "Average planner loss: {:.2f}".format(avg_p_loss)
-                    )
-                    logger.info(
-                        "Average controller loss: {:.2f}".format(avg_c_loss)
-                    )
+                    logger.info("Average planner loss: {:.2f}".format(avg_p_loss))
+                    logger.info("Average controller loss: {:.2f}".format(avg_c_loss))
 
                     print("-----------------------------------------")
 
-                    if (
-                        epoch % config.habitat_baselines.checkpoint_interval
-                        == 0
-                    ):
+                    if epoch % config.habitat_baselines.checkpoint_interval == 0:
                         self.save_checkpoint(
                             model.state_dict(), "epoch_{}.ckpt".format(epoch)
                         )
@@ -356,9 +340,7 @@ class PACMANTrainer(BaseILTrainer):
         config = self.config
 
         with habitat.config.read_write(config):
-            config.habitat.dataset.split = (
-                self.config.habitat_baselines.eval.split
-            )
+            config.habitat.dataset.split = self.config.habitat_baselines.eval.split
 
         with habitat.Env(config.habitat) as env:
             nav_dataset = NavDataset(
@@ -384,9 +366,7 @@ class PACMANTrainer(BaseILTrainer):
             model.load_state_dict(state_dict)
             model.eval().to(self.device)
 
-            results_dir = config.habitat_baselines.il.results_dir.format(
-                split="val"
-            )
+            results_dir = config.habitat_baselines.il.results_dir.format(split="val")
             video_option = self.config.habitat_baselines.eval.video_option
 
             metrics = NavMetric(
@@ -433,12 +413,8 @@ class PACMANTrainer(BaseILTrainer):
                             config.habitat_baselines.il.nav.max_controller_actions,
                         )
                         if j == "pred":
-                            planner_actions_in = planner_actions_in.to(
-                                self.device
-                            )
-                            planner_img_feats = planner_img_feats.to(
-                                self.device
-                            )
+                            planner_actions_in = planner_actions_in.to(self.device)
+                            planner_img_feats = planner_img_feats.to(self.device)
 
                             for step in range(planner_actions_in.size(0)):
                                 (
@@ -453,23 +429,18 @@ class PACMANTrainer(BaseILTrainer):
                                     planner_hidden,
                                 )
 
-                        env.sim.set_agent_state(
-                            init_pos.position, init_pos.rotation
-                        )
+                        env.sim.set_agent_state(init_pos.position, init_pos.rotation)
                         init_dist_to_target = env.sim.geodesic_distance(
                             init_pos.position, goal_pos
                         )
 
-                        if (
-                            init_dist_to_target < 0
-                            or init_dist_to_target == float("inf")
+                        if init_dist_to_target < 0 or init_dist_to_target == float(
+                            "inf"
                         ):  # unreachable
                             invalids.append([idx.item(), i])
                             continue
 
-                        dists_to_target, pos_queue = [init_dist_to_target], [
-                            init_pos
-                        ]
+                        dists_to_target, pos_queue = [init_dist_to_target], [init_pos]
                         if j == "pred":
                             planner_actions, controller_actions = [], []
 
@@ -502,11 +473,9 @@ class PACMANTrainer(BaseILTrainer):
                                         i == 30
                                     ):  # saving results for 30-step walked back case
                                         imgs.append(img)
-                                    img_feat = (
-                                        eval_loader.dataset.get_img_features(
-                                            img, preprocess=True
-                                        ).view(1, 1, 4608)
-                                    )
+                                    img_feat = eval_loader.dataset.get_img_features(
+                                        img, preprocess=True
+                                    ).view(1, 1, 4608)
                                 else:
                                     img_feat = controller_img_feats.to(
                                         self.device
@@ -543,9 +512,7 @@ class PACMANTrainer(BaseILTrainer):
                                         planner_step = True
                                         controller_action = 0
 
-                                    controller_actions.append(
-                                        controller_action
-                                    )
+                                    controller_actions.append(controller_action)
                                     first_step = False
 
                                 if planner_step:
@@ -565,9 +532,7 @@ class PACMANTrainer(BaseILTrainer):
                                             planner_hidden,
                                         )
                                     prob = F.softmax(planner_scores, dim=1)
-                                    action = int(
-                                        prob.max(1)[1].data.cpu().numpy()[0]
-                                    )
+                                    action = int(prob.max(1)[1].data.cpu().numpy()[0])
                                     planner_actions.append(action)
 
                             else:
@@ -604,9 +569,7 @@ class PACMANTrainer(BaseILTrainer):
 
                         # compute stats
                         m = "" if j == "pred" else "_f"
-                        metrics_slug[
-                            "d_T{}_{}".format(m, i)
-                        ] = dists_to_target[-1]
+                        metrics_slug["d_T{}_{}".format(m, i)] = dists_to_target[-1]
                         metrics_slug["d_D{}_{}".format(m, i)] = (
                             dists_to_target[0] - dists_to_target[-1]
                         )
@@ -615,17 +578,13 @@ class PACMANTrainer(BaseILTrainer):
                         ).min()
 
                         if j != "fwd-only":
-                            metrics_slug[
-                                "ep_len_{}".format(i)
-                            ] = episode_length
+                            metrics_slug["ep_len_{}".format(i)] = episode_length
                             if action == 3:
                                 metrics_slug["stop_{}".format(i)] = 1
                             else:
                                 metrics_slug["stop_{}".format(i)] = 0
 
-                            metrics_slug["d_0_{}".format(i)] = dists_to_target[
-                                0
-                            ]
+                            metrics_slug["d_0_{}".format(i)] = dists_to_target[0]
 
                 # collate and update metrics
                 metrics_list = []
@@ -645,19 +604,13 @@ class PACMANTrainer(BaseILTrainer):
                         )
                     )
                     logger.info(
-                        "eval: Avg metrics: {}".format(
-                            metrics.get_stat_string(mode=0)
-                        )
+                        "eval: Avg metrics: {}".format(metrics.get_stat_string(mode=0))
                     )
-                    print(
-                        "-----------------------------------------------------"
-                    )
+                    print("-----------------------------------------------------")
 
                 if (
                     config.habitat_baselines.il.eval_save_results
-                    and t
-                    % config.habitat_baselines.il.eval_save_results_interval
-                    == 0
+                    and t % config.habitat_baselines.il.eval_save_results_interval == 0
                 ):
                     q_string = q_vocab_dict.token_idx_2_string(question[0])
                     logger.info("Question: {}".format(q_string))

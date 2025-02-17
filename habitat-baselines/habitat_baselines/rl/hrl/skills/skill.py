@@ -37,9 +37,7 @@ class SkillPolicy(Policy):
         self._cur_skill_step = torch.zeros(self._batch_size)
         self._should_keep_hold_state = should_keep_hold_state
 
-        self._cur_skill_args: List[Any] = [
-            None for _ in range(self._batch_size)
-        ]
+        self._cur_skill_args: List[Any] = [None for _ in range(self._batch_size)]
         self._raw_skill_args: List[Optional[str]] = [
             None for _ in range(self._batch_size)
         ]
@@ -69,9 +67,7 @@ class SkillPolicy(Policy):
         if not found_grip and not self.should_ignore_grip:
             raise ValueError(f"Could not find grip action in {action_space}")
 
-        self._stop_action_idx, _ = find_action_range(
-            action_space, "rearrange_stop"
-        )
+        self._stop_action_idx, _ = find_action_range(action_space, "rearrange_stop")
 
     def _internal_log(self, s):
         baselines_logger.debug(
@@ -100,9 +96,7 @@ class SkillPolicy(Policy):
         # If it is holding (1) want to keep grasping -> output +1.
 
         if not self.should_ignore_grip:
-            action_data.write_action(
-                self._grip_ac_idx, is_holding + (is_holding - 1.0)
-            )
+            action_data.write_action(self._grip_ac_idx, is_holding + (is_holding - 1.0))
         return action_data
 
     def _apply_postcond(
@@ -135,9 +129,7 @@ class SkillPolicy(Policy):
         if not found:
             raise ValueError(f"Could not find action {action}")
 
-        entity_idxs = [
-            self._entities_list.index(entity) + 1 for entity in entities
-        ]
+        entity_idxs = [self._entities_list.index(entity) + 1 for entity in entities]
         if len(entity_idxs) != action.n_args:
             raise ValueError(
                 f"The skill was called with the wrong # of args {action.n_args} versus {entity_idxs} for {action} with {skill_args} and {entities}. Make sure the skill and PDDL definition match."
@@ -279,9 +271,7 @@ class SkillPolicy(Policy):
         Selects out the part of the observation that corresponds to the current goal of the skill.
         """
         for k in self._config.obs_skill_inputs:
-            cur_multi_sensor_index = self._get_multi_sensor_index(
-                cur_batch_idx
-            )
+            cur_multi_sensor_index = self._get_multi_sensor_index(cur_batch_idx)
             if k not in obs:
                 raise ValueError(
                     f"Skill {self._config.skill_name}: Could not find {k} out of {obs.keys()}"

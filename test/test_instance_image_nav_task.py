@@ -27,9 +27,7 @@ PARTIAL_LOAD_SCENES = 3
 def check_json_serialization(dataset: habitat.Dataset):
     start_time = time.time()
     json_str = dataset.to_json()
-    logger.info(
-        "JSON conversion finished. {} sec".format((time.time() - start_time))
-    )
+    logger.info("JSON conversion finished. {} sec".format((time.time() - start_time)))
     decoded_dataset = InstanceImageNavDatasetV1()
     decoded_dataset.from_json(json_str)
     assert len(decoded_dataset.episodes) == len(dataset.episodes)
@@ -46,9 +44,7 @@ def check_json_serialization(dataset: habitat.Dataset):
 def test_hm3d_instance_image_nav_dataset():
     dataset_config = get_config(CFG_TEST).habitat.dataset
     if not InstanceImageNavDatasetV1.check_config_paths_exist(dataset_config):
-        pytest.skip(
-            "Please download the HM3D InstanceImageNav Dataset to data folder."
-        )
+        pytest.skip("Please download the HM3D InstanceImageNav Dataset to data folder.")
 
     dataset = habitat.make_dataset(
         id_dataset=dataset_config.type, config=dataset_config
@@ -66,14 +62,10 @@ def test_dataset_splitting(split):
     with habitat.config.read_write(dataset_config):
         dataset_config.split = split
 
-        if not InstanceImageNavDatasetV1.check_config_paths_exist(
-            dataset_config
-        ):
+        if not InstanceImageNavDatasetV1.check_config_paths_exist(dataset_config):
             pytest.skip("Test skipped as dataset files are missing.")
 
-        scenes = InstanceImageNavDatasetV1.get_scenes_to_load(
-            config=dataset_config
-        )
+        scenes = InstanceImageNavDatasetV1.get_scenes_to_load(config=dataset_config)
         assert (
             len(scenes) > 0
         ), "Expected dataset contains separate episode file per scene."
@@ -82,9 +74,7 @@ def test_dataset_splitting(split):
         full_dataset = make_dataset(
             id_dataset=dataset_config.type, config=dataset_config
         )
-        full_episodes = {
-            (ep.scene_id, ep.episode_id) for ep in full_dataset.episodes
-        }
+        full_episodes = {(ep.scene_id, ep.episode_id) for ep in full_dataset.episodes}
 
         dataset_config.content_scenes = scenes[: PARTIAL_LOAD_SCENES // 2]
         split1_dataset = make_dataset(
@@ -115,9 +105,7 @@ def test_dataset_splitting(split):
 def test_instance_image_nav_task():
     config = get_config(CFG_TEST)
 
-    if not InstanceImageNavDatasetV1.check_config_paths_exist(
-        config.habitat.dataset
-    ):
+    if not InstanceImageNavDatasetV1.check_config_paths_exist(config.habitat.dataset):
         pytest.skip(
             "Please download the HM3D scene InstanceImageNav Datasets to data folder."
         )

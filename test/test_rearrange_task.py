@@ -31,9 +31,7 @@ from habitat.datasets.rearrange.rearrange_dataset import RearrangeDatasetV0
 from habitat.utils.geometry_utils import is_point_in_triangle
 
 CFG_TEST = "benchmark/rearrange/skills/pick.yaml"
-GEN_TEST_CFG = (
-    "habitat-lab/habitat/datasets/rearrange/configs/test_config.yaml"
-)
+GEN_TEST_CFG = "habitat-lab/habitat/datasets/rearrange/configs/test_config.yaml"
 EPISODES_LIMIT = 6
 MAX_PER_TASK_TEST_STEPS = 500
 
@@ -41,9 +39,7 @@ MAX_PER_TASK_TEST_STEPS = 500
 def check_binary_serialization(dataset: RearrangeDatasetV0):
     start_time = time.time()
     bin_dict = dataset.to_binary()
-    logger.info(
-        "Binary conversion finished. {} sec".format((time.time() - start_time))
-    )
+    logger.info("Binary conversion finished. {} sec".format((time.time() - start_time)))
     decoded_dataset = RearrangeDatasetV0()
     decoded_dataset.from_binary(bin_dict)
     decoded_dataset.config = dataset.config
@@ -66,9 +62,7 @@ def check_binary_serialization(dataset: RearrangeDatasetV0):
 def check_json_serialization(dataset: RearrangeDatasetV0):
     start_time = time.time()
     json_str = dataset.to_json()
-    logger.info(
-        "JSON conversion finished. {} sec".format((time.time() - start_time))
-    )
+    logger.info("JSON conversion finished. {} sec".format((time.time() - start_time)))
     decoded_dataset = RearrangeDatasetV0()
     decoded_dataset.from_json(json_str)
     decoded_dataset.config = dataset.config
@@ -113,9 +107,7 @@ def _get_test_pddl():
         ],
     )
     env_class = get_env_class(config.habitat.env_task)
-    env = habitat.utils.env_utils.make_env_fn(
-        env_class=env_class, config=config
-    )
+    env = habitat.utils.env_utils.make_env_fn(env_class=env_class, config=config)
     env.reset()
     return env.env.env._env.task.pddl_problem  # type: ignore
 
@@ -152,9 +144,7 @@ def test_pddl_action_postconds():
     ac_strs = [x.compact_str for x in poss_actions]
 
     # Make sure we can't do an action if the precondition is not satisfied.
-    place_ac = poss_actions[
-        ac_strs.index("place(goal0|0,TARGET_goal0|0,robot_0)")
-    ]
+    place_ac = poss_actions[ac_strs.index("place(goal0|0,TARGET_goal0|0,robot_0)")]
     assert not place_ac.apply_if_true(sim_info)
 
     # Make sure we can do an action that does have satisifed preconditions.
@@ -170,10 +160,7 @@ def test_pddl_action_postconds():
 
     # Check the object registers at the goal now.
     true_preds = pddl.get_true_predicates()
-    assert any(
-        x.compact_str == "object_at(goal0|0,TARGET_goal0|0)"
-        for x in true_preds
-    )
+    assert any(x.compact_str == "object_at(goal0|0,TARGET_goal0|0)" for x in true_preds)
     sim_info.sim.close()
 
 
@@ -219,18 +206,13 @@ def test_rearrange_tasks(test_cfg_path):
                 "This test should only be run if we have the motion data files."
             )
 
-    if (
-        config.habitat.dataset.data_path
-        == "data/ep_datasets/bench_scene.json.gz"
-    ):
+    if config.habitat.dataset.data_path == "data/ep_datasets/bench_scene.json.gz":
         pytest.skip(
             "This config is only useful for examples and does not have the generated dataset"
         )
     env_class = get_env_class(config.habitat.env_task)
 
-    env = habitat.utils.env_utils.make_env_fn(
-        env_class=env_class, config=config
-    )
+    env = habitat.utils.env_utils.make_env_fn(env_class=env_class, config=config)
 
     for _ in range(2):
         env.reset()
@@ -249,9 +231,7 @@ def test_rearrange_tasks(test_cfg_path):
 @pytest.mark.parametrize("debug_visualization", [False])
 @pytest.mark.parametrize("num_episodes", [2])
 @pytest.mark.parametrize("config", [GEN_TEST_CFG])
-def test_rearrange_episode_generator(
-    debug_visualization, num_episodes, config
-):
+def test_rearrange_episode_generator(debug_visualization, num_episodes, config):
     cfg = rr_gen.get_config_defaults()
     override_config = OmegaConf.load(config)
     cfg = OmegaConf.merge(cfg, override_config)
@@ -279,9 +259,7 @@ def test_rearrange_episode_generator(
 def test_receptacle_parsing():
     # 1. Load the parameterized scene
     sim_settings = habitat_sim.utils.settings.default_sim_settings.copy()
-    sim_settings[
-        "scene"
-    ] = "data/test_assets/scenes/simple_room.stage_config.json"
+    sim_settings["scene"] = "data/test_assets/scenes/simple_room.stage_config.json"
     sim_settings["sensor_height"] = 0
     sim_settings["enable_physics"] = True
     cfg = habitat_sim.utils.settings.make_cfg(sim_settings)
@@ -326,14 +304,12 @@ def test_receptacle_parsing():
 
         # add the chair to the scene
         chair_template_handle = (
-            sim.metadata_mediator.object_template_manager.get_template_handles(
-                "chair"
-            )[0]
+            sim.metadata_mediator.object_template_manager.get_template_handles("chair")[
+                0
+            ]
         )
-        chair_obj = (
-            sim.get_rigid_object_manager().add_object_by_template_handle(
-                chair_template_handle
-            )
+        chair_obj = sim.get_rigid_object_manager().add_object_by_template_handle(
+            chair_template_handle
         )
 
         def randomize_obj_state():
@@ -369,15 +345,11 @@ def test_receptacle_parsing():
             if receptacle.name == "receptacle_aabb_chair_test":
                 assert type(receptacle) is hab_receptacle.AABBReceptacle
             elif receptacle.name == "receptacle_mesh_chair_test.0000":
-                assert (
-                    type(receptacle) is hab_receptacle.TriangleMeshReceptacle
-                )
+                assert type(receptacle) is hab_receptacle.TriangleMeshReceptacle
             elif receptacle.name == "receptacle_aabb_simpleroom_test":
                 assert type(receptacle) is hab_receptacle.AABBReceptacle
             elif receptacle.name == "receptacle_mesh_simpleroom_test.0000":
-                assert (
-                    type(receptacle) is hab_receptacle.TriangleMeshReceptacle
-                )
+                assert type(receptacle) is hab_receptacle.TriangleMeshReceptacle
             else:
                 # TODO: add AO receptacles
                 raise AssertionError(
@@ -395,26 +367,26 @@ def test_receptacle_parsing():
                     if receptacle.parent_link is not None:
                         # articulated object
                         assert receptacle.is_parent_object_articulated
-                        parent_object = sim.get_articulated_object_manager().get_object_by_handle(
-                            receptacle.parent_object_handle
+                        parent_object = (
+                            sim.get_articulated_object_manager().get_object_by_handle(
+                                receptacle.parent_object_handle
+                            )
                         )
-                        expected_global_transform = (
-                            parent_object.get_link_scene_node(
-                                receptacle.parent_link
-                            ).absolute_transformation()
-                        )
+                        expected_global_transform = parent_object.get_link_scene_node(
+                            receptacle.parent_link
+                        ).absolute_transformation()
                     else:
                         # rigid object
                         assert not receptacle.is_parent_object_articulated
-                        parent_object = sim.get_rigid_object_manager().get_object_by_handle(
-                            receptacle.parent_object_handle
+                        parent_object = (
+                            sim.get_rigid_object_manager().get_object_by_handle(
+                                receptacle.parent_object_handle
+                            )
                         )
                         # NOTE: we use absolute transformation from the 2nd visual node (scaling node) and root of all render assets to correctly account for any COM shifting, re-orienting, or scaling which has been applied.
-                        expected_global_transform = (
-                            parent_object.visual_scene_nodes[
-                                1
-                            ].absolute_transformation()
-                        )
+                        expected_global_transform = parent_object.visual_scene_nodes[
+                            1
+                        ].absolute_transformation()
                     assert parent_object is not None
                     assert np.allclose(
                         global_transform, expected_global_transform, atol=1e-06
@@ -442,18 +414,11 @@ def test_receptacle_parsing():
                     )
                     if type(receptacle) is hab_receptacle.AABBReceptacle:
                         # check that the world->local sample point is contained in the local AABB
-                        assert receptacle.bounds.contains(
-                            expected_local_sample_point
-                        )
-                    elif (
-                        type(receptacle)
-                        is hab_receptacle.TriangleMeshReceptacle
-                    ):
+                        assert receptacle.bounds.contains(expected_local_sample_point)
+                    elif type(receptacle) is hab_receptacle.TriangleMeshReceptacle:
                         # check that the local point is within a mesh triangle
                         in_mesh = False
-                        for f_ix in range(
-                            int(len(receptacle.mesh_data.indices) / 3)
-                        ):
+                        for f_ix in range(int(len(receptacle.mesh_data.indices) / 3)):
                             verts = receptacle.get_face_verts(f_ix)
                             if is_point_in_triangle(
                                 expected_local_sample_point,
@@ -479,15 +444,13 @@ def test_receptacle_parsing():
 def test_any_object_receptacle():
     sim_settings = habitat_sim.utils.settings.default_sim_settings.copy()
     sim_settings["scene"] = "apt_0"
-    sim_settings[
-        "scene_dataset_config_file"
-    ] = "data/replica_cad/replicaCAD.scene_dataset_config.json"
+    sim_settings["scene_dataset_config_file"] = (
+        "data/replica_cad/replicaCAD.scene_dataset_config.json"
+    )
     cfg = habitat_sim.utils.settings.make_cfg(sim_settings)
     with habitat_sim.Simulator(cfg) as sim:
         # get an object which does not have a Receptacle defined
-        stool_object = sutils.get_obj_from_handle(
-            sim, "frl_apartment_stool_02_:0000"
-        )
+        stool_object = sutils.get_obj_from_handle(sim, "frl_apartment_stool_02_:0000")
         # get an ArticulatedObject and an ArticulatedLink to try
         counter_ao = sutils.get_obj_from_handle(sim, "kitchen_counter_:0000")
         drawer_link_id = 6
@@ -509,9 +472,7 @@ def test_any_object_receptacle():
             samples = [rec.sample_uniform_global(sim, 1.0) for _ in range(100)]
             # NOTE: we bump the ray origin up to account for collision object inflation around the bounding volume.
             sample_raycast_results = [
-                sim.cast_ray(
-                    habitat_sim.geo.Ray(sample + mn.Vector3(0, 0.2, 0), down)
-                )
+                sim.cast_ray(habitat_sim.geo.Ray(sample + mn.Vector3(0, 0.2, 0), down))
                 for sample in samples
             ]
             samples_over_obj = len(

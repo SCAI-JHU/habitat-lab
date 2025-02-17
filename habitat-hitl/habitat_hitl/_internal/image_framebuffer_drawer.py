@@ -37,9 +37,7 @@ class ImageFramebufferDrawer:
         if padding_needed > 0:
             if isinstance(tensor, np.ndarray):
                 pad_width = [
-                    (0, 0)
-                    if dim != len(tensor.shape) - 2
-                    else (0, padding_needed)
+                    (0, 0) if dim != len(tensor.shape) - 2 else (0, padding_needed)
                     for dim in range(len(tensor.shape))
                 ]
                 tensor = np.pad(
@@ -72,14 +70,9 @@ class ImageFramebufferDrawer:
             assert len(image_tensor.shape) == 3 and (
                 image_tensor.shape[2] == 3 or image_tensor.shape[2] == 4
             )
-            assert (
-                image_tensor.dtype == np.uint8
-                or image_tensor.dtype == torch.uint8
-            )
+            assert image_tensor.dtype == np.uint8 or image_tensor.dtype == torch.uint8
 
-            padded_tensor = self._pad_image_tensor_for_draw_requirements(
-                image_tensor
-            )
+            padded_tensor = self._pad_image_tensor_for_draw_requirements(image_tensor)
 
             # todo: catch case where storage is not 0-dim-major?
             self.draw_bytearray(
@@ -115,9 +108,11 @@ class ImageFramebufferDrawer:
 
         size = mn.Vector2i(width, height)
         image = mn.ImageView2D(
-            mn.PixelFormat.RGBA8_UNORM
-            if bytes_per_pixel == 4
-            else mn.PixelFormat.RGB8_UNORM,
+            (
+                mn.PixelFormat.RGBA8_UNORM
+                if bytes_per_pixel == 4
+                else mn.PixelFormat.RGB8_UNORM
+            ),
             size,
             bytearray_pixel_data,
         )

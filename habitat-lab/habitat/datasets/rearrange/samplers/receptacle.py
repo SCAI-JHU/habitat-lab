@@ -51,9 +51,7 @@ class Receptacle(ABC):
         :param up: The "up" direction of the receptacle in local AABB space. Used for optionally culling receptacles in un-supportive states such as inverted surfaces.
         """
         self.name = name
-        self.up = (
-            up if up is not None else mn.Vector3.y_axis(1.0)
-        )  # default local Y up
+        self.up = up if up is not None else mn.Vector3.y_axis(1.0)  # default local Y up
         nonzero_indices = np.nonzero(self.up)
         assert (
             len(nonzero_indices) == 1
@@ -87,9 +85,7 @@ class Receptacle(ABC):
         return mn.Range3D()
 
     @abstractmethod
-    def sample_uniform_local(
-        self, sample_region_scale: float = 1.0
-    ) -> mn.Vector3:
+    def sample_uniform_local(self, sample_region_scale: float = 1.0) -> mn.Vector3:
         """
         Sample a uniform random point within Receptacle in local space.
 
@@ -115,9 +111,7 @@ class Receptacle(ABC):
         # handle ArticulatedObject parent
         ao_mgr = sim.get_articulated_object_manager()
         obj = ao_mgr.get_object_by_handle(self.parent_object_handle)
-        return obj.get_link_scene_node(
-            self.parent_link
-        ).absolute_transformation()
+        return obj.get_link_scene_node(self.parent_link).absolute_transformation()
 
     def sample_uniform_global(
         self, sim: habitat_sim.Simulator, sample_region_scale: float
@@ -154,9 +148,7 @@ class Receptacle(ABC):
             # this is the stage
             return [habitat_sim.stage_id]
 
-        parent_object = sutils.get_obj_from_handle(
-            sim, self.parent_object_handle
-        )
+        parent_object = sutils.get_obj_from_handle(sim, self.parent_object_handle)
         if parent_object.is_articulated:
             if self.parent_link <= 0:
                 # Receptacle is attached to the body link, so only allow placements there
@@ -172,9 +164,7 @@ class Receptacle(ABC):
         # for rigid objects support surface is the object_id
         return [parent_object.object_id]
 
-    def dist_to_rec(
-        self, sim: habitat_sim.Simulator, point: np.ndarray
-    ) -> float:
+    def dist_to_rec(self, sim: habitat_sim.Simulator, point: np.ndarray) -> float:
         """
         Compute and return the distance from a 3D global point to the Receptacle.
 
@@ -193,9 +183,7 @@ class OnTopOfReceptacle(Receptacle):
     def set_episode_data(self, episode_data):
         self.episode_data = episode_data
 
-    def sample_uniform_local(
-        self, sample_region_scale: float = 1.0
-    ) -> mn.Vector3:
+    def sample_uniform_local(self, sample_region_scale: float = 1.0) -> mn.Vector3:
         return mn.Vector3(0.0, 0.1, 0.0)
 
     def get_global_transform(self, sim: habitat_sim.Simulator) -> mn.Matrix4:
@@ -251,9 +239,7 @@ class AABBReceptacle(Receptacle):
         """
         return self._bounds
 
-    def sample_uniform_local(
-        self, sample_region_scale: float = 1.0
-    ) -> mn.Vector3:
+    def sample_uniform_local(self, sample_region_scale: float = 1.0) -> mn.Vector3:
         """
         Sample a uniform random point in the local AABB.
 
@@ -279,9 +265,7 @@ class AABBReceptacle(Receptacle):
             # this is a global stage receptacle
             # TODO: add an API query or other method to avoid reconstructing the stage frame here
             stage_config = sim.get_stage_initialization_template()
-            r_frameup_worldup = qf2v(
-                habitat_sim.geo.UP, stage_config.orient_up
-            )
+            r_frameup_worldup = qf2v(habitat_sim.geo.UP, stage_config.orient_up)
             v_prime = qtm(r_frameup_worldup).transform_vector(
                 mn.Vector3(habitat_sim.geo.FRONT)
             )
@@ -289,9 +273,7 @@ class AABBReceptacle(Receptacle):
                 qf2v(np.array(v_prime), np.array(stage_config.orient_front))
                 * r_frameup_worldup
             )
-            world_to_local = habitat_sim.utils.common.quat_to_magnum(
-                world_to_local
-            )
+            world_to_local = habitat_sim.utils.common.quat_to_magnum(world_to_local)
             local_to_world = world_to_local.inverted()
             l2w4 = mn.Matrix4.from_(local_to_world.to_matrix(), mn.Vector3())
 
@@ -362,9 +344,7 @@ class TriangleMeshReceptacle(Receptacle):
 
         # apply the scale
         if scale is not None:
-            m_verts = self.mesh_data.mutable_attribute(
-                mn.trade.MeshAttribute.POSITION
-            )
+            m_verts = self.mesh_data.mutable_attribute(mn.trade.MeshAttribute.POSITION)
             for vix, v in enumerate(m_verts):
                 m_verts[vix] = v * scale
 
@@ -381,18 +361,16 @@ class TriangleMeshReceptacle(Receptacle):
             w1 = v[1] - v[0]
             w2 = v[2] - v[1]
             self.triangles.append(v)
-            self.area_weighted_accumulator.append(
-                0.5 * mn.math.cross(w1, w2).length()
-            )
+            self.area_weighted_accumulator.append(0.5 * mn.math.cross(w1, w2).length())
             self.total_area += self.area_weighted_accumulator[-1]
         for f_ix in range(len(self.area_weighted_accumulator)):
             self.area_weighted_accumulator[f_ix] = (
                 self.area_weighted_accumulator[f_ix] / self.total_area
             )
             if f_ix > 0:
-                self.area_weighted_accumulator[
-                    f_ix
-                ] += self.area_weighted_accumulator[f_ix - 1]
+                self.area_weighted_accumulator[f_ix] += self.area_weighted_accumulator[
+                    f_ix - 1
+                ]
         minv = mn.Vector3(mn.math.inf)
         maxv = mn.Vector3(-mn.math.inf)
         for v in self.mesh_data.attribute(mn.trade.MeshAttribute.POSITION):
@@ -446,9 +424,7 @@ class TriangleMeshReceptacle(Receptacle):
         tri_index = find_ge(self.area_weighted_accumulator, sample_val)
         return tri_index
 
-    def sample_uniform_local(
-        self, sample_region_scale: float = 1.0
-    ) -> mn.Vector3:
+    def sample_uniform_local(self, sample_region_scale: float = 1.0) -> mn.Vector3:
         """
         Sample a uniform random point from the mesh.
 
@@ -487,14 +463,10 @@ class TriangleMeshReceptacle(Receptacle):
         assert_triangles(self.mesh_data.indices)
         for verts in self.triangles:
             for edge in range(3):
-                dblr.draw_transformed_line(
-                    verts[edge], verts[(edge + 1) % 3], color
-                )
+                dblr.draw_transformed_line(verts[edge], verts[(edge + 1) % 3], color)
         dblr.pop_transform()
 
-    def dist_to_rec(
-        self, sim: habitat_sim.Simulator, point: np.ndarray
-    ) -> float:
+    def dist_to_rec(self, sim: habitat_sim.Simulator, point: np.ndarray) -> float:
         """
         Compute and return the distance from a 3D global point to the Receptacle. Uses point to mesh distance check.
 
@@ -577,9 +549,7 @@ class AnyObjectReceptacle(Receptacle):
         # return mn.Range3D()
         raise NotImplementedError
 
-    def sample_uniform_local(
-        self, sample_region_scale: float = 1.0
-    ) -> mn.Vector3:
+    def sample_uniform_local(self, sample_region_scale: float = 1.0) -> mn.Vector3:
         """
         Sample a uniform random point within Receptacle in local space.
         NOTE: This only works if a pointset cache was pre-computed. Otherwise raises an exception.
@@ -698,19 +668,13 @@ def filter_interleave_mesh(mesh: mn.trade.MeshData) -> mn.trade.MeshData:
         mn.MeshPrimitive.TRIANGLE_FAN,
     ]:
         mesh = mn.meshtools.generate_indices(mesh)
-    assert (
-        mesh.primitive == mn.MeshPrimitive.TRIANGLES
-    ), "Must be a triangle mesh."
+    assert mesh.primitive == mn.MeshPrimitive.TRIANGLES, "Must be a triangle mesh."
 
     # filter out all but positions (and indices) from the mesh
-    mesh = mn.meshtools.filter_only_attributes(
-        mesh, [mn.trade.MeshAttribute.POSITION]
-    )
+    mesh = mn.meshtools.filter_only_attributes(mesh, [mn.trade.MeshAttribute.POSITION])
 
     # reformat the mesh data after filtering
-    mesh = mn.meshtools.interleave(
-        mesh, flags=mn.meshtools.InterleaveFlags.NONE
-    )
+    mesh = mn.meshtools.interleave(mesh, flags=mn.meshtools.InterleaveFlags.NONE)
 
     return mesh
 
@@ -749,10 +713,10 @@ def import_tri_mesh(mesh_file: str) -> List[mn.trade.MeshData]:
         mesh_assignments: cr.containers.StridedArrayView1D = scene.field(
             mn.trade.SceneField.MESH
         )
-        mesh_transformations: List[
-            mn.Matrix4
-        ] = mn.scenetools.absolute_field_transformations3d(
-            scene, mn.trade.SceneField.MESH
+        mesh_transformations: List[mn.Matrix4] = (
+            mn.scenetools.absolute_field_transformations3d(
+                scene, mn.trade.SceneField.MESH
+            )
         )
         assert len(mesh_assignments) == len(mesh_transformations)
 
@@ -760,9 +724,7 @@ def import_tri_mesh(mesh_file: str) -> List[mn.trade.MeshData]:
         # i.e., len(mesh_data) likely changes after this step
         mesh_data = [
             mn.meshtools.transform3d(mesh_data[mesh_id], transformation)
-            for mesh_id, transformation in zip(
-                mesh_assignments, mesh_transformations
-            )
+            for mesh_id, transformation in zip(mesh_assignments, mesh_transformations)
         ]
 
     return mesh_data
@@ -786,9 +748,7 @@ def parse_receptacles_from_user_config(
 
     Construct and return a list of Receptacle objects. Multiple Receptacles can be defined in a single user subconfig.
     """
-    receptacles: List[
-        Union[Receptacle, AABBReceptacle, TriangleMeshReceptacle]
-    ] = []
+    receptacles: List[Union[Receptacle, AABBReceptacle, TriangleMeshReceptacle]] = []
 
     # pre-define unique specifier strings for parsing receptacle types
     receptacle_prefix_string = "receptacle_"
@@ -802,11 +762,7 @@ def parse_receptacles_from_user_config(
             # this is a receptacle, parse it
             assert sub_config.has_value("position")
             assert sub_config.has_value("scale")
-            up = (
-                None
-                if not sub_config.has_value("up")
-                else sub_config.get("up")
-            )
+            up = None if not sub_config.has_value("up") else sub_config.get("up")
 
             receptacle_name = (
                 sub_config.get("name")
@@ -831,9 +787,7 @@ def parse_receptacles_from_user_config(
                 # search for a matching link
                 for link_ix, link_name in enumerate(valid_link_names):
                     if link_name == parent_link_name:
-                        parent_link_ix = (
-                            link_ix - 1
-                        )  # starting from -1 (base link)
+                        parent_link_ix = link_ix - 1  # starting from -1 (base link)
                         break
                 assert (
                     parent_link_ix is not None
@@ -844,9 +798,7 @@ def parse_receptacles_from_user_config(
                 ), "ArticulatedObject parent link name defined in config, but no valid_link_names provided. Mistake?"
 
             # apply AO uniform instance scaling
-            receptacle_position = ao_uniform_scaling * sub_config.get(
-                "position"
-            )
+            receptacle_position = ao_uniform_scaling * sub_config.get("position")
             receptacle_scale = ao_uniform_scaling * sub_config.get("scale")
 
             if aabb_receptacle_id_string in sub_config_key:
@@ -939,9 +891,7 @@ def find_receptacles(
     if ignore_handles is None:
         ignore_handles = []
 
-    receptacles: List[
-        Union[Receptacle, AABBReceptacle, TriangleMeshReceptacle]
-    ] = []
+    receptacles: List[Union[Receptacle, AABBReceptacle, TriangleMeshReceptacle]] = []
 
     # search for global receptacles included with the stage
     stage_config = sim.get_stage_initialization_template()
@@ -986,8 +936,7 @@ def find_receptacles(
                 parent_object_handle=obj_handle,
                 parent_template_directory=source_template_file,
                 valid_link_names=[
-                    obj.get_link_name(link)
-                    for link in range(-1, obj.num_links)
+                    obj.get_link_name(link) for link in range(-1, obj.num_links)
                 ],
                 ao_uniform_scaling=obj.global_scale,
             )
@@ -995,9 +944,7 @@ def find_receptacles(
 
     # filter out individual Receptacles with excluded substrings
     if exclude_filter_strings is not None:
-        receptacles = cull_filtered_receptacles(
-            receptacles, exclude_filter_strings
-        )
+        receptacles = cull_filtered_receptacles(receptacles, exclude_filter_strings)
 
     # check for non-unique naming mistakes in user dataset
     for rec_ix in range(len(receptacles)):
@@ -1144,9 +1091,7 @@ class ReceptacleTracker:
             )
             # add exclusion filters to all receptacles sets
             for r_set in self._receptacle_sets.values():
-                r_set.excluded_receptacle_substrings.extend(
-                    filtered_unique_names
-                )
+                r_set.excluded_receptacle_substrings.extend(filtered_unique_names)
                 logger.info(
                     f"Loaded receptacle filter data for scene '{scene_handle}' from configured filter file '{scene_filter_filepath}'."
                 )
@@ -1183,22 +1128,13 @@ class ReceptacleTracker:
         if self._receptacle_counts[recep_name] == 0:
             for receptacle_set in self._receptacle_sets.values():
                 # Exclude this receptacle from appearing in the future.
-                if (
-                    recep_name
-                    not in receptacle_set.excluded_receptacle_substrings
-                ):
-                    receptacle_set.excluded_receptacle_substrings.append(
+                if recep_name not in receptacle_set.excluded_receptacle_substrings:
+                    receptacle_set.excluded_receptacle_substrings.append(recep_name)
+                if recep_name in receptacle_set.included_receptacle_substrings:
+                    recep_idx = receptacle_set.included_receptacle_substrings.index(
                         recep_name
                     )
-                if recep_name in receptacle_set.included_receptacle_substrings:
-                    recep_idx = (
-                        receptacle_set.included_receptacle_substrings.index(
-                            recep_name
-                        )
-                    )
-                    del receptacle_set.included_receptacle_substrings[
-                        recep_idx
-                    ]
+                    del receptacle_set.included_receptacle_substrings[recep_idx]
             return True
         return False
 
@@ -1253,9 +1189,7 @@ def get_navigable_receptacles(
         # get the global bounding box of the object
         receptacle_bb = None
         if receptacle.parent_link >= 0:
-            link_node = receptacle_obj.get_link_scene_node(
-                receptacle.parent_link
-            )
+            link_node = receptacle_obj.get_link_scene_node(receptacle.parent_link)
             receptacle_bb = habitat_sim.geo.get_transformed_bb(
                 link_node.cumulative_bb, link_node.absolute_transformation()
             )

@@ -20,9 +20,7 @@ def init_sim():
     config = get_config("benchmark/nav/pointnav/pointnav_habitat_test.yaml")
     if not os.path.exists(config.habitat.simulator.scene):
         pytest.skip("Please download Habitat test data to data folder.")
-    return make_sim(
-        config.habitat.simulator.type, config=config.habitat.simulator
-    )
+    return make_sim(config.habitat.simulator.type, config=config.habitat.simulator)
 
 
 def test_sim_trajectory():
@@ -43,18 +41,14 @@ def test_sim_trajectory():
                 state = sim.get_agent_state()
                 assert (
                     np.allclose(
-                        np.array(
-                            test_trajectory["positions"][i], dtype=np.float32
-                        ),
+                        np.array(test_trajectory["positions"][i], dtype=np.float32),
                         state.position,
                     )
                     is True
                 ), "mismatch in position " "at step {}".format(i)
                 assert (
                     np.allclose(
-                        np.array(
-                            test_trajectory["rotations"][i], dtype=np.float32
-                        ),
+                        np.array(test_trajectory["rotations"][i], dtype=np.float32),
                         np.array([*state.rotation.imag, state.rotation.real]),
                     )
                     is True

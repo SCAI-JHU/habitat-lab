@@ -26,9 +26,7 @@ def _npobs_dict_to_tensorobs_dict(npobs_dict):
     return result
 
 
-@pytest.mark.skipif(
-    not baseline_installed, reason="baseline sub-module not installed"
-)
+@pytest.mark.skipif(not baseline_installed, reason="baseline sub-module not installed")
 @pytest.mark.parametrize(
     "observation_space",
     [

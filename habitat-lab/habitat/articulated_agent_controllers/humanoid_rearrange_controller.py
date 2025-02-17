@@ -20,11 +20,15 @@ from habitat.articulated_agent_controllers.humanoid_base_controller import (
     BASE_HUMANOID_OFFSET,
 )
 
-MIN_ANGLE_TURN: float = 5.0  # If we turn less than this amount, we can just rotate the base and keep walking motion the same as if we had not rotated
+MIN_ANGLE_TURN: float = (
+    5.0  # If we turn less than this amount, we can just rotate the base and keep walking motion the same as if we had not rotated
+)
 TURNING_STEP_AMOUNT: float = (
     20.0  # The maximum angle we should be rotating at a given step
 )
-THRESHOLD_ROTATE_NOT_MOVE: float = 20.0  # The rotation angle above which we should only walk as if rotating in place
+THRESHOLD_ROTATE_NOT_MOVE: float = (
+    20.0  # The rotation angle above which we should only walk as if rotating in place
+)
 DIST_TO_STOP: float = (
     1e-9  # If the amount to move is this distance, just stop the character
 )
@@ -117,16 +121,12 @@ class HumanoidRearrangeController(HumanoidBaseController):
                 nposes = hand_data["pose_motion"]["transform_array"].shape[0]
                 self.vpose_info = hand_data["coord_info"].item()
                 hand_motion = Motion(
-                    hand_data["pose_motion"]["joints_array"].reshape(
-                        nposes, -1, 4
-                    ),
+                    hand_data["pose_motion"]["joints_array"].reshape(nposes, -1, 4),
                     hand_data["pose_motion"]["transform_array"],
                     None,
                     1,
                 )
-                self.hand_processed_data[hand_name] = self.build_ik_vectors(
-                    hand_motion
-                )
+                self.hand_processed_data[hand_name] = self.build_ik_vectors(hand_motion)
             else:
                 self.hand_processed_data[hand_name] = None
 
@@ -178,10 +178,7 @@ class HumanoidRearrangeController(HumanoidBaseController):
 
         deg_per_rads = 180.0 / np.pi
         forward_V = target_position
-        if (
-            forward_V.length() < DIST_TO_STOP
-            or np.isnan(target_position).any()
-        ):
+        if forward_V.length() < DIST_TO_STOP or np.isnan(target_position).any():
             self.calculate_stop_pose()
             return
 
@@ -194,8 +191,7 @@ class HumanoidRearrangeController(HumanoidBaseController):
             # If prev orientation is None, transition to this position directly
             prev_orientation = self.prev_orientation
             prev_angle = (
-                np.arctan2(prev_orientation[0], prev_orientation[2])
-                * deg_per_rads
+                np.arctan2(prev_orientation[0], prev_orientation[2]) * deg_per_rads
             )
 
             forward_angle = new_angle - prev_angle
@@ -204,9 +200,7 @@ class HumanoidRearrangeController(HumanoidBaseController):
                 actual_angle_move = self.turning_step_amount
                 if abs(forward_angle) < actual_angle_move:
                     actual_angle_move = abs(forward_angle)
-                new_angle = prev_angle + actual_angle_move * np.sign(
-                    forward_angle
-                )
+                new_angle = prev_angle + actual_angle_move * np.sign(forward_angle)
                 new_angle /= deg_per_rads
                 did_rotate = True
             else:
@@ -244,12 +238,8 @@ class HumanoidRearrangeController(HumanoidBaseController):
         ) % self.walk_motion.num_poses
 
         # Compute how much distance we covered in this motion
-        prev_cum_distance_covered = self.walk_motion.displacement[
-            prev_mocap_frame
-        ]
-        new_cum_distance_covered = self.walk_motion.displacement[
-            self.walk_mocap_frame
-        ]
+        prev_cum_distance_covered = self.walk_motion.displacement[prev_mocap_frame]
+        new_cum_distance_covered = self.walk_motion.displacement[self.walk_mocap_frame]
 
         offset = 0
         if self.walk_mocap_frame < prev_mocap_frame:
@@ -266,9 +256,7 @@ class HumanoidRearrangeController(HumanoidBaseController):
 
         # We correct the object transform
 
-        forward_V_norm = mn.Vector3(
-            [forward_V[2], forward_V[1], -forward_V[0]]
-        )
+        forward_V_norm = mn.Vector3([forward_V[2], forward_V[1], -forward_V[0]])
         look_at_path_T = mn.Matrix4.look_at(
             self.obj_transform_base.translation,
             self.obj_transform_base.translation + forward_V_norm.normalized(),
@@ -290,24 +278,18 @@ class HumanoidRearrangeController(HumanoidBaseController):
         forward_V_dist = forward_V * dist_diff * distance_multiplier
         obj_transform_base.translation += forward_V_dist
 
-        rot_offset = mn.Matrix4.rotation(
-            mn.Rad(-np.pi / 2), mn.Vector3(1, 0, 0)
-        )
+        rot_offset = mn.Matrix4.rotation(mn.Rad(-np.pi / 2), mn.Vector3(1, 0, 0))
         self.obj_transform_base = obj_transform_base @ rot_offset
         self.joint_pose = joint_pose
 
-    def translate_and_rotate_with_gait(
-        self, forward_delta: float, rot_delta: float
-    ):
+    def translate_and_rotate_with_gait(self, forward_delta: float, rot_delta: float):
         """
         Translates the character in the forward direction and rotates the character
 
         :param forward_delta: how much to move forward or backward
         :param rot_delta: how much to rotate (in radians)
         """
-        forward_vec = self.obj_transform_base.transform_vector(
-            mn.Vector3(1, 0, 0)
-        )
+        forward_vec = self.obj_transform_base.transform_vector(mn.Vector3(1, 0, 0))
         self.obj_transform_base.translation += forward_delta * forward_vec
         prev_angle = np.arctan2(forward_vec[0], forward_vec[2])
         new_angle = prev_angle + rot_delta
@@ -317,9 +299,7 @@ class HumanoidRearrangeController(HumanoidBaseController):
             self.obj_transform_base.translation + new_forward_vec.normalized(),
             mn.Vector3.y_axis(),
         )
-        rot_offset = mn.Matrix4.rotation(
-            mn.Rad(-np.pi / 2), mn.Vector3(1, 0, 0)
-        )
+        rot_offset = mn.Matrix4.rotation(mn.Rad(-np.pi / 2), mn.Vector3(1, 0, 0))
         self.obj_transform_base = look_at_path_T @ rot_offset
 
         # Set a new position frame
@@ -354,9 +334,7 @@ class HumanoidRearrangeController(HumanoidBaseController):
                 b = len(self.walk_motion.displacement) - 1
                 target_displ += dist_to_beginning
             # Bin search over which frame we should cover
-            index = bin_search(
-                self.walk_motion.displacement, a, b, target_displ
-            )
+            index = bin_search(self.walk_motion.displacement, a, b, target_displ)
             self.walk_mocap_frame = index
 
         new_pose = self.walk_motion.poses[self.walk_mocap_frame]
@@ -401,30 +379,23 @@ class HumanoidRearrangeController(HumanoidBaseController):
             new_angle = (new_angle + 180) % 360 - 180
             if self.prev_orientation is not None:
                 prev_angle = (
-                    np.arctan2(
-                        self.prev_orientation[2], self.prev_orientation[0]
-                    )
+                    np.arctan2(self.prev_orientation[2], self.prev_orientation[0])
                     * deg_per_rads
                 )
             else:
                 prev_angle = None
 
-            new_angle_walk = (
-                np.arctan2(forward_V[2], forward_V[0]) * deg_per_rads
-            )
+            new_angle_walk = np.arctan2(forward_V[2], forward_V[0]) * deg_per_rads
 
         else:
             new_angle = np.arctan2(forward_V[2], forward_V[0]) * deg_per_rads
-            new_angle_walk = (
-                np.arctan2(forward_V[2], forward_V[0]) * deg_per_rads
-            )
+            new_angle_walk = np.arctan2(forward_V[2], forward_V[0]) * deg_per_rads
 
         if self.prev_orientation is not None:
             # If prev orientation is None, transition to this position directly
             prev_orientation = self.prev_orientation
             prev_angle = (
-                np.arctan2(prev_orientation[2], prev_orientation[0])
-                * deg_per_rads
+                np.arctan2(prev_orientation[2], prev_orientation[0]) * deg_per_rads
             )
             forward_angle = new_angle - prev_angle
             if forward_angle >= 180:
@@ -439,21 +410,15 @@ class HumanoidRearrangeController(HumanoidBaseController):
                     actual_angle_move = self.turning_step_amount * 20
                 if abs(forward_angle) < actual_angle_move:
                     actual_angle_move = abs(forward_angle)
-                new_angle = prev_angle + actual_angle_move * np.sign(
-                    forward_angle
-                )
+                new_angle = prev_angle + actual_angle_move * np.sign(forward_angle)
                 new_angle /= deg_per_rads
                 did_rotate = True
                 new_angle_walk = new_angle
             else:
                 new_angle = new_angle / deg_per_rads
                 new_angle_walk = new_angle_walk / deg_per_rads
-            forward_V = mn.Vector3(
-                np.cos(new_angle_walk), 0, np.sin(new_angle_walk)
-            )
-            forward_V_orientation = mn.Vector3(
-                np.cos(new_angle), 0, np.sin(new_angle)
-            )
+            forward_V = mn.Vector3(np.cos(new_angle_walk), 0, np.sin(new_angle_walk))
+            forward_V_orientation = mn.Vector3(np.cos(new_angle), 0, np.sin(new_angle))
 
         forward_V = mn.Vector3(forward_V)
         forward_V = forward_V.normalized()
@@ -490,12 +455,8 @@ class HumanoidRearrangeController(HumanoidBaseController):
         ) % self.walk_motion.num_poses
 
         # Compute how much distance we covered in this motion
-        prev_cum_distance_covered = self.walk_motion.displacement[
-            prev_mocap_frame
-        ]
-        new_cum_distance_covered = self.walk_motion.displacement[
-            self.walk_mocap_frame
-        ]
+        prev_cum_distance_covered = self.walk_motion.displacement[prev_mocap_frame]
+        new_cum_distance_covered = self.walk_motion.displacement[self.walk_mocap_frame]
 
         offset = 0
         if self.walk_mocap_frame < prev_mocap_frame:
@@ -539,9 +500,7 @@ class HumanoidRearrangeController(HumanoidBaseController):
         forward_V_dist = forward_V * dist_diff * distance_multiplier
         obj_transform_base.translation += forward_V_dist
 
-        rot_offset = mn.Matrix4.rotation(
-            mn.Rad(-np.pi / 2), mn.Vector3(1, 0, 0)
-        )
+        rot_offset = mn.Matrix4.rotation(mn.Rad(-np.pi / 2), mn.Vector3(1, 0, 0))
         self.obj_transform_base = obj_transform_base @ rot_offset
         self.joint_pose = joint_pose
 
@@ -562,16 +521,12 @@ class HumanoidRearrangeController(HumanoidBaseController):
 
             quat_Rot = mn.Quaternion.from_matrix(curr_transform.rotation())
             joints.append(
-                np.array(hand_motion.poses[ind].joints).reshape(-1, 4)[
-                    None, ...
-                ]
+                np.array(hand_motion.poses[ind].joints).reshape(-1, 4)[None, ...]
             )
             rotations.append(
                 np.array(list(quat_Rot.vector) + [quat_Rot.scalar])[None, ...]
             )
-            translations.append(
-                np.array(curr_transform.translation)[None, ...]
-            )
+            translations.append(np.array(curr_transform.translation)[None, ...])
 
         add_rot = mn.Matrix4.rotation(mn.Rad(np.pi), mn.Vector3(0, 1.0, 0))
 
@@ -585,12 +540,8 @@ class HumanoidRearrangeController(HumanoidBaseController):
         curr_transform = trans @ obj_transform
 
         quat_Rot = mn.Quaternion.from_matrix(curr_transform.rotation())
-        joints.append(
-            np.array(self.stop_pose.joints).reshape(-1, 4)[None, ...]
-        )
-        rotations.append(
-            np.array(list(quat_Rot.vector) + [quat_Rot.scalar])[None, ...]
-        )
+        joints.append(np.array(self.stop_pose.joints).reshape(-1, 4)[None, ...])
+        rotations.append(np.array(list(quat_Rot.vector) + [quat_Rot.scalar])[None, ...])
         translations.append(np.array(curr_transform.translation)[None, ...])
         return (joints, rotations, translations)
 
@@ -636,9 +587,7 @@ class HumanoidRearrangeController(HumanoidBaseController):
             value_norm_t = index - lower
             if lower < 0:
                 min_poss_val = 0.0
-                lower = int(
-                    (min_poss_val - minv) * (num_bins - 1) / (maxv - minv)
-                )
+                lower = int((min_poss_val - minv) * (num_bins - 1) / (maxv - minv))
                 value_norm_t = (index - lower) / -lower
                 lower = -1
 
@@ -651,9 +600,7 @@ class HumanoidRearrangeController(HumanoidBaseController):
             if y_i < 0 or x_i < 0 or z_i < 0:
                 return -1
             index = (
-                y_i
-                * self.vpose_info["num_bins"][0]
-                * self.vpose_info["num_bins"][2]
+                y_i * self.vpose_info["num_bins"][0] * self.vpose_info["num_bins"][2]
                 + x_i * self.vpose_info["num_bins"][2]
                 + z_i
             )
@@ -721,8 +668,7 @@ class HumanoidRearrangeController(HumanoidBaseController):
         # each value contains the lower, upper index and distance
         interp = [False, False, True]
         x_ind, y_ind, z_ind = [
-            find_index_quant(*data, interp)
-            for interp, data in zip(interp, coord_data)
+            find_index_quant(*data, interp) for interp, data in zip(interp, coord_data)
         ]
 
         data_trans = np.concatenate(translations)
@@ -733,14 +679,10 @@ class HumanoidRearrangeController(HumanoidBaseController):
         res_rot = inter_data(x_ind, y_ind, z_ind, data_rot, is_quat=True)
         quat_rot = mn.Quaternion(mn.Vector3(res_rot[:3]), res_rot[-1])
         joint_list = list(res_joint.reshape(-1))
-        transform = mn.Matrix4.from_(
-            quat_rot.to_matrix(), mn.Vector3(res_trans)
-        )
+        transform = mn.Matrix4.from_(quat_rot.to_matrix(), mn.Vector3(res_trans))
         return joint_list, transform
 
-    def calculate_reach_pose(
-        self, obj_pos: mn.Vector3, index_hand: int = 0
-    ) -> None:
+    def calculate_reach_pose(self, obj_pos: mn.Vector3, index_hand: int = 0) -> None:
         """
         Updates the controller's humanoid state to reach position, obj_pos, with the hand.
 

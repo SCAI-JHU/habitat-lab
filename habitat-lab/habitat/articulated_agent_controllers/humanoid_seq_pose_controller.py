@@ -47,9 +47,7 @@ class HumanoidSeqPoseController(HumanoidBaseController):
         )
         self.motion_frame = 0
         self.ref_pose = mn.Matrix4()
-        self.first_pose = mn.Matrix4(
-            self.humanoid_motion.poses[0].root_transform
-        )
+        self.first_pose = mn.Matrix4(self.humanoid_motion.poses[0].root_transform)
         self.step_size = int(self.humanoid_motion.fps / self.motion_fps)
         self.base_transform_offset = mn.Matrix4()
 
@@ -63,9 +61,7 @@ class HumanoidSeqPoseController(HumanoidBaseController):
         self.base_transform_offset = mn.Matrix4()
         self.calculate_pose()
 
-    def apply_base_transformation(
-        self, base_transformation: mn.Matrix4
-    ) -> None:
+    def apply_base_transformation(self, base_transformation: mn.Matrix4) -> None:
         """Sets the current pose to the base transformation, making the rest of poses are relative to this one"""
         self.base_transform_offset = mn.Matrix4()
         self.base_transform_offset.translation = (
@@ -116,9 +112,7 @@ class HumanoidSeqPoseController(HumanoidBaseController):
             - self.first_pose.translation
             + self.ref_pose.translation
         )
-        curr_transform.translation = curr_transform.translation - mn.Vector3(
-            0, 0.9, 0
-        )
+        curr_transform.translation = curr_transform.translation - mn.Vector3(0, 0.9, 0)
         curr_poses = self.humanoid_motion.poses[self.motion_frame].joints
         self.obj_transform_offset = self.base_transform_offset @ curr_transform
         self.joint_pose = curr_poses

@@ -22,7 +22,9 @@ import os
 if __name__ == "__main__":
     # The Habitat-lab program to be profiled (the command you usually use to
     # invoke it).
-    program_str = "python -u -m habitat_baselines.run --config-name=pointnav/ddppo_pointnav.yaml"
+    program_str = (
+        "python -u -m habitat_baselines.run --config-name=pointnav/ddppo_pointnav.yaml"
+    )
 
     # Path to Nsight Systems nsys command-line tool. This hard-coded path is
     # for the FAIR cluster.
@@ -74,7 +76,9 @@ if __name__ == "__main__":
         # You must use ${SLURM_NODEID} and ${SLURM_LOCALID} if using
         # capture_all_tasks so that each profile gets a unique name. Use of
         # ${SLURM_JOB_ID} is optional.
-        profile_output_filename_base = "profile_job${SLURM_JOB_ID}_node${SLURM_NODEID}_local${SLURM_LOCALID}"
+        profile_output_filename_base = (
+            "profile_job${SLURM_JOB_ID}_node${SLURM_NODEID}_local${SLURM_LOCALID}"
+        )
     else:
         profile_output_filename_base = "local_profile"
 
@@ -140,7 +144,9 @@ if __name__ == "__main__":
         program_with_extra_args_str = program_str
 
     if do_capture_step_range:
-        capture_range_args = '--capture-range=nvtx -p "habitat_capture_range" --stop-on-range-end=true'
+        capture_range_args = (
+            '--capture-range=nvtx -p "habitat_capture_range" --stop-on-range-end=true'
+        )
     else:
         capture_range_args = (
             "--delay="

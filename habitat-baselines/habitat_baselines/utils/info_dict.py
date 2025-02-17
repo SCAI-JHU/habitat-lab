@@ -35,8 +35,7 @@ def extract_scalars_from_info(
                 {
                     k + "." + subk: subv
                     for subk, subv in extract_scalars_from_info(v).items()
-                    if isinstance(subk, str)
-                    and k + "." + subk not in ignore_keys
+                    if isinstance(subk, str) and k + "." + subk not in ignore_keys
                 }
             )
         # Things that are scalar-like will have an np.size of 1.
