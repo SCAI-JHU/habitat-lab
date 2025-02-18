@@ -73,10 +73,12 @@ class RearrangeSim(HabitatSim):
                     sensor_keys = list(agent_cfg.sim_sensors.keys())
                     for sensor_key in sensor_keys:
                         sensor_config = agent_cfg.sim_sensors.pop(sensor_key)
-                        sensor_config.uuid = f"{agent_name}_{sensor_config.uuid}"
-                        agent_cfg.sim_sensors[f"{agent_name}_{sensor_key}"] = (
-                            sensor_config
+                        sensor_config.uuid = (
+                            f"{agent_name}_{sensor_config.uuid}"
                         )
+                        agent_cfg.sim_sensors[
+                            f"{agent_name}_{sensor_key}"
+                        ] = sensor_config
 
         super().__init__(config)
 
@@ -128,19 +130,27 @@ class RearrangeSim(HabitatSim):
             self.habitat_config.habitat_sim_v0.enable_gfx_replay_save
         )
         self._needs_markers = self.habitat_config.needs_markers
-        self._update_articulated_agent = self.habitat_config.update_articulated_agent
+        self._update_articulated_agent = (
+            self.habitat_config.update_articulated_agent
+        )
         self._step_physics = self.habitat_config.step_physics
         self._auto_sleep = self.habitat_config.auto_sleep
         self._load_objs = self.habitat_config.load_objs
-        self._additional_object_paths = self.habitat_config.additional_object_paths
+        self._additional_object_paths = (
+            self.habitat_config.additional_object_paths
+        )
         self._kinematic_mode = self.habitat_config.kinematic_mode
         # KRM manages child/parent relationships in kinematic mode. Initialized in reconfigure if applicable.
-        self.kinematic_relationship_manager: KinematicRelationshipManager = None
+        self.kinematic_relationship_manager: KinematicRelationshipManager = (
+            None
+        )
 
         self._extra_runtime_perf_stats: Dict[str, float] = defaultdict(float)
         self._perf_logging_enabled = False
         self.cur_runtime_perf_scope: List[str] = []
-        self._should_setup_semantic_ids = self.habitat_config.should_setup_semantic_ids
+        self._should_setup_semantic_ids = (
+            self.habitat_config.should_setup_semantic_ids
+        )
 
     def enable_perf_logging(self):
         """
@@ -317,7 +327,9 @@ class RearrangeSim(HabitatSim):
             self._start_art_states = {}
             if self._kinematic_mode:
                 # NOTE: scene must be loaded so articulated objects are available before KRM initialization
-                self.kinematic_relationship_manager = KinematicRelationshipManager(self)
+                self.kinematic_relationship_manager = (
+                    KinematicRelationshipManager(self)
+                )
 
         if new_scene:
             self.agents_mgr.on_new_scene()
@@ -384,7 +396,8 @@ class RearrangeSim(HabitatSim):
             self.agents_mgr.first_setup()
             # Capture the starting art states
             self._start_art_states = {
-                ao: (ao.joint_positions, ao.transformation) for ao in self.art_objs
+                ao: (ao.joint_positions, ao.transformation)
+                for ao in self.art_objs
             }
 
         if self._should_setup_semantic_ids:
@@ -397,7 +410,9 @@ class RearrangeSim(HabitatSim):
         for _, handle in enumerate(rom.get_object_handles()):
             obj = rom.get_object_by_handle(handle)
             for node in obj.visual_scene_nodes:
-                node.semantic_id = obj.object_id + self.habitat_config.object_ids_start
+                node.semantic_id = (
+                    obj.object_id + self.habitat_config.object_ids_start
+                )
 
     def get_agent_data(self, agent_idx: Optional[int]) -> ArticulatedAgentData:
         if agent_idx is None:
@@ -432,7 +447,9 @@ class RearrangeSim(HabitatSim):
             start_pos = self.safe_snap_point(start_pos)
             start_rot = np.random.uniform(0, 2 * np.pi)
 
-            if filter_func is not None and not filter_func(start_pos, start_rot):
+            if filter_func is not None and not filter_func(
+                start_pos, start_rot
+            ):
                 continue
 
             articulated_agent.base_pos = start_pos
@@ -494,7 +511,9 @@ class RearrangeSim(HabitatSim):
         return self._largest_indoor_island_idx
 
     @add_perf_timing_func()
-    def _clear_objects(self, should_add_objects: bool, new_scene: bool) -> None:
+    def _clear_objects(
+        self, should_add_objects: bool, new_scene: bool
+    ) -> None:
         rom = self.get_rigid_object_manager()
 
         # Clear all the rigid objects.
@@ -532,7 +551,9 @@ class RearrangeSim(HabitatSim):
             ao = aom.get_object_by_handle(aoi_handle)
             ao_pose = ao.joint_positions
             for link_ix, joint_state in joint_states.items():
-                joint_position_index = ao.get_link_joint_pos_offset(int(link_ix))
+                joint_position_index = ao.get_link_joint_pos_offset(
+                    int(link_ix)
+                )
                 ao_pose[joint_position_index] = joint_state
             ao.joint_positions = ao_pose
 
@@ -548,7 +569,9 @@ class RearrangeSim(HabitatSim):
         When that point returns NaN, computes a navigable point at increasing
         distances to it.
         """
-        new_pos = self.pathfinder.snap_point(pos, self._largest_indoor_island_idx)
+        new_pos = self.pathfinder.snap_point(
+            pos, self._largest_indoor_island_idx
+        )
 
         max_iter = 10
         offset_distance = 1.5
@@ -603,7 +626,9 @@ class RearrangeSim(HabitatSim):
                     )
                 elif len(object_template_handles) > 1:
                     # handle duplicates which exact string matching
-                    obj_handle_shortname = object_shortname_from_handle(obj_handle)
+                    obj_handle_shortname = object_shortname_from_handle(
+                        obj_handle
+                    )
                     object_path = None
                     for template_handle in object_template_handles:
                         template_shortname = object_shortname_from_handle(
@@ -659,16 +684,23 @@ class RearrangeSim(HabitatSim):
             for aoi_handle in ao_mgr.get_object_handles():
                 ao = ao_mgr.get_object_by_handle(aoi_handle)
                 if self._kinematic_mode:
-                    if ao.motion_type == habitat_sim.physics.MotionType.DYNAMIC:
+                    if (
+                        ao.motion_type
+                        == habitat_sim.physics.MotionType.DYNAMIC
+                    ):
                         # NOTE: allow STATIC objects in kinematic mode
-                        ao.motion_type = habitat_sim.physics.MotionType.KINEMATIC
+                        ao.motion_type = (
+                            habitat_sim.physics.MotionType.KINEMATIC
+                        )
                     # remove any existing motors when converting to kinematic AO
                     for motor_id in ao.existing_joint_motor_ids:
                         ao.remove_joint_motor(motor_id)
                 self.art_objs.append(ao)
         if self._kinematic_mode and new_scene or should_add_objects:
             # initialize KRM with parent->child relationships from the RearrangeEpisode
-            self.kinematic_relationship_manager = KinematicRelationshipManager(self)
+            self.kinematic_relationship_manager = KinematicRelationshipManager(
+                self
+            )
             self.kinematic_relationship_manager.initialize_from_obj_to_rec_pairs(
                 ep_info.name_to_receptacle,
                 list(self._receptacles.values()),
@@ -717,16 +749,25 @@ class RearrangeSim(HabitatSim):
         rom = self.get_rigid_object_manager()
         obj_attr_mgr = self.get_object_template_manager()
 
+        # Enable BB render for the debug render call.
+        for obj_id in self._draw_bb_objs:
+            self.set_object_bb_draw(True, obj_id)
+
         if self._debug_render_goal:
             for target_handle, transform in self._targets.items():
                 # Visualize the goal of the object
-                new_target_handle = target_handle.split("_:")[0] + ".object_config.json"
-                matching_templates = obj_attr_mgr.get_templates_by_handle_substring(
-                    new_target_handle
+                new_target_handle = (
+                    target_handle.split("_:")[0] + ".object_config.json"
+                )
+                matching_templates = (
+                    obj_attr_mgr.get_templates_by_handle_substring(
+                        new_target_handle
+                    )
                 )
                 ro = rom.add_object_by_template_handle(
                     list(matching_templates.keys())[0]
                 )
+                self.set_object_bb_draw(True, ro.object_id)
                 ro.transformation = transform
                 make_render_only(ro, self)
                 ro_global_bb = habitat_sim.geo.get_transformed_bb(
@@ -829,7 +870,9 @@ class RearrangeSim(HabitatSim):
         for T, ao in zip(state["art_T"], self.art_objs):
             ao.transformation = T
 
-        for T, V, i in zip(state["rigid_T"], state["rigid_V"], self._scene_obj_ids):
+        for T, V, i in zip(
+            state["rigid_T"], state["rigid_V"], self._scene_obj_ids
+        ):
             # reset object transform
             obj = rom.get_object_by_id(i)
             obj.transformation = T
@@ -852,7 +895,9 @@ class RearrangeSim(HabitatSim):
 
     def get_agent_state(self, agent_id: int = 0) -> habitat_sim.AgentState:
         articulated_agent = self.get_agent_data(agent_id).articulated_agent
-        rot_offset = mn.Quaternion.rotation(mn.Rad(-np.pi / 2), mn.Vector3(0, 1, 0))
+        rot_offset = mn.Quaternion.rotation(
+            mn.Rad(-np.pi / 2), mn.Vector3(0, 1, 0)
+        )
         return AgentState(
             articulated_agent.base_pos,
             quat_from_magnum(articulated_agent.sim_obj.rotation * rot_offset),
@@ -867,6 +912,10 @@ class RearrangeSim(HabitatSim):
                 self.agents_mgr.update_debug()
             rom = self.get_rigid_object_manager()
             self._try_acquire_context()
+
+            # Disable BB drawing for observation render
+            for obj_id in self._draw_bb_objs:
+                self.set_object_bb_draw(False, obj_id)
 
             # Remove viz objects
             for obj in self._viz_objs.values():
@@ -914,7 +963,9 @@ class RearrangeSim(HabitatSim):
                 self.internal_step(-1, update_articulated_agent=False)
 
             t_start = time.time()
-            obs = self._sensor_suite.get_observations(self.get_sensor_observations())
+            obs = self._sensor_suite.get_observations(
+                self.get_sensor_observations()
+            )
             self.add_perf_timing("get_sensor_observations", t_start)
 
         # TODO: Support recording while batch rendering
@@ -930,7 +981,9 @@ class RearrangeSim(HabitatSim):
             for k, (pos, r) in add_back_viz_objs.items():
                 viz_id = self.viz_ids[k]
 
-                self.viz_ids[k] = self.visualize_position(pos, self.viz_ids[k], r=r)
+                self.viz_ids[k] = self.visualize_position(
+                    pos, self.viz_ids[k], r=r
+                )
 
             # Also render debug information
             self._create_obj_viz()
@@ -970,7 +1023,9 @@ class RearrangeSim(HabitatSim):
                 self._viz_templates[str(r)] = template_mgr.register_template(
                     template, "ball_new_viz_" + str(r)
                 )
-            viz_obj = rom.add_object_by_template_id(self._viz_templates[str(r)])
+            viz_obj = rom.add_object_by_template_id(
+                self._viz_templates[str(r)]
+            )
             make_render_only(viz_obj, self)
             self._viz_handle_to_template[viz_obj.object_id] = r
         else:
@@ -1006,7 +1061,9 @@ class RearrangeSim(HabitatSim):
             return np.array([]), np.array([])
         targ_idx, targ_trans = list(zip(*self._get_target_trans()))
 
-        a, b = np.array(targ_idx), [np.array(x.translation) for x in targ_trans]
+        a, b = np.array(targ_idx), [
+            np.array(x.translation) for x in targ_trans
+        ]
         return a, np.array(b)
 
     def get_n_targets(self) -> int:
@@ -1021,7 +1078,10 @@ class RearrangeSim(HabitatSim):
         """Get the positions of all clutter RigidObjects in the scene as a numpy array."""
         rom = self.get_rigid_object_manager()
         return np.array(
-            [rom.get_object_by_id(idx).translation for idx in self._scene_obj_ids]
+            [
+                rom.get_object_by_id(idx).translation
+                for idx in self._scene_obj_ids
+            ]
         )
 
     def add_perf_timing(self, desc: str, t_start: float) -> None:

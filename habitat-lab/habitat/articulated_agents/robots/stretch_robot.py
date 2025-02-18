@@ -4,8 +4,6 @@
 
 import magnum as mn
 import numpy as np
-from typing import List
-import pinocchio
 
 from habitat.articulated_agents.mobile_manipulator import (
     ArticulatedAgentCameraParams,
@@ -27,7 +25,9 @@ class StretchRobot(MobileManipulator):
             gripper_init_params=np.array([0.0, 0.0], dtype=np.float32),
             ee_offset=[mn.Vector3(0.08, 0, 0)],
             ee_links=[36],
-            ee_constraint=np.array([[[-0.08, 0.29], [-0.84, -0.27], [0.01, 1.12]]]),
+            ee_constraint=np.array(
+                [[[-0.08, 0.29], [-0.84, -0.27], [0.01, 1.12]]]
+            ),
             cameras={
                 "head": ArticulatedAgentCameraParams(
                     cam_offset_pos=mn.Vector3(0, 0.0, 0.1),
@@ -35,6 +35,14 @@ class StretchRobot(MobileManipulator):
                     attached_link_id=14,
                     relative_transform=mn.Matrix4.rotation_y(mn.Deg(-90))
                     @ mn.Matrix4.rotation_z(mn.Deg(-90)),
+                ),
+                "articulated_agent_arm": ArticulatedAgentCameraParams(
+                    cam_offset_pos=mn.Vector3(0, 0.1, 0.0),
+                    cam_look_at_pos=mn.Vector3(0.0, 0.0, 0.0),
+                    attached_link_id=35,
+                    relative_transform=mn.Matrix4.rotation_y(mn.Deg(180)),
+                    # relative_transform=mn.Matrix4.rotation_y(mn.Deg(-90)),
+                    # @ mn.Matrix4.rotation_z(mn.Deg(90)),
                 ),
                 "third": ArticulatedAgentCameraParams(
                     cam_offset_pos=mn.Vector3(-0.5, 1.7, -0.5),
@@ -64,10 +72,14 @@ class StretchRobot(MobileManipulator):
 
     @property
     def base_transformation(self):
-        add_rot = mn.Matrix4.rotation(mn.Rad(-np.pi / 2), mn.Vector3(1.0, 0, 0))
+        add_rot = mn.Matrix4.rotation(
+            mn.Rad(-np.pi / 2), mn.Vector3(1.0, 0, 0)
+        )
         return self.sim_obj.transformation @ add_rot
 
-    def __init__(self, agent_cfg, sim, limit_robo_joints=True, fixed_base=True):
+    def __init__(
+        self, agent_cfg, sim, limit_robo_joints=True, fixed_base=True
+    ):
         super().__init__(
             self._get_fetch_params(),
             agent_cfg,
@@ -78,5 +90,7 @@ class StretchRobot(MobileManipulator):
 
 
 class StretchRobotNoWheels(StretchRobot):
-    def __init__(self, urdf_path, sim, limit_robo_joints=True, fixed_base=True):
+    def __init__(
+        self, urdf_path, sim, limit_robo_joints=True, fixed_base=True
+    ):
         super().__init__(urdf_path, sim, limit_robo_joints, fixed_base)

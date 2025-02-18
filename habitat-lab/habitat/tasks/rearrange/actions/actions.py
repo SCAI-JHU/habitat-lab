@@ -105,13 +105,19 @@ class ArmAction(ArticulatedAgentAction):
 
     def __init__(self, *args, config, sim: RearrangeSim, **kwargs):
         super().__init__(*args, config=config, sim=sim, **kwargs)
-        arm_controller_cls = registry.get_task_action(self._config.arm_controller)
+        arm_controller_cls = registry.get_task_action(
+            self._config.arm_controller
+        )
         self._sim: RearrangeSim = sim
         self._task = kwargs["task"]
-        self.arm_ctrlr = arm_controller_cls(*args, config=config, sim=sim, **kwargs)
+        self.arm_ctrlr = arm_controller_cls(
+            *args, config=config, sim=sim, **kwargs
+        )
 
         if self._config.grip_controller is not None:
-            grip_controller_cls = registry.get_task_action(self._config.grip_controller)
+            grip_controller_cls = registry.get_task_action(
+                self._config.grip_controller
+            )
             self.grip_ctrlr: Optional[GripSimulatorTaskAction] = cast(
                 GripSimulatorTaskAction,
                 grip_controller_cls(*args, config=config, sim=sim, **kwargs),
@@ -130,12 +136,13 @@ class ArmAction(ArticulatedAgentAction):
     @property
     def action_space(self):
         action_spaces = {
-            self._action_arg_prefix + "arm_action": self.arm_ctrlr.action_space,
+            self._action_arg_prefix
+            + "arm_action": self.arm_ctrlr.action_space,
         }
         if self.grip_ctrlr is not None and self.grip_ctrlr.requires_action:
-            action_spaces[self._action_arg_prefix + "grip_action"] = (
-                self.grip_ctrlr.action_space
-            )
+            action_spaces[
+                self._action_arg_prefix + "grip_action"
+            ] = self.grip_ctrlr.action_space
         return spaces.Dict(action_spaces)
 
     def step(self, *args, **kwargs):
@@ -184,7 +191,10 @@ class ArmRelPosAction(ArticulatedAgentAction):
 
         # The actual joint positions
         self._sim: RearrangeSim
-        if self.cur_articulated_agent.sim_obj.motion_type == MotionType.DYNAMIC:
+        if (
+            self.cur_articulated_agent.sim_obj.motion_type
+            == MotionType.DYNAMIC
+        ):
             self.cur_articulated_agent.arm_motor_pos = (
                 delta_pos + self.cur_articulated_agent.arm_motor_pos
             )
@@ -203,7 +213,10 @@ class ArmRelPosMaskAction(ArticulatedAgentAction):
         self._arm_joint_mask = self._config.arm_joint_mask
         self._arm_joint_limit = self._config.arm_joint_limit
         if self._arm_joint_limit is not None:
-            assert len(self._arm_joint_limit) == self._config.arm_joint_dimensionality
+            assert (
+                len(self._arm_joint_limit)
+                == self._config.arm_joint_dimensionality
+            )
 
     @property
     def action_space(self):
@@ -398,7 +411,9 @@ class ArmRelPosKinematicReducedActionStretch(ArticulatedAgentAction):
 
         min_limit, max_limit = self.cur_articulated_agent.arm_joint_limits
 
-        set_arm_pos = expanded_delta_pos + self.cur_articulated_agent.arm_motor_pos
+        set_arm_pos = (
+            expanded_delta_pos + self.cur_articulated_agent.arm_motor_pos
+        )
         # Perform roll over to the joints so that the user cannot control
         # the motor 2, 3, 4 for the arm.
         if expanded_delta_pos[0] >= 0:
@@ -552,7 +567,9 @@ class BaseVelNonCylinderAction(ArticulatedAgentAction):
         assert isinstance(
             self.cur_articulated_agent.params, MobileManipulatorParams
         ), "ArticulatedAgent must be a MobileManipulator to use this action."
-        self._navmesh_offset = self.cur_articulated_agent.params.navmesh_offsets
+        self._navmesh_offset = (
+            self.cur_articulated_agent.params.navmesh_offsets
+        )
         assert (
             self._navmesh_offset is not None
         ), "MobileManipulatorParams must define a set of 2D navmesh_offset points to use this action."
@@ -580,7 +597,9 @@ class BaseVelNonCylinderAction(ArticulatedAgentAction):
                 }
             )
 
-    def collision_check(self, trans, target_trans, target_rigid_state, compute_sliding):
+    def collision_check(
+        self, trans, target_trans, target_rigid_state, compute_sliding
+    ):
         """
         trans: the transformation of the current location of the robot
         target_trans: the transformation of the target location of the robot given the center original Navmesh
@@ -590,7 +609,9 @@ class BaseVelNonCylinderAction(ArticulatedAgentAction):
         # Get the offset positions
         num_check_cylinder = len(self._navmesh_offset)
         # TODO: height 0 is not a good assumption in general. This must be changed to query current navmesh height.
-        nav_pos_3d = [np.array([xz[0], 0.0, xz[1]]) for xz in self._navmesh_offset]
+        nav_pos_3d = [
+            np.array([xz[0], 0.0, xz[1]]) for xz in self._navmesh_offset
+        ]
         cur_pos = [trans.transform_point(xyz) for xyz in nav_pos_3d]
         goal_pos = [target_trans.transform_point(xyz) for xyz in nav_pos_3d]
 
@@ -687,12 +708,16 @@ class BaseVelNonCylinderAction(ArticulatedAgentAction):
                 self._action_arg_prefix + "base_vel"
             ]
         else:
-            longitudinal_lin_vel, ang_vel = kwargs[self._action_arg_prefix + "base_vel"]
+            longitudinal_lin_vel, ang_vel = kwargs[
+                self._action_arg_prefix + "base_vel"
+            ]
 
         longitudinal_lin_vel = (
             np.clip(longitudinal_lin_vel, -1, 1) * self._longitudinal_lin_speed
         )
-        lateral_lin_vel = np.clip(lateral_lin_vel, -1, 1) * self._lateral_lin_speed
+        lateral_lin_vel = (
+            np.clip(lateral_lin_vel, -1, 1) * self._lateral_lin_speed
+        )
         ang_vel = np.clip(ang_vel, -1, 1) * self._ang_speed
         if not self._allow_back:
             longitudinal_lin_vel = np.maximum(longitudinal_lin_vel, 0)
@@ -702,7 +727,11 @@ class BaseVelNonCylinderAction(ArticulatedAgentAction):
         )
         self.base_vel_ctrl.angular_velocity = mn.Vector3(0, ang_vel, 0)
 
-        if longitudinal_lin_vel != 0.0 or lateral_lin_vel != 0.0 or ang_vel != 0.0:
+        if (
+            longitudinal_lin_vel != 0.0
+            or lateral_lin_vel != 0.0
+            or ang_vel != 0.0
+        ):
             self.update_base(ang_vel != 0.0)
 
 
@@ -733,8 +762,12 @@ class ArmEEAction(ArticulatedAgentAction):
     def apply_ee_constraints(self):
         self.ee_target = np.clip(
             self.ee_target,
-            self._sim.articulated_agent.params.ee_constraint[self.ee_index, :, 0],
-            self._sim.articulated_agent.params.ee_constraint[self.ee_index, :, 1],
+            self._sim.articulated_agent.params.ee_constraint[
+                self.ee_index, :, 0
+            ],
+            self._sim.articulated_agent.params.ee_constraint[
+                self.ee_index, :, 1
+            ],
         )
 
     def set_desired_ee_pos(self, ee_pos: np.ndarray) -> None:
@@ -757,10 +790,8 @@ class ArmEEAction(ArticulatedAgentAction):
         self.set_desired_ee_pos(ee_pos)
 
         if self._render_ee_target:
-            global_pos = (
-                self._sim.articulated_agent.base_transformation.transform_point(
-                    self.ee_target
-                )
+            global_pos = self._sim.articulated_agent.base_transformation.transform_point(
+                self.ee_target
             )
             self._sim.viz_ids["ee_target"] = self._sim.visualize_position(
                 global_pos, self._sim.viz_ids["ee_target"]
@@ -804,7 +835,9 @@ class HumanoidJointAction(ArticulatedAgentAction):
             The first elements correspond to a flattened list of quaternions for each joint.
             When the array is all 0 it keeps the previous joint rotation and transform.
         """
-        human_joints_trans = kwargs[self._action_arg_prefix + "human_joints_trans"]
+        human_joints_trans = kwargs[
+            self._action_arg_prefix + "human_joints_trans"
+        ]
         new_joints = human_joints_trans[:-32]
         new_pos_transform_base = human_joints_trans[-16:]
         new_pos_transform_offset = human_joints_trans[-32:-16]

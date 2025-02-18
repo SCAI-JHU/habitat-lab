@@ -83,11 +83,15 @@ class RearrangeTask(NavigationTask):
         self._cur_episode_step = 0
         self._should_place_articulated_agent = should_place_articulated_agent
         self._seed = self._sim.habitat_config.seed
-        self._min_distance_start_agents = self._config.min_distance_start_agents
+        self._min_distance_start_agents = (
+            self._config.min_distance_start_agents
+        )
         # TODO: this patch supports hab2 benchmark fixed states, but should be refactored w/ state caching for multi-agent
         if (
             hasattr(self._sim.habitat_config.agents, "main_agent")
-            and self._sim.habitat_config.agents["main_agent"].is_set_start_state
+            and self._sim.habitat_config.agents[
+                "main_agent"
+            ].is_set_start_state
         ):
             self._should_place_articulated_agent = False
 
@@ -165,13 +169,20 @@ class RearrangeTask(NavigationTask):
         return f"{self._episode_id}_{agent_idx}"
 
     def _cache_articulated_agent_start(self, cache_data, agent_idx: int = 0):
-        if self._articulated_agent_pos_start is not None and self._should_save_to_cache:
+        if (
+            self._articulated_agent_pos_start is not None
+            and self._should_save_to_cache
+        ):
             start_ident = self._get_ep_init_ident(agent_idx)
             self._articulated_agent_pos_start[start_ident] = cache_data
-            self._articulated_agent_init_cache.save(self._articulated_agent_pos_start)
+            self._articulated_agent_init_cache.save(
+                self._articulated_agent_pos_start
+            )
 
     def _set_articulated_agent_start(self, agent_idx: int) -> None:
-        articulated_agent_start = self._get_cached_articulated_agent_start(agent_idx)
+        articulated_agent_start = self._get_cached_articulated_agent_start(
+            agent_idx
+        )
         if articulated_agent_start is None:
             filter_agent_position = None
             if self._min_distance_start_agents > 0.0:
@@ -188,7 +199,8 @@ class RearrangeTask(NavigationTask):
                 def _filter_agent_position(start_pos, start_rot):
                     start_pos_2d = start_pos[[0, 2]]
                     prev_pos_2d = [
-                        prev_pose_agent[[0, 2]] for prev_pose_agent in prev_pose_agents
+                        prev_pose_agent[[0, 2]]
+                        for prev_pose_agent in prev_pose_agents
                     ]
                     distances = np.array(
                         [
@@ -213,7 +225,9 @@ class RearrangeTask(NavigationTask):
                 articulated_agent_pos,
                 articulated_agent_rot,
             ) = articulated_agent_start
-        articulated_agent = self._sim.get_agent_data(agent_idx).articulated_agent
+        articulated_agent = self._sim.get_agent_data(
+            agent_idx
+        ).articulated_agent
         articulated_agent.base_pos = articulated_agent_pos
         articulated_agent.base_rot = articulated_agent_rot
 
@@ -273,7 +287,9 @@ class RearrangeTask(NavigationTask):
         idxs, goal_pos = self._sim.get_targets()
         scene_pos = self._sim.get_scene_pos()
         target_pos = scene_pos[idxs]
-        min_dist = np.min(np.linalg.norm(target_pos - goal_pos, ord=2, axis=-1))
+        min_dist = np.min(
+            np.linalg.norm(target_pos - goal_pos, ord=2, axis=-1)
+        )
         return (
             self._sim.grasp_mgr.is_grasped
             and action_args.get("grip_action", None) is not None
@@ -283,7 +299,9 @@ class RearrangeTask(NavigationTask):
 
     def step(self, action: Dict[str, Any], episode: Episode):
         action_args = action["action_args"]
-        if self._enable_safe_drop and self._is_violating_safe_drop(action_args):
+        if self._enable_safe_drop and self._is_violating_safe_drop(
+            action_args
+        ):
             action_args["grip_action"] = None
         obs = super().step(action=action, episode=episode)
 
@@ -386,7 +404,9 @@ class RearrangeTask(NavigationTask):
         # by a metric, the episode will end on the _next_
         # step. This makes sure that the episode is ended
         # on the correct step.
-        self._is_episode_active = (not self._should_end) and self._is_episode_active
+        self._is_episode_active = (
+            not self._should_end
+        ) and self._is_episode_active
         if new_val:
             rearrange_logger.debug("-" * 40)
             rearrange_logger.debug(
